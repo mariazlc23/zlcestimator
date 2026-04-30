@@ -12,8 +12,7 @@
   --tx:#1a1916;--t2:#6b6860;--t3:#9e9b94;
   --ac:#c8521a;--al:#fdf0ea;--ad:#9e3d0f;
   --gn:#2d7a4f;--gl:#eaf4ee;--bl:#1a5fa8;--bll:#eaf2fc;
-  --yw:#b45309;--ywl:#fef3c7;
-  --rd:#b91c1c;--rdl:#fee2e2;
+  --yw:#b45309;--ywl:#fef3c7;--rd:#b91c1c;--rdl:#fee2e2;
   --r:10px;--rl:14px;--f:'DM Sans',sans-serif;--m:'DM Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -28,31 +27,28 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;li
 .ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.6);border-left:3px solid transparent;transition:all .15s;}
 .ni:hover{background:rgba(255,255,255,.07);color:#fff;}
 .ni.active{background:rgba(200,82,26,.22);color:#f4a070;border-left-color:var(--ac);}
-.ni svg{flex-shrink:0;opacity:.65;}.ni.active svg{opacity:1;}
 .proj-list{flex:1;overflow-y:auto;}
-.pi{display:flex;align-items:center;gap:8px;padding:8px 18px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.55);border-left:3px solid transparent;transition:all .15s;position:relative;}
+.pi{display:flex;align-items:center;gap:8px;padding:8px 18px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.55);border-left:3px solid transparent;transition:all .15s;}
 .pi:hover{background:rgba(255,255,255,.06);color:#fff;}
 .pi.active{color:#f4a070;border-left-color:var(--ac);background:rgba(200,82,26,.15);}
 .pi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.2);}
-.pi.active .pi-dot{background:var(--ac);}
+.pi.active .pi-dot,.pi-pending .pi-dot{background:var(--yw);}
 .pi-won .pi-dot{background:var(--gn);}
 .pi-lost .pi-dot{background:var(--rd);}
-.pi-followup::after{content:'!';position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--ac);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;text-align:center;line-height:16px;}
 .sbot{padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);}
-.upload-btn-sb{width:100%;padding:9px;background:var(--ac);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:var(--f);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;}
-.upload-btn-sb:hover{background:var(--ad);}
+.ubtn{width:100%;padding:9px;background:var(--ac);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:var(--f);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;}
+.ubtn:hover{background:var(--ad);}
 .pg{display:none;}.pg.active{display:block;}
 .mh{padding:18px 28px 14px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;z-index:10;}
 .mh h2{font-size:19px;font-weight:700;}
 .mhmeta{font-size:12px;color:var(--t2);margin-top:2px;}
 .ha{display:flex;gap:8px;flex-shrink:0;}
-.cnt{padding:24px 28px;}
 .btn{padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-family:var(--f);font-size:13px;font-weight:500;color:var(--tx);display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
 .btn:hover{border-color:var(--b2);background:var(--s2);}
 .bp{background:var(--ac);border-color:var(--ac);color:#fff;}.bp:hover{background:var(--ad);}
 .bsm{padding:5px 11px;font-size:12px;}
+.cnt{padding:24px 28px;}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px 17px;}
 .sc-l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
@@ -66,14 +62,32 @@ thead th{text-align:left;padding:9px 11px;font-size:11px;font-weight:700;color:v
 tbody td{padding:10px 11px;border-bottom:1px solid var(--bd);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:#fafaf8;}
+tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;background:var(--s2);}
 .tr{text-align:right;font-family:var(--m);font-size:12.5px;}
 .tw{font-weight:600;}.tac{color:var(--ac);font-weight:600;}.tgn{color:var(--gn);font-weight:600;}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);}
 .s-pending{background:var(--ywl);color:var(--yw);}
 .s-won{background:var(--gl);color:var(--gn);}
 .s-lost{background:var(--rdl);color:var(--rd);}
-.s-pending::before{content:'○ ';}.s-won::before{content:'● ';}.s-lost::before{content:'✕ ';}
+.info-row{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:12px;color:var(--t3);min-width:120px;flex-shrink:0;}
+.info-val{font-size:13.5px;font-weight:500;word-break:break-word;}
+.sr{display:flex;align-items:center;padding:8px 0;border-top:1px solid var(--bd);}
+.sl{flex:1;font-size:13.5px;color:var(--t2);}
+.sv{font-family:var(--m);font-size:13.5px;font-weight:600;}
+.sr.grand{border-top:2px solid var(--b2);margin-top:4px;padding-top:12px;}
+.sr.grand .sl{font-size:15px;font-weight:700;color:var(--tx);}
+.sr.grand .sv{font-size:19px;color:var(--ac);}
+.shdr{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;margin:18px 0 10px;}
+.shdr::after{content:'';flex:1;height:1px;background:var(--bd);}
+.tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--m);background:var(--s2);color:var(--t2);}
 .prop-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:44px;max-width:800px;}
+#empty-state{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;}
+.drop-card{background:var(--sf);border:2px dashed var(--b2);border-radius:var(--rl);padding:60px 52px;max-width:500px;width:100%;text-align:center;transition:all .2s;}
+.drop-card:hover,.drop-card.drag{border-color:var(--ac);background:var(--al);}
+.drop-card h2{font-size:21px;font-weight:700;margin-bottom:8px;}
+.drop-card p{font-size:13.5px;color:var(--t2);line-height:1.65;margin-bottom:26px;}
 #prog{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;}
 #prog.show{display:flex;}
 .prog-box{background:var(--sf);border-radius:var(--rl);padding:38px 46px;text-align:center;min-width:300px;}
@@ -82,66 +96,8 @@ tbody tr:hover td{background:#fafaf8;}
 .prog-bg{height:7px;background:var(--s2);border-radius:4px;overflow:hidden;}
 .prog-fill{height:100%;background:var(--ac);border-radius:4px;transition:width .3s;}
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1916;color:#fff;padding:9px 16px;border-radius:var(--r);font-size:13px;z-index:9999;display:none;}
-.file-in{display:none;}
 .dv{height:1px;background:var(--bd);margin:14px 0;}
-#empty-state{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;}
-.drop-card{background:var(--sf);border:2px dashed var(--b2);border-radius:var(--rl);padding:60px 52px;max-width:500px;width:100%;text-align:center;transition:all .2s;cursor:pointer;}
-.drop-card:hover,.drop-card.drag{border-color:var(--ac);background:var(--al);}
-.drop-card h2{font-size:21px;font-weight:700;margin-bottom:8px;}
-.drop-card p{font-size:13.5px;color:var(--t2);line-height:1.65;margin-bottom:26px;}
-.info-row{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);}
-.info-row:last-child{border-bottom:none;}
-.info-label{font-size:12px;color:var(--t3);min-width:110px;}
-.info-val{font-size:13.5px;font-weight:500;}
-.sr{display:flex;align-items:center;padding:8px 0;border-top:1px solid var(--bd);}
-.sl{flex:1;font-size:13.5px;color:var(--t2);}
-.sv{font-family:var(--m);font-size:13.5px;font-weight:600;}
-.sr.grand{border-top:2px solid var(--b2);margin-top:4px;padding-top:12px;}
-.sr.grand .sl{font-size:15px;font-weight:700;color:var(--tx);}
-.sr.grand .sv{font-size:19px;color:var(--ac);}
-.tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--m);background:var(--s2);color:var(--t2);}
 ::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:var(--sf);border-radius:var(--rl);padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);}
-.modal-box h3{font-size:16px;font-weight:700;margin-bottom:18px;}
-.form-row{margin-bottom:14px;}
-.form-row label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
-.form-row input,.form-row select,.form-row textarea{width:100%;padding:8px 11px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:13px;color:var(--tx);background:var(--sf);outline:none;transition:border-color .15s;}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--ac);}
-.form-row textarea{resize:vertical;min-height:70px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-
-/* FOLLOW-UP ALERT */
-.followup-banner{background:var(--al);border:1px solid #f5c8ab;border-radius:var(--r);padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
-.followup-banner .fub-icon{font-size:20px;flex-shrink:0;}
-.followup-banner .fub-text{flex:1;font-size:13px;}
-.followup-banner .fub-text strong{color:var(--ac);}
-.followup-banner .fub-dismiss{font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline;white-space:nowrap;}
-
-/* FILTER BAR */
-.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
-.filter-bar label{font-size:12px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-.filter-bar select{padding:6px 10px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:13px;background:var(--sf);color:var(--tx);cursor:pointer;}
-.filter-bar .clear-filter{font-size:12px;color:var(--ac);cursor:pointer;text-decoration:underline;}
-
-/* LOST CARDS */
-.lost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px;}
-.lost-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:box-shadow .2s;cursor:pointer;}
-.lost-card:hover{box-shadow:0 2px 14px rgba(0,0,0,.08);}
-.lost-card-top{padding:16px 18px;border-bottom:1px solid var(--bd);}
-.lost-card-amount{font-size:22px;font-weight:700;color:var(--rd);font-variant-numeric:tabular-nums;margin:8px 0 2px;}
-.lost-card-meta{font-size:11px;color:var(--t3);}
-.lost-card-bottom{padding:12px 18px;background:var(--s2);display:flex;align-items:center;justify-content:space-between;}
-.lost-card-date{font-size:11.5px;color:var(--t2);}
-.lost-card-days{font-size:11px;color:var(--t3);}
-
-/* EDITABLE NAME */
-.editable-name{border:none;background:transparent;font-size:19px;font-weight:700;font-family:var(--f);color:var(--tx);min-width:60px;max-width:420px;width:420px;outline:none;cursor:text;padding:0;border-bottom:1px solid transparent;}
-.editable-name:hover{border-bottom-color:var(--b2);}
-.editable-name:focus{border-bottom:2px solid var(--ac);}
 
 /* WIN SUMMARY */
 .win-summary-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:36px;max-width:820px;}
@@ -156,46 +112,31 @@ tbody tr:hover td{background:#fafaf8;}
 .ws-row{display:flex;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px;}
 .ws-row:last-child{border-bottom:none;}
 .ws-label{flex:1;color:var(--t2);}
-.ws-val{font-weight:600;font-family:var(--m);}
+.ws-val{font-weight:600;text-align:right;}
 .ws-grand{display:flex;padding:14px 0;border-top:2px solid var(--tx);margin-top:8px;align-items:center;}
 .ws-grand .ws-label{font-size:16px;font-weight:700;color:var(--tx);}
 .ws-grand .ws-val{font-size:22px;color:var(--ac);}
 
-@media print{
-  #sb,#prog,.np,.followup-banner,.filter-bar{display:none!important;}
-  #mn{overflow:visible;}
-  body{background:#fff;}
-  .mh{position:static;}
-  .modal-overlay{display:none!important;}
-}
+@media print{#sb,#prog,.np{display:none!important;}#mn{overflow:visible;}body{background:#fff;}.mh{position:static;}}
 </style>
 </head>
 <body>
-<input type="file" id="file-in" class="file-in" accept=".xlsx,.xlsm,.xls" onchange="handleFile(this.files[0])">
-
+<input type="file" id="file-in" style="display:none" accept=".xlsx,.xlsm,.xls" onchange="handleFile(this.files[0])">
 <div id="app">
 <nav id="sb">
-  <div class="slo">
-    <h1>ZLC Estimator</h1>
-    <p>Project Manager</p>
-  </div>
+  <div class="slo"><h1>ZLC Estimator</h1><p>Project Manager</p></div>
   <div class="ss">Vistas</div>
   <div class="ni active" onclick="navTo('dashboard')" id="nav-dashboard">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Dashboard
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
   </div>
-  <div class="ni" onclick="navTo('lost-page')" id="nav-lost-page">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-    Lost Projects
-  </div>
-  <div class="ss">Projects</div>
+  <div class="ss">Proyectos</div>
   <div class="proj-list" id="proj-list-sb">
-    <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>
+    <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Sube un archivo para comenzar</div>
   </div>
   <div class="sbot">
-    <button class="upload-btn-sb" onclick="document.getElementById('file-in').click()">
+    <button class="ubtn" onclick="document.getElementById('file-in').click()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Load Master Sheet
+      Cargar Master Sheet
     </button>
   </div>
 </nav>
@@ -205,59 +146,29 @@ tbody tr:hover td{background:#fafaf8;}
     <div class="drop-card" id="drop-zone" ondragover="onDrag(event)" ondragleave="offDrag(event)" ondrop="onDrop(event)">
       <div style="font-size:52px;margin-bottom:18px;">📊</div>
       <h2>ZLC Estimator</h2>
-      <p>Upload your <strong>Master Sheet</strong> (.xlsm / .xlsx) to get started.<br>Each file is a project. You can load multiple.</p>
-      <button class="btn bp" onclick="document.getElementById('file-in').click()" style="font-size:14px;padding:10px 22px;">Select Excel File</button>
-      <p style="margin-top:14px;font-size:12px;color:var(--t3);">or drag the file here</p>
+      <p>Sube tu <strong>Master Sheet</strong> (.xlsm / .xlsx).<br>Cada archivo = un proyecto diferente.</p>
+      <button class="btn bp" onclick="document.getElementById('file-in').click()" style="font-size:14px;padding:10px 22px;">Seleccionar archivo Excel</button>
+      <p style="margin-top:14px;font-size:12px;color:var(--t3);">o arrastra el archivo aquí</p>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="pg-dashboard" class="pg">
     <div class="mh">
-      <div><h2>Dashboard</h2><div class="mhmeta" id="dash-meta">All projects</div></div>
+      <div><h2>Dashboard</h2><div class="mhmeta" id="dash-meta">Todos los proyectos</div></div>
       <div class="ha np">
-        <button class="btn bsm" onclick="document.getElementById('file-in').click()">+ Load Project</button>
+        <button class="btn bsm" onclick="document.getElementById('file-in').click()">+ Cargar proyecto</button>
         <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
       </div>
     </div>
     <div class="cnt">
-      <div id="followup-alerts"></div>
-      <div class="filter-bar">
-        <label>Month:</label>
-        <select id="month-filter" onchange="renderDashboard()"><option value="">All</option></select>
-        <label>Status:</label>
-        <select id="status-filter" onchange="renderDashboard()">
-          <option value="">All</option><option value="Pending">Pending</option>
-          <option value="Won">Won</option><option value="Lost">Lost</option>
-        </select>
-        <span class="clear-filter" onclick="clearFilters()">✕ Clear</span>
-      </div>
       <div class="g4" id="dash-stats"></div>
-      <div class="card">
-        <div class="ch">Projects <span id="dash-count" style="font-weight:400;color:var(--t3);"></span></div>
-        <div id="all-projects-table"></div>
-      </div>
+      <div class="card"><div class="ch">Todos los Proyectos</div><div id="all-proj-tbl"></div></div>
     </div>
   </div>
 
-  <!-- LOST PAGE -->
-  <div id="pg-lost-page" class="pg">
-    <div class="mh">
-      <div><h2>Lost Projects</h2><div class="mhmeta" id="lost-meta"></div></div>
-    </div>
-    <div class="cnt">
-      <div class="g4" id="lost-stats" style="margin-bottom:22px;"></div>
-      <div id="lost-grid" class="lost-grid"></div>
-    </div>
-  </div>
-
-  <!-- PROJECT DETAIL -->
   <div id="pg-project" class="pg">
     <div class="mh">
-      <div>
-        <input class="editable-name" id="proj-name-input" value="Project" onblur="saveProjectName()" onkeydown="if(event.key==='Enter')this.blur()" title="Click to edit name">
-        <div class="mhmeta" id="proj-pg-meta"></div>
-      </div>
+      <div><h2 id="proj-pg-name">Proyecto</h2><div class="mhmeta" id="proj-pg-meta"></div></div>
       <div class="ha np">
         <button class="btn bsm" onclick="navTo('proposal')" style="color:var(--bl);border-color:var(--bl);">📄 Proposal</button>
         <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
@@ -266,22 +177,14 @@ tbody tr:hover td{background:#fafaf8;}
     <div class="cnt" id="proj-pg-content"></div>
   </div>
 
-  <!-- PROPOSAL -->
   <div id="pg-proposal" class="pg">
     <div class="mh">
       <div><h2>Proposal</h2><div class="mhmeta" id="prop-meta"></div></div>
-      <div class="ha np"><button class="btn bp bsm" onclick="window.print()">🖨️ Print / PDF</button></div>
+      <div class="ha np"><button class="btn bp bsm" onclick="window.print()">🖨️ Imprimir / PDF</button></div>
     </div>
     <div class="cnt"><div id="prop-content"></div></div>
   </div>
 
-  <!-- KEY -->
-  <div id="pg-key" class="pg">
-    <div class="mh"><div><h2>Key — Precios</h2><div class="mhmeta" id="key-meta"></div></div></div>
-    <div class="cnt" id="key-content"></div>
-  </div>
-
-  <!-- BUDGET DETAIL -->
   <div id="pg-budget" class="pg">
     <div class="mh">
       <div><h2 id="bpg-title">Budget</h2><div class="mhmeta" id="bpg-meta"></div></div>
@@ -290,205 +193,300 @@ tbody tr:hover td{background:#fafaf8;}
     <div class="cnt" id="bpg-content"></div>
   </div>
 
-  <!-- WIN SUMMARY -->
+  <!-- WIN SUMMARY PAGE -->
   <div id="pg-win-summary" class="pg">
     <div class="mh">
       <div><h2>Job Summary</h2><div class="mhmeta" id="ws-meta"></div></div>
       <div class="ha np">
-        <button class="btn bsm" onclick="navTo('project')" style="color:var(--t2);">← Volver</button>
-        <button class="btn bp bsm" onclick="window.print()">🖨️ Print / PDF</button>
+        <button class="btn bsm" onclick="navTo('project')">← Volver</button>
+        <button class="btn bp bsm" onclick="window.print()">🖨️ Imprimir</button>
       </div>
     </div>
-    <div class="cnt"><div id="win-summary-content"></div></div>
-  </div>
-</div>
-</div>
-
-<!-- EDIT MODAL -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-box">
-    <h3>✏️ Edit Project</h3>
-    <div class="form-row"><label>Project Name</label><input type="text" id="em-name" placeholder="Project name"></div>
-    <div class="form-row"><label>Bid Date Sent</label><input type="date" id="em-bid-date"></div>
-    <div class="form-row"><label>Notes</label><textarea id="em-notes" placeholder="Additional notes..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditModal()">Cancel</button>
-      <button class="btn bp" onclick="saveEditModal()">Save</button>
+    <div class="cnt">
+      <div class="win-summary-wrap" id="ws-wrap">
+        <div id="ws-content"></div>
+      </div>
     </div>
   </div>
 </div>
-
-<!-- WON MODAL -->
-<div class="modal-overlay" id="won-modal">
-  <div class="modal-box">
-    <h3>🎉 Project Won!</h3>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Would you like to view the printable Job Summary with a full breakdown of days, materials, rentals, and disposal?</p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeWonModal()">Solo guardar</button>
-      <button class="btn bp" onclick="goToWinSummary()">📋 Ver Job Summary</button>
-    </div>
-  </div>
 </div>
 
-<div id="prog"><div class="prog-box"><h3>Reading file...</h3><p id="prog-msg">Extracting data</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
+<div id="prog"><div class="prog-box"><h3>Leyendo archivo...</h3><p id="prog-msg">Extrayendo datos</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
 <div id="toast"></div>
 
 <script>
+// ─── STATE ────────────────────────────────────────────────────
 let projects=[];
 let curProjId=null;
-let curBudgetIdx=null;
-let pendingWonId=null;
 const STATUS=['Pending','Won','Lost'];
-const STATUS_CLASS={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
+const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
 
-function saveProjects(){try{localStorage.setItem('zlc_v3',JSON.stringify(projects));}catch(e){}}
-function loadProjects(){
+function savePersist(){try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}}
+function loadPersist(){
   try{
-    const s=localStorage.getItem('zlc_v3')||localStorage.getItem('zlc_projects_v2');
-    if(s){
-      projects=JSON.parse(s);
-      projects.forEach(p=>{
-        if(!p.bidDate)p.bidDate=null;
-        if(!p.notes)p.notes='';
-        if(p.followupDismissed===undefined)p.followupDismissed=false;
-        if(!p.customName)p.customName=null;
-      });
-    }
+    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    const s=localStorage.getItem('zlc_v7');
+    if(s){const parsed=JSON.parse(s);projects=Array.isArray(parsed)?parsed:[];}
+    else projects=[];
   }catch(e){projects=[];}
 }
 
+// ─── DROP ─────────────────────────────────────────────────────
 function onDrag(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag');}
 function offDrag(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');}
 function onDrop(e){e.preventDefault();offDrag(e);const f=e.dataTransfer.files[0];if(f)handleFile(f);}
 
 function handleFile(file){
   if(!file)return;
-  showProg('Opening file...',10);
+  showProg('Abriendo...',10);
   const reader=new FileReader();
   reader.onload=e=>{
     try{
       showProg('Parseando hojas...',25);
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
-      showProg('Reading project...',45);
+      showProg('Leyendo Project Settings...',40);
       const proj=readProjectSettings(wb);
-      showProg('Reading Key...',60);
-      const key=readKey(wb);
-      showProg('Reading Budgets...',75);
-      const budgets=readBudgets(wb,proj);
-      showProg('Reading Scopes...',88);
+      showProg('Leyendo Proposal...',55);
+      const proposalBudgetNums=readProposalBudgetNums(wb);
+      showProg('Leyendo Budgets...',70);
+      const budgets=readBudgets(wb,proj,proposalBudgetNums);
+      showProg('Leyendo Scopes...',85);
       const scopes=readScopes(wb);
-      showProg('Guardando...',95);
-      const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-      const existing=projects.findIndex(p=>p.filename===file.name);
-      const entry={id,filename:file.name,status:'Pending',proj,key,budgets,scopes,
-        loadedAt:new Date().toISOString(),bidDate:null,notes:'',followupDismissed:false,customName:null};
-      if(existing>=0){
-        const old=projects[existing];
-        projects[existing]={...entry,id:old.id,bidDate:old.bidDate,notes:old.notes,
-          status:old.status,customName:old.customName,followupDismissed:old.followupDismissed};
-      } else {projects.push(entry);}
-      saveProjects();
+      showProg('Leyendo Key...',92);
+      const key=readKey(wb);
+      showProg('Guardando...',98);
+      const p={id:'p_'+Date.now(),filename:file.name,status:'Pending',proj,budgets,scopes,key,loadedAt:new Date().toISOString()};
+      projects.unshift(p);
+      savePersist();
       hideProg();
-      document.getElementById('empty-state').style.display='none';
-      renderDashboard();rebuildSidebar();
-      toast('Project loaded: '+(proj.name||file.name));
-    }catch(err){hideProg();alert('Error reading file:\n'+err.message);}
+      rebuildSidebar();
+      renderDashboard();
+      openProject(p.id);
+      document.getElementById('file-in').value='';
+      toast('Proyecto cargado ✓');
+    }catch(err){hideProg();console.error(err);toast('Error: '+err.message);}
   };
-  reader.onerror=()=>{hideProg();alert('Error reading file.');};
   reader.readAsArrayBuffer(file);
 }
 
+// ─── READ PROJECT SETTINGS ────────────────────────────────────
+// Exact cell map (confirmed from formula analysis):
+//   G8 = Project Name       G9  = Project Address
+//   G10 = Client            G7  = Project Number (Job #)
+//   G11 = Client PO#        G12 = Start date
+//   G13 = Finish date       G14 = Consultant/Architect
+//   G15 = Sheets/Plan Date  G16 = Addendum
+//   G17 = Site Visit        H17 = City
+//   I7  = PM Name           I8  = PM Email
+//   I9  = PM Phone          I10 = Superintendent
+//   J16 = "Travel time" label → J17 = travel time value
 function readProjectSettings(wb){
-  const ws=wb.Sheets['Project'];
-  const p={name:'',client:'',address:'',city:'',pm:'',pmEmail:'',pmPhone:'',super:'',jobNum:'',planDate:'',travelTime:0,estimatedValue:0};
+  const ws=wb.Sheets['Project settings'];
+  const p={name:'',address:'',client:'',jobNum:'',clientPO:'',
+            startDate:'',endDate:'',architect:'',planDate:'',
+            addendum:'',siteVisit:'',city:'',travelTime:0,
+            pm:'',pmEmail:'',pmPhone:'',super:'',estimatedValue:0};
   if(!ws)return p;
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-  for(const r of rows){
-    if(!r||!r.length)continue;
-    const hlabel=String(r[0]||'').trim().replace(':','');
-    const hv=String(r[1]||'').trim();
-    if(hlabel==='Project Name')p.name=p.name||hv;
-    if(hlabel==='Address')p.address=p.address||hv;
-    if(hlabel==='City')p.city=p.city||hv;
-    if(hlabel==='Plan Date')p.planDate=p.planDate||hv;
-    if(hlabel==='Phone')p.pmPhone=p.pmPhone||hv;
-    if(hlabel==='Superintendent'||hlabel==='Superintendent:')p.super=hv;
-    if(typeof r[9]==='number'&&r[9]>0&&r[9]<24)p.travelTime=r[9];
-    const kJob=r[10],kPMem=r[11],kPMname=r[12],kName=r[13],kAddr=r[14],kClient=r[15],kEV=r[17];
-    if(kJob&&String(kJob)!=='0'&&String(kJob)!=='Job #')p.jobNum=p.jobNum||String(kJob).trim();
-    if(kPMname&&String(kPMname)!=='0'&&String(kPMname)!=='Project Manager Name')p.pm=p.pm||String(kPMname).trim();
-    if(kPMem&&String(kPMem)!=='0'&&String(kPMem)!=='Project Manager Email')p.pmEmail=p.pmEmail||String(kPMem).trim();
-    if(kName&&String(kName)!=='0'&&String(kName).trim())p.name=p.name||String(kName).trim();
-    if(kAddr&&String(kAddr)!=='0'&&String(kAddr).trim())p.address=p.address||String(kAddr).trim();
-    if(kClient&&String(kClient)!=='0'&&String(kClient).trim()&&String(kClient)!=='Client')p.client=p.client||String(kClient).trim();
-    if(kEV&&typeof kEV==='number'&&kEV>0)p.estimatedValue=kEV;
-  }
+
+  // Helper: read cell value, skip 0 and empty
+  const cv=(addr)=>{
+    const c=ws[addr];
+    if(!c||c.v===null||c.v===undefined)return '';
+    const v=c.v;
+    if(v===0||v==='0'||String(v).trim()==='')return '';
+    // Format dates
+    if(c.t==='d'||c.t==='n'&&v>40000&&v<50000){
+      try{
+        const d=new Date(Math.round((v-25569)*86400*1000));
+        return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+      }catch(e){}
+    }
+    return String(v).trim();
+  };
+
+  p.jobNum     = cv('G7');
+  p.name       = cv('G8');
+  p.address    = cv('G9');
+  p.client     = cv('G10');
+  p.clientPO   = cv('G11');
+  p.startDate  = cv('G12');
+  p.endDate    = cv('G13');
+  p.architect  = cv('G14');
+  p.planDate   = cv('G15');
+  p.addendum   = cv('G16');
+  p.siteVisit  = cv('G17');
+  p.city       = cv('H17');
+  p.pm         = cv('I7');
+  p.pmEmail    = cv('I8');
+  p.pmPhone    = cv('I9');
+  p.super      = cv('I10');
+
+  // Travel time: label is J16, value is K16 or J17
+  const tt=ws['K16'];
+  if(tt&&typeof tt.v==='number'&&tt.v>0&&tt.v<24)p.travelTime=tt.v;
+  else{const tt2=ws['J17'];if(tt2&&typeof tt2.v==='number'&&tt2.v>0&&tt2.v<24)p.travelTime=tt2.v;}
+
   return p;
 }
 
-function readBudgets(wb,proj){
+// ─── READ PROPOSAL BUDGET NUMS ────────────────────────────────
+// Proposal G22:G35 = the 14 SOV line slots
+// In a real file these have formulas like ='Budget #2'!F109
+// Strategy: read formulas from those cells to find which Budget #N they reference
+// ALSO: a budget's Type cell (B2) being non-empty means it's active/in-proposal
+function readProposalBudgetNums(wb){
+  const ws=wb.Sheets['Proposal'];
+  const nums=new Set();
+  if(!ws)return nums;
+
+  // Check G22:G35 for formulas referencing Budget sheets
+  for(let row=22;row<=35;row++){
+    const addr='G'+row;
+    const cell=ws[addr];
+    if(!cell)continue;
+    const formula=cell.f||'';
+    const match=formula.match(/Budget #(\d+)/i);
+    if(match)nums.add(+match[1]);
+    // Also check if value is non-zero (calculated value)
+    if(cell.v&&typeof cell.v==='number'&&cell.v!==0){
+      // We'll also scan nearby cells for description to get budget #
+      const bCell=ws['B'+row];
+      if(bCell&&bCell.f){
+        const m2=bCell.f.match(/Budget #(\d+)/i);
+        if(m2)nums.add(+m2[1]);
+      }
+      const cCell=ws['C'+row];
+      if(cCell&&cCell.f){
+        const m3=cCell.f.match(/Budget #(\d+)/i);
+        if(m3)nums.add(+m3[1]);
+      }
+    }
+  }
+
+  // If no formulas found (empty template or data_only), fall back to:
+  // budgets are in proposal if their Type cell (B2) has a value
+  // We signal this by returning an empty set with a special flag
+  if(nums.size===0)nums.add(-1); // -1 = "use Type cell fallback"
+  return nums;
+}
+
+// ─── READ BUDGETS ─────────────────────────────────────────────
+function readBudgets(wb,proj,proposalNums){
   const budgets=[];
+  const useFallback=proposalNums.has(-1);
   const sheetNames=wb.SheetNames.filter(n=>/^Budget #\d+$/.test(n));
+
   for(const sname of sheetNames){
     const ws=wb.Sheets[sname];if(!ws)continue;
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
-    if(!rows.length)continue;
-    const r2=rows[1]||[];
-    const typeVal=r2[1],crewVal=r2[2];
-    const daysVal=typeof r2[3]==='number'?r2[3]:0;
-    const shiftsVal=typeof r2[4]==='number'?r2[4]:8;
-    const travelVal=typeof r2[5]==='number'?r2[5]:(proj.travelTime||0);
-    const cv=addr=>{const c=ws[addr];return c&&typeof c.v==='number'?Math.round(c.v*100)/100:0;};
-    const laborCost=cv('F19'),ownedEquipC=cv('F34'),rentalEquipC=cv('F44'),trucksCost=cv('J56');
-    const dispCost=cv('F67'),matCost=cv('F86'),subCost=cv('F100');
-    const totalCost=cv('E107'),totalProfit=cv('E108'),grandTotal=cv('F109');
-    const isActive=!!(typeVal)||grandTotal>0||totalCost>0||laborCost>0;
-    if(!isActive)continue;
+    const num=+sname.replace('Budget #','');
+
+    // Determine if this budget is in the Proposal:
+    // 1. If Proposal had explicit formula references, use those
+    // 2. Fallback: Type cell B2 has a non-empty value
+    const typeCell=ws['B2'];
+    const typeVal=typeCell&&typeCell.v?String(typeCell.v).trim():'';
+    const crewCell=ws['C2'];
+    const crewVal=crewCell&&crewCell.v?String(crewCell.v).trim():'';
+    const daysCell=ws['D2'];
+    const daysVal=daysCell&&typeof daysCell.v==='number'?daysCell.v:0;
+    const shiftsCell=ws['E2'];
+    const shiftsVal=shiftsCell&&typeof shiftsCell.v==='number'?shiftsCell.v:8;
+
+    const inProposal=useFallback?!!typeVal:proposalNums.has(num);
+    if(!inProposal)continue;
+
+    // Travel time from Project settings (F2 formula = 'Project settings'!J17)
+    const travelCell=ws['F2'];
+    const travelVal=travelCell&&typeof travelCell.v==='number'?travelCell.v:(proj.travelTime||0);
+
+    // Read all section totals using calculated values
+    const cv=addr=>{const c=ws[addr];return c&&typeof c.v==='number'?c.v:0;};
+
+    const laborCost    = cv('F19');
+    const laborMkAmt   = cv('G20');
+    const ownedEquipC  = cv('F34');
+    const ownedEquipMk = cv('G35');
+    const rentalEquipC = cv('F44');
+    const rentalEquipMk= cv('F45');
+    const trucksCost   = cv('J56');
+    const dispCost     = cv('F67');
+    const dispMkAmt    = cv('F68');
+    const matCost      = cv('F86');
+    const matMkAmt     = cv('F87');
+    const subCost      = cv('F100');
+    const subMkAmt     = cv('F101');
+    const totalCost    = cv('E107');
+    const totalProfit  = cv('E108');
+    const grandTotal   = cv('F109');
+
+    // Markup %
+    const mkPctCell=ws['F20'];
+    const markupPct=mkPctCell&&typeof mkPctCell.v==='number'?mkPctCell.v:0.45;
+
+    // Description: typed text in col B rows 4-8 (skip "Description" placeholder)
     let desc='';
-    for(let ri=3;ri<8&&ri<rows.length;ri++){
-      const c=String(rows[ri]?.[1]||'').trim();
-      if(c&&c!=='Description'&&c.length>4&&!c.startsWith('#')){desc=c;break;}
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+    for(let ri=3;ri<9&&ri<rows.length;ri++){
+      const candidate=String(rows[ri]?.[1]||'').trim();
+      if(candidate&&candidate!=='Description'&&candidate.length>4&&!candidate.startsWith('#')){
+        desc=candidate;break;
+      }
     }
+
+    // Read individual rows for detail view
     const laborRows=[];
     for(let ri=10;ri<=17&&ri<rows.length;ri++){
-      const rr=rows[ri];const tp=String(rr[1]||'').trim(),rt=+rr[2]||0,hr=+rr[4]||0,ct=+rr[6]||0;
-      if(tp&&tp!=='#N/A'&&tp!=='Labor Type:'&&(rt>0||hr>0||ct>0))laborRows.push({type:tp,rate:rt,hours:hr,cost:ct||r2n(rt*hr)});
+      const rr=rows[ri];
+      const tp=String(rr[1]||'').trim(),rt=+rr[2]||0,hr=+rr[4]||0,ct=+rr[6]||0;
+      if(tp&&tp!=='#N/A'&&tp!=='Labor Type:'&&(rt>0||ct>0)){
+        laborRows.push({type:tp,rate:rt,hours:hr,cost:ct||rnd(rt*hr)});
+      }
     }
     const equipRows=[];
     for(let ri=23;ri<=32&&ri<rows.length;ri++){
-      const rr=rows[ri];const nm=String(rr[1]||'').trim(),qt=+rr[3]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[6]||0;
-      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Equipment',qty:qt,rate:rt,unit:un,cost:ct||r2n(qt*rt)});
+      const rr=rows[ri];
+      const nm=String(rr[1]||'').trim(),qt=+rr[3]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[6]||0;
+      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Equipment',qty:qt,rate:rt,unit:un,cost:ct||rnd(qt*rt)});
     }
     for(let ri=39;ri<=42&&ri<rows.length;ri++){
-      const rr=rows[ri];const nm=String(rr[1]||'').trim(),qt=+rr[2]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[7]||0;
-      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Rental Equip',qty:qt,rate:rt,unit:un,cost:ct||r2n(qt*rt),rental:true});
+      const rr=rows[ri];
+      const nm=String(rr[1]||'').trim(),qt=+rr[2]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[7]||0;
+      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Rental',qty:qt,rate:rt,unit:un,cost:ct||rnd(qt*rt),rental:true});
     }
     const truckRows=[];
     for(let ri=48;ri<=57&&ri<rows.length;ri++){
-      const rr=rows[ri];const nm=String(rr[0]||'').trim(),ld=+rr[4]||0,rt=+rr[5]||0,ct=+rr[7]||0;
-      if(nm&&nm!=='Aggregates'&&(ld>0||ct>0))truckRows.push({name:nm,loads:ld,rate:rt,cost:ct||r2n(ld*rt)});
+      const rr=rows[ri];
+      const nm=String(rr[0]||'').trim(),ld=+rr[4]||0,rt=+rr[5]||0,ct=+rr[7]||0;
+      if(nm&&nm!=='Aggregates'&&(ld>0||ct>0))truckRows.push({name:nm,loads:ld,rate:rt,cost:ct||rnd(ld*rt)});
     }
     const dispRows=[];
     for(let ri=60;ri<=65&&ri<rows.length;ri++){
-      const rr=rows[ri];const tp=String(rr[1]||'').trim(),fc=String(rr[2]||'').trim(),un=String(rr[3]||'Ton').trim(),rt=+rr[4]||0,qt=+rr[5]||0,ct=+rr[7]||0;
-      if(tp&&(qt>0||ct>0))dispRows.push({type:tp,facility:fc,unit:un,rate:rt,qty:qt,cost:ct||r2n(qt*rt)});
+      const rr=rows[ri];
+      const tp=String(rr[1]||'').trim(),fc=String(rr[2]||'').trim(),un=String(rr[3]||'Ton').trim(),rt=+rr[4]||0,qt=+rr[5]||0,ct=+rr[7]||0;
+      if(tp&&(qt>0||ct>0))dispRows.push({type:tp,facility:fc,unit:un,rate:rt,qty:qt,cost:ct||rnd(qt*rt)});
     }
     const matRows=[];
     for(let ri=72;ri<=84&&ri<rows.length;ri++){
-      const rr=rows[ri];const nm=String(rr[0]||rr[1]||'').trim(),qt=+rr[1]||0,rt=+rr[4]||0,ct=+rr[7]||0;
-      if(nm&&nm!=='Materials'&&nm!=='Item'&&(qt>0||ct>0)&&rt>0)matRows.push({name:nm,qty:qt,rate:rt,cost:ct||r2n(qt*rt)});
+      const rr=rows[ri];
+      const nm=String(rr[0]||rr[1]||'').trim(),qt=+rr[1]||0,rt=+rr[4]||0,ct=+rr[7]||0;
+      if(nm&&nm!=='Materials'&&nm!=='Item'&&(qt>0||ct>0)&&rt>0)matRows.push({name:nm,qty:qt,rate:rt,cost:ct||rnd(qt*rt)});
     }
-    const num=+sname.replace('Budget #','');
-    budgets.push({sheetName:sname,num,type:String(typeVal||'Standard'),crew:String(crewVal||''),
-      days:daysVal||1,shifts:shiftsVal||8,travel:travelVal||0,description:desc,scopeCode:inferScope(desc,num),
+
+    budgets.push({
+      sheetName:sname,num,type:typeVal,crew:crewVal,
+      days:daysVal||1,shifts:shiftsVal||8,travel:travelVal,
+      description:desc,scopeCode:inferScope(desc,num),
       laborRows,equipRows,truckRows,dispRows,matRows,
-      laborCost,ownedEquipC,rentalEquipC,trucksCost,dispCost,matCost,subCost,
-      totalCost,totalProfit,grandTotal});
+      laborCost,laborMkAmt,ownedEquipC,rentalEquipC,trucksCost,
+      dispCost,matCost,subCost,
+      totalCost,totalProfit,grandTotal,markupPct,
+      inProposal:true
+    });
   }
   return budgets.sort((a,b)=>a.num-b.num);
 }
 
-function r2n(n){return Math.round(n*100)/100;}
+function rnd(n){return Math.round(n*100)/100;}
 function inferScope(desc,num){
   const d=(desc||'').toLowerCase();
   if(d.includes('hard demo'))return 'T001_Hard_Demo';
@@ -500,47 +498,7 @@ function inferScope(desc,num){
   return 'Budget_'+num;
 }
 
-function readKey(wb){
-  const ws=wb.Sheets['key'];
-  const k={laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],clients:[],estimators:[],crews:[]};
-  if(!ws)return k;
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-  for(let i=0;i<rows.length;i++){
-    const r=rows[i];const r0=String(r[0]||'').trim(),r8=String(r[8]||'').trim();
-    const lpMap={'Foreman (Standard)':1,'Laborer (Standard)':1,'Concrete worker (Standard)':1,'Foreman (OT)':1,'Foreman (PW)':1,'Laborer (OT)':1,'Laborer (PW)':1,'Concrete worker (OT)':1,'Concrete worker (PW)':1,'Foreman (Travel Time)':1,'Laborer (Travel Time)':1,'Concrete worker (Travel Time)':1,'Truck driver':1,'Truck driver OT':1};
-    if(lpMap[r8]&&typeof r[9]==='number')k.laborProd.push({type:r8,st:r[9],ot:+r[10]||0});
-    const tmMap={Foreman:1,'Foreman (OT)':1,Laborer:1,'Laborer (OT)':1,'Laborer (Travel Time)':1,'Concrete Worker':1,'Concrete Worker (OT)':1,'Concrete Worker (Travel time)':1,'Driver ':1,'Driver OT':1};
-    if(tmMap[r0]&&typeof r[1]==='number'&&r[1]>30){
-      const ex=k.laborTM.find(x=>x.type===r0.trim());
-      if(ex)ex.ot=r[1]||ex.ot;else k.laborTM.push({type:r0.trim(),st:r[1],ot:0,tt:0});
-    }
-    const ekw=['Ton Mini','Ton Ex','Skid Steer','Track Skid','Georgia','Floor Scraper','Air Comp','Generator','roller','Breaker','breaker','Flat saw','Core drill','GPR','Jack Hammer','Chainsaw','Jumping Jack','Plate Compactor','Concrete Mixer','Reversable','Pick Up','Utility Crew','Roll Off','SEMI Truck'];
-    if(r0&&typeof r[1]==='number'&&r[1]>50&&ekw.some(kw=>r0.toLowerCase().includes(kw.toLowerCase().split(' ')[0]))){
-      if(!k.equipment.find(e=>e.name===r0))k.equipment.push({name:r0,daily:r[1],weekly:+r[2]||0,tm:+r[3]||0});
-    }
-    if(r8&&typeof r[10]==='number'&&r[10]>0&&r[9])k.materials.push({name:r8,unit:String(r[9]).trim(),price:r[10],supplier:String(r[12]||'').trim()});
-    const c40=String(r[40]||'').trim();if(c40&&c40.length>3&&!k.clients.includes(c40))k.clients.push(c40);
-    const c44=String(r[44]||'').trim();if(c44.includes('Estimator'))k.estimators.push({name:c44.replace(', Estimator','').trim(),phone:String(r[45]||'').trim()});
-    ['Xolos','Chingones','Lobos','Poblanos','Warriors'].forEach(cn=>{
-      if(String(r[11]||'').trim()===cn&&typeof r[12]==='number')k.crews.push({name:cn,foremans:r[12],laborers:r[13]||0});
-    });
-    const dm={'Certified Blue':'C&D','Devlin':'C&D','Zanker':'C&D','Blue Line Transfer':'C&D','County Quarry':'Concrete','Argent':'Concrete','SCQ':'Concrete','Ranch':'Dirt','Soiland':'Dirt','Diablo Valley Road':'Brick','Alco':'Metal'};
-    Object.keys(dm).forEach(fac=>{
-      for(let c=0;c<Math.min(r.length,50);c++){
-        if(String(r[c]||'').trim()===fac&&typeof r[c+1]==='number'&&r[c+1]>0&&!k.disposal.find(d=>d.facility===fac))
-          k.disposal.push({type:dm[fac],facility:fac,price:r[c+1],unit:'Ton'});
-      }
-    });
-  }
-  k.laborProd=[...new Map(k.laborProd.map(x=>[x.type,x])).values()];
-  k.laborTM=[...new Map(k.laborTM.map(x=>[x.type,x])).values()].filter(x=>x.st>0);
-  k.equipment=[...new Map(k.equipment.map(x=>[x.name,x])).values()];
-  k.materials=[...new Map(k.materials.map(x=>[x.name,x])).values()].filter(x=>x.price>0);
-  k.clients=[...new Set(k.clients)].filter(Boolean).slice(0,30);
-  k.crews=[...new Map(k.crews.map(x=>[x.name,x])).values()];
-  return k;
-}
-
+// ─── READ SCOPES ──────────────────────────────────────────────
 function readScopes(wb){
   const ws=wb.Sheets['Scope'];const sc=[];if(!ws)return sc;
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
@@ -551,143 +509,98 @@ function readScopes(wb){
   return sc;
 }
 
-// ─── FOLLOW-UP ────────────────────────────────────────────────
-function daysSinceBid(p){
-  if(!p.bidDate)return -1;
-  return Math.floor((new Date()-new Date(p.bidDate))/(1000*60*60*24));
-}
-function needsFollowup(p){
-  return p.status==='Pending'&&p.bidDate&&!p.followupDismissed&&daysSinceBid(p)>=7;
-}
-function renderFollowUpAlerts(){
-  const fups=projects.filter(needsFollowup);
-  const c=document.getElementById('followup-alerts');
-  c.innerHTML=fups.map(p=>{
-    const d=daysSinceBid(p);
-    const name=p.customName||p.proj.name||p.filename;
-    return `<div class="followup-banner">
-      <div class="fub-icon">⏰</div>
-      <div class="fub-text"><strong>Follow-up: ${esc(name)}</strong> — Bid sent <strong>${d} days</strong> ago. Contact ${esc(p.proj.client||'the client')}.
-      ${p.proj.pmPhone?` <a href="tel:${p.proj.pmPhone}" style="color:var(--ac);">${esc(p.proj.pmPhone)}</a>`:''}</div>
-      <span class="fub-dismiss" onclick="dismissFollowup('${p.id}')">Descartar</span>
-    </div>`;
-  }).join('');
-}
-function dismissFollowup(id){
-  const p=projects.find(x=>x.id===id);if(p){p.followupDismissed=true;saveProjects();}
-  renderFollowUpAlerts();renderDashboard();rebuildSidebar();
-}
-
-// ─── MONTH FILTER ─────────────────────────────────────────────
-function populateMonthFilter(){
-  const sel=document.getElementById('month-filter');
-  const cur=sel.value;
-  const months=new Set();
-  projects.forEach(p=>{
-    const d=new Date(p.bidDate||p.loadedAt);
-    months.add(d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0'));
-  });
-  sel.innerHTML='<option value="">All</option>';
-  [...months].sort().reverse().forEach(m=>{
-    const[yr,mo]=m.split('-');
-    const label=new Date(+yr,+mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-    sel.innerHTML+=`<option value="${m}"${m===cur?' selected':''}>${label.charAt(0).toUpperCase()+label.slice(1)}</option>`;
-  });
-}
-function clearFilters(){
-  document.getElementById('month-filter').value='';
-  document.getElementById('status-filter').value='';
-  renderDashboard();
-}
-function getFiltered(){
-  const m=document.getElementById('month-filter')?.value||'';
-  const s=document.getElementById('status-filter')?.value||'';
-  return projects.filter(p=>{
-    if(s&&p.status!==s)return false;
-    if(m){const d=new Date(p.bidDate||p.loadedAt);const pm=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');if(pm!==m)return false;}
-    return true;
-  });
+// ─── READ KEY ─────────────────────────────────────────────────
+function readKey(wb){
+  const ws=wb.Sheets['key'];
+  const k={laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]};
+  if(!ws)return k;
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  for(const r of rows){
+    const r8=String(r[8]||'').trim();
+    const lpMap={'Foreman (Standard)':1,'Laborer (Standard)':1,'Concrete worker (Standard)':1,'Foreman (OT)':1,'Foreman (PW)':1,'Laborer (OT)':1,'Laborer (PW)':1,'Concrete worker (OT)':1,'Concrete worker (PW)':1,'Foreman (Travel Time)':1,'Laborer (Travel Time)':1,'Concrete worker (Travel Time)':1,'Truck driver':1,'Truck driver OT':1};
+    if(lpMap[r8]&&typeof r[9]==='number'){k.laborProd.push({type:r8,st:r[9],ot:+r[10]||0});}
+    const c44=String(r[44]||'').trim();
+    if(c44.includes('Estimator'))k.estimators.push({name:c44.replace(', Estimator','').trim(),phone:String(r[45]||'').trim()});
+    ['Xolos','Chingones','Lobos','Poblanos','Warriors'].forEach(cn=>{
+      if(String(r[11]||'').trim()===cn&&typeof r[12]==='number'&&!k.crews.find(c=>c.name===cn))k.crews.push({name:cn,foremans:r[12],laborers:r[13]||0});
+    });
+  }
+  return k;
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────
 function renderDashboard(){
   if(!projects.length){document.getElementById('empty-state').style.display='flex';return;}
   document.getElementById('empty-state').style.display='none';
-  populateMonthFilter();renderFollowUpAlerts();
-  const filtered=getFiltered();
-  const won=filtered.filter(p=>p.status==='Won');
-  const pending=filtered.filter(p=>p.status==='Pending');
-  const lost=filtered.filter(p=>p.status==='Lost');
-  const tPending=pending.reduce((s,p)=>s+projGrand(p),0);
-  const tWon=won.reduce((s,p)=>s+projGrand(p),0);
-  document.getElementById('dash-meta').textContent=`${filtered.length} project${filtered.length!==1?'s':''} · ${won.length} won · ${pending.length} pending`;
-  document.getElementById('dash-count').textContent=`(${filtered.length})`;
+  const won=projects.filter(p=>p.status==='Won');
+  const pend=projects.filter(p=>p.status==='Pending');
+  const totalPend=pend.reduce((s,p)=>s+projGrand(p),0);
+  const totalWon=won.reduce((s,p)=>s+projGrand(p),0);
+  document.getElementById('dash-meta').textContent=`${projects.length} proyecto${projects.length!==1?'s':''} · ${won.length} Won · ${pend.length} Pending`;
+  const lost=projects.filter(p=>p.status==='Lost');
+  const totalLost=lost.reduce((s,p)=>s+projGrand(p),0);
   document.getElementById('dash-stats').innerHTML=`
-    <div class="sc"><div class="sc-l">Projects</div><div class="sc-v">${filtered.length}</div><div class="sc-s">${won.length} Won · ${pending.length} Pending · ${lost.length} Lost</div></div>
-    <div class="sc"><div class="sc-l">Pipeline (Pending)</div><div class="sc-v or">${fmt(tPending)}</div><div class="sc-s">${pending.length} project${pending.length!==1?'s':''}</div></div>
-    <div class="sc"><div class="sc-l">Total Won</div><div class="sc-v gn">${fmt(tWon)}</div><div class="sc-s">${won.length} project${won.length!==1?'s':''}</div></div>
-    <div class="sc"><div class="sc-l">Total Portfolio</div><div class="sc-v bl">${fmt(tPending+tWon)}</div><div class="sc-s">pending + won</div></div>`;
-  document.getElementById('all-projects-table').innerHTML=`
-    <table><thead><tr>
-      <th>Project</th><th>Client</th><th>PM / Contact</th><th>Bid Sent</th>
-      <th class="tr">Days</th><th class="tr">Direct Cost</th><th class="tr">Profit</th><th class="tr">Total</th><th>Status</th><th></th>
-    </tr></thead><tbody>${filtered.map(p=>{
-      const bd=p.bidDate?new Date(p.bidDate).toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}):'—';
-      const fu=needsFollowup(p);
-      return `<tr onclick="openProject('${p.id}')" style="cursor:pointer">
-        <td><div style="font-weight:600;">${esc(p.customName||p.proj.name||p.filename)}</div>
-          <div style="font-size:11px;color:var(--t3);">${esc(p.proj.jobNum||'')}${p.proj.city?' · '+p.proj.city:''}</div></td>
-        <td><div>${esc(p.proj.client||'—')}</div>
-          ${p.proj.address?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.address.slice(0,30))}</div>`:''}</td>
-        <td><div>${esc(p.proj.pm||'—')}</div>
-          ${p.proj.pmPhone?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmPhone)}</div>`:''}</td>
-        <td><div style="${fu?'color:var(--ac);font-weight:600;':''}">${bd}</div>
-          ${fu?'<div style="font-size:10.5px;color:var(--ac);">⏰ Follow-up</div>':''}</td>
-        <td class="tr">${totalDays(p)>0?totalDays(p)+'d':'—'}</td>
-        <td class="tr">${fmt(projCost(p))}</td>
-        <td class="tr tac">${fmt(projProfit(p))}</td>
-        <td class="tr" style="font-weight:700;font-size:14px;${p.status==='Won'?'color:var(--gn);':p.status==='Lost'?'color:var(--rd);':''}">${fmt(projGrand(p))}</td>
-        <td><button class="badge ${STATUS_CLASS[p.status]}" onclick="event.stopPropagation();cycleStatus('${p.id}')">${p.status}</button></td>
-        <td><button class="btn bsm" style="background:transparent;border-color:transparent;color:var(--rd);" onclick="event.stopPropagation();deleteProject('${p.id}')">✕</button></td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
+    <div class="sc"><div class="sc-l">Pipeline (Pending)</div><div class="sc-v or">${fmt(totalPend)}</div><div class="sc-s">${pend.length} proyecto${pend.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Won</div><div class="sc-v gn">${fmt(totalWon)}</div><div class="sc-s">${won.length} proyecto${won.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Lost</div><div class="sc-v" style="color:var(--rd);">${fmt(totalLost)}</div><div class="sc-s">${lost.length} proyecto${lost.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Portfolio (Pending+Won)</div><div class="sc-v bl">${fmt(totalPend+totalWon)}</div><div class="sc-s">${projects.length} proyectos total</div></div>`;
+  document.getElementById('all-proj-tbl').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>Proyecto</th><th>Cliente</th><th>Contacto</th>
+        <th class="tr">Días</th><th class="tr">Costo Directo</th>
+        <th class="tr">Profit</th><th class="tr">Total</th>
+        <th>Status</th><th></th>
+      </tr></thead>
+      <tbody>${projects.map(p=>`
+        <tr onclick="openProject('${p.id}')" style="cursor:pointer">
+          <td>
+            <div style="font-weight:600;">${esc(p.proj.name||p.filename)}</div>
+            <div style="font-size:11px;color:var(--t3);">${[p.proj.jobNum,p.proj.city].filter(Boolean).join(' · ')}</div>
+          </td>
+          <td>
+            <div>${esc(p.proj.client||'—')}</div>
+            ${p.proj.address?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.address.slice(0,35))}</div>`:''}
+          </td>
+          <td>
+            <div>${esc(p.proj.pm||'—')}</div>
+            ${p.proj.pmPhone?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmPhone)}</div>`:''}
+            ${p.proj.pmEmail?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmEmail)}</div>`:''}
+          </td>
+          <td class="tr">${totalDays(p)>0?totalDays(p)+'d':'—'}</td>
+          <td class="tr">${fmt(projCost(p))}</td>
+          <td class="tr tac">${fmt(projProfit(p))}</td>
+          <td class="tr tgn tw">${fmt(projGrand(p))}</td>
+          <td>
+            <button class="badge ${SC[p.status]}" onclick="event.stopPropagation();cycleStatus('${p.id}')">
+              ${p.status}
+            </button>
+          </td>
+          <td>
+            <button class="btn bsm" style="background:transparent;border-color:transparent;color:var(--rd);" onclick="event.stopPropagation();delProj('${p.id}')">✕</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
-// ─── LOST PAGE ────────────────────────────────────────────────
-function renderLostPage(){
-  const losts=projects.filter(p=>p.status==='Lost');
-  const tLost=losts.reduce((s,p)=>s+projGrand(p),0);
-  const winRate=projects.length?Math.round(projects.filter(p=>p.status==='Won').length/projects.length*100):0;
-  document.getElementById('lost-meta').textContent=`${losts.length} lost project${losts.length!==1?'s':''}`;
-  document.getElementById('lost-stats').innerHTML=`
-    <div class="sc"><div class="sc-l">Lost</div><div class="sc-v" style="color:var(--rd);">${losts.length}</div><div class="sc-s">lost projects</div></div>
-    <div class="sc"><div class="sc-l">Valor Total Lost</div><div class="sc-v" style="color:var(--rd);">${fmt(tLost)}</div><div class="sc-s">suma de propuestas</div></div>
-    <div class="sc"><div class="sc-l">Promedio</div><div class="sc-v" style="color:var(--t2);">${fmt(losts.length?tLost/losts.length:0)}</div><div class="sc-s">valor promedio</div></div>
-    <div class="sc"><div class="sc-l">Win Rate</div><div class="sc-v bl">${winRate}%</div><div class="sc-s">${projects.filter(p=>p.status==='Won').length} won / ${projects.length} total</div></div>`;
-  if(!losts.length){document.getElementById('lost-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);grid-column:1/-1;">No hay lost projects</div>';return;}
-  document.getElementById('lost-grid').innerHTML=losts.map(p=>{
-    const grand=projGrand(p);
-    const name=p.customName||p.proj.name||p.filename;
-    const bd=p.bidDate?new Date(p.bidDate).toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}):'No date';
-    const dSince=Math.floor((new Date()-new Date(p.loadedAt))/(1000*60*60*24));
-    return `<div class="lost-card" onclick="openProject('${p.id}')">
-      <div class="lost-card-top">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
-          <div>
-            <div style="font-size:14px;font-weight:700;">${esc(name)}</div>
-            <div style="font-size:12px;color:var(--t3);">${esc(p.proj.client||'—')}${p.proj.city?' · '+esc(p.proj.city):''}</div>
-          </div>
-          <span class="badge s-lost" style="flex-shrink:0;">Lost</span>
-        </div>
-        <div class="lost-card-amount">${fmt(grand)}</div>
-        <div class="lost-card-meta">${totalDays(p)>0?totalDays(p)+' days · ':''}${esc(p.proj.pm||'')}</div>
-      </div>
-      <div class="lost-card-bottom">
-        <div class="lost-card-date">📅 Bid: ${bd}</div>
-        <div class="lost-card-days">Hace ${dSince}d</div>
-      </div>
-    </div>`;
-  }).join('');
+function projGrand(p){return(p.budgets||[]).reduce((s,b)=>s+b.grandTotal,0);}
+function projCost(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalCost,0);}
+function projProfit(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalProfit,0);}
+function totalDays(p){return(p.budgets||[]).reduce((s,b)=>s+(b.days||0),0);}
+
+function cycleStatus(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  p.status=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
+  savePersist();renderDashboard();rebuildSidebar();
+  if(curProjId===id)openProject(id);
+  toast('Status: '+p.status);
+}
+function delProj(id){
+  if(!confirm('¿Eliminar proyecto?'))return;
+  projects=projects.filter(p=>p.id!==id);
+  savePersist();rebuildSidebar();renderDashboard();
+  if(curProjId===id){curProjId=null;navTo('dashboard');}
 }
 
 // ─── PROJECT DETAIL ───────────────────────────────────────────
@@ -697,112 +610,414 @@ function openProject(id){
   document.querySelectorAll('.pi').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('pi-'+id);if(el)el.classList.add('active');
   const grand=projGrand(p),cost=projCost(p),profit=projProfit(p);
-  const name=p.customName||p.proj.name||p.filename;
-  document.getElementById('proj-name-input').value=name;
-  document.getElementById('proj-pg-meta').textContent=[p.proj.client,p.proj.address].filter(Boolean).join(' · ')||p.filename;
-  buildKeyPage(p);buildProposalPage(p);
+  const margin=cost>0?Math.round(profit/cost*100):0;
+
+  document.getElementById('proj-pg-name').textContent=p.proj.name||p.filename;
+  document.getElementById('proj-pg-meta').textContent=[p.proj.client,p.proj.city].filter(Boolean).join(' · ')||p.filename;
+
+  buildProposalPage(p);
+
   let html='';
-  // Follow-up alert
-  if(needsFollowup(p)){
-    html+=`<div class="followup-banner"><div class="fub-icon">⏰</div>
-      <div class="fub-text">Bid sent <strong>${daysSinceBid(p)} days</strong> ago. Time to follow up with ${esc(p.proj.client||'the client')}!</div>
-      <span class="fub-dismiss" onclick="dismissFollowup('${p.id}');openProject('${p.id}')">Descartar</span></div>`;
-  }
-  // Status + bid date + actions
-  const bdFmt=p.bidDate?new Date(p.bidDate).toLocaleDateString('en-US',{day:'2-digit',month:'long',year:'numeric'}):'Not recorded';
-  html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-    <button class="badge ${STATUS_CLASS[p.status]}" style="font-size:13px;padding:5px 14px;" onclick="cycleStatus('${p.id}');openProject('${p.id}')">${p.status}</button>
-    <span style="font-size:13px;color:var(--t2);">📅 Bid: <strong>${bdFmt}</strong></span>
-    <button class="btn bsm" onclick="openEditModal('${p.id}')">✏️ Edit</button>
-    ${p.status==='Won'?`<button class="btn bsm bp" onclick="openWinSummary('${p.id}')">📋 Job Summary</button>`:''}
+
+  // STATUS
+  html+=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <button class="badge ${SC[p.status]}" style="font-size:13px;padding:5px 14px;" onclick="cycleStatus('${p.id}');openProject('${p.id}')">
+      ${p.status}
+    </button>
+    <span style="font-size:12px;color:var(--t3);">Clic para cambiar · Cargado: ${new Date(p.loadedAt).toLocaleDateString()}</span>
   </div>`;
-  if(p.notes){html+=`<div style="background:var(--ywl);border:1px solid #f5d87c;border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--yw);">📝 <strong>Notes:</strong> ${esc(p.notes)}</div>`;}
-  // Stats
+
+  // STATS
   html+=`<div class="g4" style="margin-bottom:18px;">
     <div class="sc"><div class="sc-l">Grand Total</div><div class="sc-v gn">${fmt(grand)}</div><div class="sc-s">todos los budgets</div></div>
-    <div class="sc"><div class="sc-l">Costo Directo</div><div class="sc-v">${fmt(cost)}</div><div class="sc-s">sin markup</div></div>
-    <div class="sc"><div class="sc-l">Profit</div><div class="sc-v or">${fmt(profit)}</div><div class="sc-s">${cost>0?Math.round(profit/cost*100):0}% markup</div></div>
-    <div class="sc"><div class="sc-l">Total Days</div><div class="sc-v">${totalDays(p)}</div><div class="sc-s">${p.budgets.length} budget${p.budgets.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Costo Directo</div><div class="sc-v bl">${fmt(cost)}</div><div class="sc-s">pre-markup</div></div>
+    <div class="sc"><div class="sc-l">Profit / Markup</div><div class="sc-v or">${fmt(profit)}</div><div class="sc-s">${margin}% margen</div></div>
+    <div class="sc"><div class="sc-l">Budgets en Proposal</div><div class="sc-v">${p.budgets.length}</div><div class="sc-s">${totalDays(p)>0?totalDays(p)+' días totales':''}</div></div>
   </div>`;
-  // Project info
-  const info=[[p.proj.client,'Client'],[p.proj.address,'Address'],[p.proj.city,'City'],[p.proj.pm,'Project Manager'],[p.proj.pmEmail,'PM Email'],[p.proj.pmPhone,'PM Phone'],[p.proj.super,'Superintendent'],[p.proj.jobNum,'Job #'],[p.proj.planDate,'Plan Date']].filter(([v])=>v);
-  if(info.length){html+=`<div class="card"><div class="ch">Project Information</div>${info.map(([v,l])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${esc(v)}</span></div>`).join('')}</div>`;}
-  // Budgets table
-  html+=`<div class="card"><div class="ch">Budgets <span style="font-weight:400;color:var(--t3);">(${p.budgets.length} activos)</span></div>
-    <table><thead><tr><th>#</th><th>Description</th><th>Type</th><th class="tr">Days</th><th class="tr">Direct Cost</th><th class="tr">Markup</th><th class="tr">Total</th></tr></thead>
-    <tbody>${p.budgets.map((b,i)=>`<tr onclick="openBudget('${p.id}',${i})" style="cursor:pointer">
-      <td><span class="tag">Budget #${b.num}</span></td>
-      <td><strong>${esc(b.description||b.scopeCode||'—')}</strong><div style="font-size:11px;color:var(--t3);">${esc(b.scopeCode)}</div></td>
-      <td><span style="font-size:12px;color:var(--t2);">${esc(b.type)}</span>${b.crew?` · <span style="font-size:12px;color:var(--bl);">${esc(b.crew)}</span>`:''}</td>
-      <td class="tr">${b.days>0?b.days+'d':'—'}</td>
-      <td class="tr">${fmt(b.totalCost)}</td>
-      <td class="tr tac">${fmt(b.totalProfit)}</td>
-      <td class="tr tgn tw">${fmt(b.grandTotal)}</td>
-    </tr>`).join('')}
-    <tr style="border-top:2px solid var(--b2);background:var(--s2);font-weight:700;">
-      <td colspan="4">TOTAL PROYECTO</td><td class="tr tw">${fmt(cost)}</td>
-      <td class="tr tac">${fmt(profit)}</td><td class="tr" style="font-size:15px;color:var(--gn);">${fmt(grand)}</td>
-    </tr></tbody></table></div>`;
-  html+=`<div style="display:flex;gap:10px;">
-    <button class="btn bsm" onclick="navTo('proposal')">📄 Ver Proposal</button>
-    <button class="btn bsm" onclick="navTo('key')">🔑 Ver Key de precios</button>
+
+  // PROJECT INFO + CONTACT — editable
+  html+=`<div class="g2">
+    <div class="card"><div class="ch">Información del Proyecto <button class="btn bsm np" style="font-weight:400;" onclick="toggleEdit('${p.id}')">✏️ Editar</button></div>
+      <div id="proj-info-${p.id}">
+        ${[
+          ['Nombre del Proyecto',p.proj.name],
+          ['Job / Project #',p.proj.jobNum],
+          ['Dirección',p.proj.address],
+          ['Ciudad',p.proj.city],
+          ['Cliente',p.proj.client],
+          ['Client PO#',p.proj.clientPO],
+          ['Architect / Consultant',p.proj.architect],
+          ['Sheets / Plan Date',p.proj.planDate],
+          ['Addendum',p.proj.addendum],
+          ['Site Visit',p.proj.siteVisit],
+          ['Start Date',p.proj.startDate],
+          ['Finish Date',p.proj.endDate],
+          ['Travel Time',p.proj.travelTime>0?p.proj.travelTime+' hrs':''],
+        ].filter(([,v])=>v&&String(v).trim()).map(([l,v])=>
+          `<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${esc(v)}</span></div>`
+        ).join('')||'<div style="color:var(--t3);font-size:13px;padding:8px 0;">Sin datos — usa Editar para ingresar manualmente</div>'}
+      </div>
+      <div id="proj-edit-${p.id}" style="display:none;">
+        ${[
+          ['name','Nombre del Proyecto',p.proj.name,'text'],
+          ['jobNum','Job / Project #',p.proj.jobNum,'text'],
+          ['address','Dirección',p.proj.address,'text'],
+          ['city','Ciudad',p.proj.city,'text'],
+          ['client','Cliente',p.proj.client,'text'],
+          ['clientPO','Client PO#',p.proj.clientPO,'text'],
+          ['architect','Architect / Consultant',p.proj.architect,'text'],
+          ['planDate','Sheets / Plan Date',p.proj.planDate,'text'],
+          ['startDate','Start Date',p.proj.startDate,'text'],
+          ['endDate','Finish Date',p.proj.endDate,'text'],
+        ].map(([field,label,val,type])=>
+          `<div class="info-row"><span class="info-label" style="padding-top:6px;">${label}</span>
+           <input type="${type}" value="${esc(val||'')} " data-field="${field}" data-proj="${p.id}"
+             style="flex:1;padding:5px 8px;border:1px solid var(--bd);border-radius:6px;font-family:var(--f);font-size:13px;"
+             onchange="updateProjField('${p.id}','${field}',this.value)"></div>`
+        ).join('')}
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn bsm bp" onclick="saveEdit('${p.id}')">💾 Guardar</button>
+          <button class="btn bsm" onclick="toggleEdit('${p.id}')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="ch">Cliente & Contacto</div>
+      ${p.proj.client?`<div style="font-size:18px;font-weight:700;margin-bottom:14px;color:var(--tx);">${esc(p.proj.client)}</div>`:''}
+      ${[
+        ['Project Manager',p.proj.pm],
+        ['Email PM',p.proj.pmEmail],
+        ['Teléfono PM',p.proj.pmPhone],
+        ['Superintendent',p.proj.super],
+      ].filter(([,v])=>v&&String(v).trim()).map(([l,v])=>
+        `<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${esc(v)}</span></div>`
+      ).join('')||'<div style="color:var(--t3);font-size:13px;padding:8px 0;">Sin datos de contacto en el Excel</div>'}
+      ${p.key.estimators.length?`<div class="shdr" style="margin-top:14px;">Estimators ZLC</div>
+        ${p.key.estimators.map(e=>`<div class="info-row"><span class="info-label">${esc(e.name)}</span><span class="info-val" style="color:var(--t2);font-size:12.5px;">${esc(e.phone)}</span></div>`).join('')}`:''}
+      ${p.key.crews.length?`<div class="shdr" style="margin-top:14px;">Cuadrillas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${p.key.crews.map(c=>`<span class="badge" style="background:var(--bll);color:var(--bl);">${c.name} ${c.foremans}F+${c.laborers}L</span>`).join('')}
+        </div>`:''}
+    </div>
   </div>`;
+
+  // BUDGETS TABLE (only proposal budgets)
+  html+=`<div class="card"><div class="ch">
+    Budgets en Proposal
+    <span style="font-weight:400;color:var(--t3);font-size:11px;">${p.budgets.length} activos</span>
+  </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Descripción del Scope</th><th>Type</th><th>Crew</th>
+        <th class="tr">Días</th><th class="tr">Costo Directo</th>
+        <th class="tr">Markup</th><th class="tr">Total</th>
+      </tr></thead>
+      <tbody>${p.budgets.map((b,i)=>`
+        <tr onclick="openBudget('${p.id}',${i})" style="cursor:pointer">
+          <td><span class="tag">${esc(b.sheetName)}</span></td>
+          <td>
+            <div style="font-weight:500;max-width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(b.description)}">${esc(b.description||'Sin descripción')}</div>
+            <div style="font-size:11px;color:var(--t3);">${esc(b.scopeCode)}</div>
+          </td>
+          <td style="font-size:12.5px;color:var(--t2);">${esc(b.type)}</td>
+          <td style="font-size:12.5px;color:var(--bl);">${esc(b.crew)}</td>
+          <td class="tr">${b.days>0?b.days+'d':'—'}</td>
+          <td class="tr">${fmt(b.totalCost)}</td>
+          <td class="tr tac">${fmt(b.totalProfit)}</td>
+          <td class="tr tgn tw">${fmt(b.grandTotal)}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr>
+        <td colspan="5">TOTAL PROYECTO</td>
+        <td class="tr tw">${fmt(cost)}</td>
+        <td class="tr tac">${fmt(profit)}</td>
+        <td class="tr" style="font-size:15px;color:var(--gn);">${fmt(grand)}</td>
+      </tr></tfoot>
+    </table>
+  </div>`;
+
+  // WON SUMMARY — detailed breakdown by category across all budgets
+  if(p.status==='Won'&&p.budgets.length){
+    const totalLabor=p.budgets.reduce((s,b)=>s+b.laborCost,0);
+    const totalEquip=p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
+    const totalTrucks=p.budgets.reduce((s,b)=>s+(b.trucksCost||0),0);
+    const totalDisp=p.budgets.reduce((s,b)=>s+(b.dispCost||0),0);
+    const totalMat=p.budgets.reduce((s,b)=>s+(b.matCost||0),0);
+    const totalSub=p.budgets.reduce((s,b)=>s+(b.subCost||0),0);
+    const totalMk=p.budgets.reduce((s,b)=>s+b.totalProfit,0);
+
+    html+=`<div class="card" style="border:2px solid var(--gn);margin-top:4px;">
+      <div class="ch" style="color:var(--gn);">
+        🏆 Resumen — Proyecto Ganado
+        <span style="font-weight:400;font-size:11px;color:var(--t3);">${p.budgets.length} budget${p.budgets.length!==1?'s':''}</span>
+      </div>
+
+      <!-- Per-budget breakdown -->
+      <table style="margin-bottom:20px;">
+        <thead><tr>
+          <th>Budget</th><th>Descripción</th>
+          <th class="tr">Labor</th><th class="tr">Equipment</th><th class="tr">Trucks</th>
+          <th class="tr">Disposal</th><th class="tr">Materials</th>
+          <th class="tr">Subs</th><th class="tr">Markup</th><th class="tr">Total</th>
+        </tr></thead>
+        <tbody>${p.budgets.map((b,i)=>`
+          <tr onclick="openBudget('${p.id}',${i})" style="cursor:pointer">
+            <td><span class="tag">${esc(b.sheetName)}</span></td>
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--t2);" title="${esc(b.description)}">${esc(b.description||b.scopeCode)}</td>
+            <td class="tr">${b.laborCost>0?fmt(b.laborCost):'—'}</td>
+            <td class="tr">${(b.ownedEquipC+b.rentalEquipC)>0?fmt(b.ownedEquipC+b.rentalEquipC):'—'}</td>
+            <td class="tr">${b.trucksCost>0?fmt(b.trucksCost):'—'}</td>
+            <td class="tr">${b.dispCost>0?fmt(b.dispCost):'—'}</td>
+            <td class="tr">${b.matCost>0?fmt(b.matCost):'—'}</td>
+            <td class="tr">${b.subCost>0?fmt(b.subCost):'—'}</td>
+            <td class="tr tac">${fmt(b.totalProfit)}</td>
+            <td class="tr tgn tw">${fmt(b.grandTotal)}</td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot><tr style="background:var(--gl);">
+          <td colspan="2" style="color:var(--gn);font-weight:700;">TOTALES</td>
+          <td class="tr tw">${fmt(totalLabor)}</td>
+          <td class="tr tw">${fmt(totalEquip)}</td>
+          <td class="tr tw">${fmt(totalTrucks)}</td>
+          <td class="tr tw">${fmt(totalDisp)}</td>
+          <td class="tr tw">${fmt(totalMat)}</td>
+          <td class="tr tw">${fmt(totalSub)}</td>
+          <td class="tr tac tw">${fmt(totalMk)}</td>
+          <td class="tr" style="font-size:15px;color:var(--gn);font-weight:700;">${fmt(grand)}</td>
+        </tr></tfoot>
+      </table>
+
+      <!-- Category totals visual summary -->
+      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Resumen por Categoría</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;">
+        ${[
+          ['👷 Labor',totalLabor,'var(--ac)'],
+          ['🚜 Equipment',totalEquip,'var(--bl)'],
+          ['🚛 Trucks',totalTrucks,'#7c3aed'],
+          ['🗑️ Disposal',totalDisp,'var(--gn)'],
+          ['🧱 Materials',totalMat,'#d97706'],
+          ['🏗️ Subs',totalSub,'var(--t2)'],
+        ].filter(([,v])=>v>0).map(([l,v,c])=>`
+          <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;">
+            <div style="font-size:12px;color:var(--t2);margin-bottom:4px;">${l}</div>
+            <div style="font-size:17px;font-weight:700;color:${c};">${fmt(v)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(v/cost*100):'0'}% del costo</div>
+          </div>`).join('')}
+        <div style="background:var(--al);border-radius:var(--r);padding:12px 14px;border:1px solid var(--ac);">
+          <div style="font-size:12px;color:var(--ac);margin-bottom:4px;">💰 Markup Total</div>
+          <div style="font-size:17px;font-weight:700;color:var(--ac);">${fmt(totalMk)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(totalMk/cost*100):'0'}% margen</div>
+        </div>
+        <div style="background:var(--gl);border-radius:var(--r);padding:12px 14px;border:1px solid var(--gn);">
+          <div style="font-size:12px;color:var(--gn);margin-bottom:4px;">🏆 Grand Total</div>
+          <div style="font-size:17px;font-weight:700;color:var(--gn);">${fmt(grand)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">costo + markup</div>
+        </div>
+      </div>
+
+      <!-- Cost breakdown bar -->
+      ${(()=>{
+        const bars=[{l:'Labor',v:totalLabor,c:'var(--ac)'},{l:'Equipment',v:totalEquip,c:'var(--bl)'},{l:'Trucks',v:totalTrucks,c:'#7c3aed'},{l:'Disposal',v:totalDisp,c:'var(--gn)'},{l:'Materials',v:totalMat,c:'#d97706'},{l:'Subs',v:totalSub,c:'var(--t2)'}].filter(x=>x.v>0);
+        if(!bars.length)return '';
+        const tot=cost||1;
+        return `<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Distribución del Costo Directo</div>
+        <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-bottom:10px;gap:1px;">
+          ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;">
+          ${bars.map(x=>`<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+            <div style="width:10px;height:10px;border-radius:3px;background:${x.c};flex-shrink:0;"></div>
+            <span style="color:var(--t2);">${x.l}</span><strong>${fmt(x.v)}</strong>
+            <span style="color:var(--t3);font-size:11px;">${Math.round(x.v/tot*100)}%</span>
+          </div>`).join('')}
+        </div>`;
+      })()}
+    </div>`;
+  }
+
+  html+=`<div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn bsm" onclick="navTo('proposal')">📄 Ver Proposal completo</button>
+    <button class="btn bsm bp np" onclick="printSummary('${p.id}')">🖨️ Imprimir Resumen</button>
+  </div>`;
+
   document.getElementById('proj-pg-content').innerHTML=html;
   navTo('project');
 }
 
-// ─── EDITABLE NAME ────────────────────────────────────────────
-function saveProjectName(){
-  if(!curProjId)return;
-  const val=document.getElementById('proj-name-input').value.trim();
-  const p=projects.find(x=>x.id===curProjId);
-  if(p&&val){p.customName=val;saveProjects();rebuildSidebar();renderDashboard();}
+// ─── BUDGET DETAIL ────────────────────────────────────────────
+function openBudget(projId,idx){
+  curProjId=projId;
+  const p=projects.find(x=>x.id===projId);if(!p)return;
+  const b=p.budgets[idx];if(!b)return;
+
+  document.getElementById('bpg-title').textContent=b.sheetName;
+  document.getElementById('bpg-meta').textContent=[b.type,b.crew,b.days>0?b.days+'d':'',b.travel>0?b.travel+'h travel':''].filter(Boolean).join(' · ');
+
+  let html='';
+
+  if(b.description){
+    html+=`<div class="card"><div class="ch">Descripción</div>
+      <p style="font-size:13.5px;line-height:1.75;color:var(--t2);">${esc(b.description)}</p>
+      <div style="margin-top:10px;"><span class="tag">${esc(b.scopeCode)}</span></div>
+    </div>`;
+  }
+
+  // Cost bar
+  const tot=b.totalCost||1;
+  const bars=[{l:'Labor',v:b.laborCost,c:'var(--ac)'},{l:'Equipment',v:(b.ownedEquipC||0)+(b.rentalEquipC||0),c:'var(--bl)'},{l:'Trucks',v:b.trucksCost||0,c:'#7c3aed'},{l:'Disposal',v:b.dispCost||0,c:'var(--gn)'},{l:'Materials',v:b.matCost||0,c:'#d97706'}].filter(x=>x.v>0);
+  if(bars.length){
+    html+=`<div class="card"><div class="ch">Desglose — ${fmt(b.totalCost)}</div>
+      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:14px;gap:1px;">
+        ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 20px;">
+        ${bars.map(x=>`<div style="display:flex;align-items:center;gap:7px;font-size:12.5px;">
+          <div style="width:9px;height:9px;border-radius:3px;background:${x.c};flex-shrink:0;"></div>
+          <span style="color:var(--t2);">${x.l}</span><strong>${fmt(x.v)}</strong>
+          <span style="color:var(--t3);font-size:11px;">${Math.round(x.v/tot*100)}%</span>
+        </div>`).join('')}
+      </div></div>`;
+  }
+
+  if(b.laborRows.length){html+=mkTable('👷 Labor',['Tipo de Labor','Rate ($/hr)','Horas','Costo'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost));}
+  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipo','Unit','Qty','Rate','Costo'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
+  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Tipo','Loads','Rate','Costo'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
+  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Tipo','Facilidad','Qty','Unit','$/Unit','Costo'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
+  if(b.matRows.length){html+=mkTable('🧱 Materials',['Material','Qty','Rate','Costo'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost));}
+
+  html+=`<div class="card"><div class="ch">💰 Resumen — ${b.sheetName}</div>
+    <div style="max-width:420px;">
+      ${b.laborCost>0?srw('Labor',fmt(b.laborCost)):''}
+      ${(b.ownedEquipC+b.rentalEquipC)>0?srw('Equipment',fmt(b.ownedEquipC+b.rentalEquipC)):''}
+      ${b.trucksCost>0?srw('Trucks',fmt(b.trucksCost)):''}
+      ${b.dispCost>0?srw('Disposal',fmt(b.dispCost)):''}
+      ${b.matCost>0?srw('Materials',fmt(b.matCost)):''}
+      ${b.subCost>0?srw('Subcontractors',fmt(b.subCost)):''}
+      ${srw('Total Costo Directo','<strong>'+fmt(b.totalCost)+'</strong>')}
+      <div class="sr"><span class="sl" style="color:var(--ac);">+ Markup / Profit (${Math.round(b.markupPct*100)}%)</span><span class="sv" style="color:var(--ac);">${fmt(b.totalProfit)}</span></div>
+      <div class="sr grand"><span class="sl">TOTAL ${esc(b.sheetName)}</span><span class="sv">${fmt(b.grandTotal)}</span></div>
+    </div></div>`;
+
+  document.getElementById('bpg-content').innerHTML=html;
+  navTo('budget');
 }
 
-// ─── EDIT MODAL ───────────────────────────────────────────────
-function openEditModal(id){
-  const p=projects.find(x=>x.id===id);if(!p)return;
-  curProjId=id;
-  document.getElementById('em-name').value=p.customName||p.proj.name||p.filename;
-  document.getElementById('em-bid-date').value=p.bidDate||'';
-  document.getElementById('em-notes').value=p.notes||'';
-  document.getElementById('edit-modal').classList.add('show');
-}
-function closeEditModal(){document.getElementById('edit-modal').classList.remove('show');}
-function saveEditModal(){
-  const p=projects.find(x=>x.id===curProjId);if(!p)return;
-  const nameVal=document.getElementById('em-name').value.trim();
-  p.customName=nameVal||null;
-  p.bidDate=document.getElementById('em-bid-date').value||null;
-  p.notes=document.getElementById('em-notes').value.trim();
-  p.followupDismissed=false;
-  saveProjects();closeEditModal();
-  openProject(curProjId);renderDashboard();rebuildSidebar();
-  toast('Project updated');
+function srw(l,v){return `<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`;}
+function mkTable(title,headers,rows,total){
+  const lastIdx=headers.length-1;
+  return `<div class="card"><div class="ch">${title}</div>
+    <table><thead><tr>${headers.map((h,i)=>`<th${i===lastIdx?' class="tr"':''}>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i===lastIdx?' class="tr tac"':''} style="font-size:13px;">${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    <tfoot><tr><td colspan="${headers.length-1}">Total</td><td class="tr tac">${total}</td></tr></tfoot>
+    </table></div>`;
 }
 
-// ─── STATUS CYCLE ─────────────────────────────────────────────
-function cycleStatus(id){
-  const p=projects.find(x=>x.id===id);if(!p)return;
-  const newStatus=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
-  p.status=newStatus;
-  saveProjects();renderDashboard();rebuildSidebar();
-  toast('Status: '+newStatus);
-  if(newStatus==='Won'){pendingWonId=id;document.getElementById('won-modal').classList.add('show');}
+// ─── PROPOSAL ────────────────────────────────────────────────
+function buildProposalPage(p){
+  const budgets=p.budgets,scopes=p.scopes,proj=p.proj;
+  const grand=projGrand(p);
+  const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('prop-meta').textContent=proj.name||p.filename;
+  document.getElementById('prop-content').innerHTML=`
+  <div class="prop-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;">
+      <div>
+        <div style="font-size:24px;font-weight:700;">ZLC Corporation</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:4px;">1027 Detroit Ave, Ste A · Concord, CA 94518</div>
+        <div style="font-size:13px;color:var(--t2);">Phone: 925-465-6663 · CA License 890327</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:20px;font-weight:700;color:var(--ac);">PROPOSAL</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:4px;">Date: ${today}</div>
+        ${proj.jobNum?`<div style="font-size:12px;color:var(--t2);">Job #: ${esc(proj.jobNum)}</div>`:''}
+      </div>
+    </div>
+    <div style="padding:14px 16px;background:var(--s2);border-radius:var(--r);margin-bottom:24px;">
+      <div class="g2" style="gap:16px;">
+        <div>
+          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Project</div>
+          <div style="font-weight:700;font-size:15px;">${esc(proj.name||p.filename)}</div>
+          ${proj.address?`<div style="font-size:13px;color:var(--t2);">${esc(proj.address)}</div>`:''}
+          ${proj.planDate?`<div style="font-size:12px;color:var(--t3);">Plans: ${esc(proj.planDate)}</div>`:''}
+          ${proj.architect?`<div style="font-size:12px;color:var(--t3);">Architect: ${esc(proj.architect)}</div>`:''}
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Client</div>
+          <div style="font-weight:700;font-size:15px;">${esc(proj.client||'—')}</div>
+          ${proj.pm?`<div style="font-size:13px;color:var(--t2);">PM: ${esc(proj.pm)}</div>`:''}
+          ${proj.pmEmail?`<div style="font-size:12px;color:var(--t3);">${esc(proj.pmEmail)}</div>`:''}
+          ${proj.city?`<div style="font-size:12px;color:var(--t3);">${esc(proj.city)}</div>`:''}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Scope of Work — Schedule of Values</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <thead><tr style="border-bottom:2px solid var(--b2);">
+        <th style="text-align:left;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;min-width:110px;">Budget</th>
+        <th style="text-align:left;padding:10px 10px;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Description</th>
+        <th style="text-align:right;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Amount</th>
+      </tr></thead>
+      <tbody>${budgets.map(b=>{
+        const s=scopes.find(sc=>b.scopeCode&&sc.code&&b.scopeCode.includes(sc.code.split('_')[0]));
+        const desc=b.description&&b.description.trim()?b.description:(s?s.description:b.scopeCode||b.sheetName);
+        return `<tr style="border-bottom:1px solid var(--bd);">
+          <td style="padding:12px 0;vertical-align:top;">
+            <div style="font-family:var(--m);font-size:11px;color:var(--t2);font-weight:600;">${esc(b.sheetName)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${esc(b.scopeCode)}</div>
+          </td>
+          <td style="padding:12px 10px;font-size:13px;vertical-align:top;line-height:1.65;">${esc(desc)}</td>
+          <td style="padding:12px 0;text-align:right;font-family:var(--m);font-weight:700;vertical-align:top;font-size:14px;">${fmt(b.grandTotal)}</td>
+        </tr>`;}).join('')}
+      </tbody>
+      <tfoot><tr style="border-top:2px solid var(--tx);">
+        <td colspan="2" style="padding:16px 0;font-size:16px;font-weight:700;">TOTAL PROPOSAL</td>
+        <td style="text-align:right;font-family:var(--m);font-size:21px;font-weight:700;color:var(--ac);">${fmt(grand)}</td>
+      </tr></tfoot>
+    </table>
+    <div style="padding:14px;border:1px solid var(--bd);border-radius:var(--r);font-size:12.5px;color:var(--t2);line-height:1.8;">
+      <strong>Notes:</strong> This proposal is based on plans and specifications as described above. Any work not specifically listed is excluded. Prices are valid for 30 days from date of proposal.
+    </div>
+    <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
+      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">ZLC Corporation — Authorized Signature / Date</div>
+      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">Client Acceptance / Date</div>
+    </div>
+  </div>`;
 }
-function closeWonModal(){document.getElementById('won-modal').classList.remove('show');pendingWonId=null;}
-function goToWinSummary(){closeWonModal();openWinSummary(pendingWonId);pendingWonId=null;}
 
-// ─── WIN SUMMARY ──────────────────────────────────────────────
-function openWinSummary(id){
+// ─── EDIT PROJECT INFO ───────────────────────────────────────
+function toggleEdit(id){
+  const info=document.getElementById('proj-info-'+id);
+  const edit=document.getElementById('proj-edit-'+id);
+  if(!info||!edit)return;
+  const isEditing=edit.style.display!=='none';
+  info.style.display=isEditing?'':'none';
+  edit.style.display=isEditing?'none':'';
+}
+function updateProjField(id,field,val){
   const p=projects.find(x=>x.id===id);if(!p)return;
-  curProjId=id;
-  const name=p.customName||p.proj.name||p.filename;
+  p.proj[field]=val.trim();
+}
+function saveEdit(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  // Collect all input values
+  document.querySelectorAll(`[data-proj="${id}"]`).forEach(inp=>{
+    const field=inp.dataset.field;
+    if(field)p.proj[field]=inp.value.trim();
+  });
+  savePersist();
+  toggleEdit(id);
+  openProject(id); // re-render with new data
+  rebuildSidebar();
+  toast('Información guardada ✓');
+}
+
+// ─── WIN SUMMARY (print-ready) ───────────────────────────────
+function printSummary(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const name=p.proj.name||p.filename;
   const grand=projGrand(p),cost=projCost(p),profit=projProfit(p);
   const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('ws-meta').textContent=name;
 
-  // Aggregate
+  // Aggregate all rows across budgets
   let allLabor=[],allMat=[],allEquip=[],allDisp=[],allTrucks=[];
   p.budgets.forEach(b=>{
     b.laborRows.forEach(r=>allLabor.push({...r,budget:b.num}));
@@ -813,7 +1028,6 @@ function openWinSummary(id){
   });
 
   const groupBy=(arr,key)=>{const m={};arr.forEach(r=>{const k=r[key];if(!m[k]){m[k]={...r,totalQty:0,totalHours:0,totalCost:0};}m[k].totalQty+=(r.qty||0);m[k].totalHours+=(r.hours||0);m[k].totalCost+=(r.cost||0);});return Object.values(m);};
-
   const laborSum=groupBy(allLabor,'type');
   const matSum=groupBy(allMat,'name');
   const dispByFac=groupBy(allDisp,'facility');
@@ -825,199 +1039,107 @@ function openWinSummary(id){
   const tEquipCost=p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
   const tDispCost=p.budgets.reduce((s,b)=>s+b.dispCost,0);
   const tTruckCost=p.budgets.reduce((s,b)=>s+b.trucksCost,0);
+  const statusColor=p.status==='Won'?'#2d7a4f':p.status==='Lost'?'#b91c1c':'#b45309';
 
-  let html=`<div class="win-summary-wrap">
+  const wsWrap=document.getElementById('ws-wrap');
+  const wsContent=document.getElementById('ws-content');
+  if(!wsWrap||!wsContent){console.error('win-summary containers not found');return;}
+  const wsMeta=document.getElementById('ws-meta');if(wsMeta)wsMeta.textContent=name;
+
+  let whtml=`
   <div class="ws-header">
-    <div><div class="ws-logo">ZLC <span>Corporation</span></div>
-      <div class="ws-logo-sub">1027 Detroit Ave, Ste A · Concord, CA 94518<br>925-465-6663 · CA License 890327</div></div>
-    <div style="text-align:right;"><div class="ws-title">JOB SUMMARY</div>
-      <div class="ws-title-sub">Date: ${today}<br>Status: <span style="color:var(--gn);font-weight:700;">WON ●</span></div></div>
+    <div>
+      <div class="ws-logo">ZLC <span>Corporation</span></div>
+      <div class="ws-logo-sub">1027 Detroit Ave, Ste A · Concord, CA 94518<br>925-465-6663 · CA License 890327</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="ws-title">JOB SUMMARY</div>
+      <div class="ws-title-sub">Date: ${today}<br>Status: <span style="color:${statusColor};font-weight:700;">${p.status} ●</span></div>
+    </div>
   </div>
 
   <div class="ws-section">
     <div class="ws-section-title">Project Information</div>
     <div class="ws-row"><span class="ws-label">Project</span><span class="ws-val">${esc(name)}</span></div>
-    ${p.proj.client?`<div class="ws-row"><span class="ws-label">Cliente</span><span class="ws-val">${esc(p.proj.client)}</span></div>`:''}
+    ${p.proj.client?`<div class="ws-row"><span class="ws-label">Client</span><span class="ws-val">${esc(p.proj.client)}</span></div>`:''}
     ${p.proj.address?`<div class="ws-row"><span class="ws-label">Address</span><span class="ws-val">${esc(p.proj.address)}</span></div>`:''}
+    ${p.proj.city?`<div class="ws-row"><span class="ws-label">City</span><span class="ws-val">${esc(p.proj.city)}</span></div>`:''}
     ${p.proj.pm?`<div class="ws-row"><span class="ws-label">Project Manager</span><span class="ws-val">${esc(p.proj.pm)}</span></div>`:''}
+    ${p.proj.pmPhone?`<div class="ws-row"><span class="ws-label">Phone</span><span class="ws-val">${esc(p.proj.pmPhone)}</span></div>`:''}
     ${p.proj.jobNum?`<div class="ws-row"><span class="ws-label">Job #</span><span class="ws-val">${esc(p.proj.jobNum)}</span></div>`:''}
-    ${p.bidDate?`<div class="ws-row"><span class="ws-label">Bid Sent</span><span class="ws-val">${new Date(p.bidDate).toLocaleDateString('en-US',{day:'2-digit',month:'long',year:'numeric'})}</span></div>`:''}
-    <div class="ws-row"><span class="ws-label">Total Duration</span><span class="ws-val">${totalDays(p)} days · ${p.budgets.length} scope${p.budgets.length!==1?'s':''}</span></div>
+    ${p.proj.planDate?`<div class="ws-row"><span class="ws-label">Plan Date</span><span class="ws-val">${esc(p.proj.planDate)}</span></div>`:''}
+    <div class="ws-row"><span class="ws-label">Duration</span><span class="ws-val">${totalDays(p)} days · ${p.budgets.length} scope${p.budgets.length!==1?'s':''}</span></div>
   </div>
 
   <div class="ws-section">
-    <div class="ws-section-title">Summary by Scope</div>
+    <div class="ws-section-title">Summary by Scope / Budget</div>
     ${p.budgets.map(b=>`<div style="margin-bottom:10px;padding:12px;border:1px solid var(--bd);border-radius:var(--r);">
       <div style="font-weight:700;font-size:13px;margin-bottom:8px;">${esc(b.description||b.scopeCode||'Budget #'+b.num)} <span style="font-weight:400;color:var(--t3);font-size:11px;">Budget #${b.num}</span></div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px;">
         <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Days</div><strong>${b.days}d</strong></div>
         <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Crew</div><strong>${esc(b.crew)||'—'}</strong></div>
-        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Costo Directo</div><strong>${fmt(b.totalCost)}</strong></div>
+        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Direct Cost</div><strong>${fmt(b.totalCost)}</strong></div>
         <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Total Budget</div><strong style="color:var(--gn);">${fmt(b.grandTotal)}</strong></div>
       </div>
     </div>`).join('')}
   </div>`;
 
-  if(laborSum.length)html+=`<div class="ws-section">
+  if(laborSum.length)whtml+=`<div class="ws-section">
     <div class="ws-section-title">👷 Labor — Total ${fmt(tLaborCost)}</div>
     ${laborSum.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.type)}</span><span class="ws-val">${r.totalHours>0?r.totalHours.toFixed(0)+'h · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
   </div>`;
 
-  if(matSum.length)html+=`<div class="ws-section">
-    <div class="ws-section-title">🧱 Materials — Total ${fmt(tMatCost)}</div>
-    ${matSum.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' units · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
-  </div>`;
-
-  if(allEquip.length)html+=`<div class="ws-section">
+  if(allEquip.length)whtml+=`<div class="ws-section">
     <div class="ws-section-title">🚜 Equipment & Rentals — Total ${fmt(tEquipCost)}</div>
     ${owned.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.qty>0?r.qty+' '+r.unit+' · ':''}${fmt(r.cost)}</span></div>`).join('')}
     ${rentals.length?`<div style="font-size:11px;font-weight:700;color:var(--bl);text-transform:uppercase;letter-spacing:.05em;padding:8px 0 4px;">Rentals</div>`:''}
     ${rentals.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)} <span style="font-size:10px;background:var(--bll);color:var(--bl);padding:1px 5px;border-radius:4px;">rental</span></span><span class="ws-val">${r.qty>0?r.qty+' '+r.unit+' · ':''}${fmt(r.cost)}</span></div>`).join('')}
   </div>`;
 
-  if(dispByFac.length)html+=`<div class="ws-section">
+  if(dispByFac.length)whtml+=`<div class="ws-section">
     <div class="ws-section-title">🗑️ Disposal — Total ${fmt(tDispCost)}</div>
-    ${dispByFac.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.facility)} <span style="font-size:10px;background:var(--s2);padding:1px 5px;border-radius:4px;">${esc(r.type)}</span></span><span class="ws-val">${r.totalQty>0?r.totalQty+' ton · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+    ${dispByFac.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.facility)} <span style="font-size:10px;background:var(--s2);padding:1px 5px;border-radius:4px;">${esc(r.type)}</span></span><span class="ws-val">${r.totalQty>0?r.totalQty.toFixed(1)+' ton · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
   </div>`;
 
-  if(allTrucks.length)html+=`<div class="ws-section">
+  if(matSum.length)whtml+=`<div class="ws-section">
+    <div class="ws-section-title">🧱 Materials — Total ${fmt(tMatCost)}</div>
+    ${matSum.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' units · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+  </div>`;
+
+  if(allTrucks.length)whtml+=`<div class="ws-section">
     <div class="ws-section-title">🚛 Trucks — Total ${fmt(tTruckCost)}</div>
     ${allTrucks.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.loads>0?r.loads+' loads · ':''}${fmt(r.cost)}</span></div>`).join('')}
   </div>`;
 
-  html+=`<div class="ws-grand"><span class="ws-label">TOTAL DEL PROYECTO</span><span class="ws-val">${fmt(grand)}</span></div>
-  <div style="margin-top:8px;display:flex;gap:20px;font-size:13px;color:var(--t2);">
+  whtml+=`
+  <div class="ws-grand">
+    <span class="ws-label">TOTAL DEL PROYECTO</span>
+    <span class="ws-val">${fmt(grand)}</span>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:24px;font-size:13px;color:var(--t2);">
     <span>Costo directo: <strong>${fmt(cost)}</strong></span>
     <span>Profit: <strong style="color:var(--ac);">${fmt(profit)}</strong></span>
     <span>Margen: <strong>${cost>0?Math.round(profit/cost*100):0}%</strong></span>
   </div>
-  <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
+  <div style="margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
     <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">ZLC Corporation — Authorized / Date</div>
     <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">Client — Accepted / Date</div>
-  </div></div>`;
+  </div>`;
 
-  document.getElementById('win-summary-content').innerHTML=html;
+  wsContent.innerHTML=whtml;
   navTo('win-summary');
-}
-
-// ─── DELETE ───────────────────────────────────────────────────
-function deleteProject(id){
-  if(!confirm('Delete this project?'))return;
-  projects=projects.filter(p=>p.id!==id);
-  saveProjects();rebuildSidebar();renderDashboard();
-  if(curProjId===id){curProjId=null;navTo('dashboard');}
-}
-
-// ─── BUDGET DETAIL ────────────────────────────────────────────
-function openBudget(projId,idx){
-  curProjId=projId;curBudgetIdx=idx;
-  const p=projects.find(x=>x.id===projId);if(!p)return;
-  const b=p.budgets[idx];if(!b)return;
-  document.getElementById('bpg-title').textContent=`Budget #${b.num}`;
-  document.getElementById('bpg-meta').textContent=[b.type,b.crew,b.days>0?b.days+'d':'',b.shifts!==8?b.shifts+'h/day':'',b.travel>0?b.travel+'h travel':''].filter(Boolean).join(' · ')||'Budget';
-  let html='';
-  if(b.description){html+=`<div class="card"><div class="ch">Description</div><p style="font-size:13.5px;line-height:1.75;color:var(--t2);">${esc(b.description)}</p>${b.scopeCode?`<div style="margin-top:10px;"><span class="tag">${esc(b.scopeCode)}</span></div>`:''}</div>`;}
-  const tot=b.totalCost||1;
-  const bars=[{l:'Labor',v:b.laborCost,c:'var(--ac)'},{l:'Equipment',v:(b.ownedEquipC||0)+(b.rentalEquipC||0),c:'var(--bl)'},{l:'Trucks',v:b.trucksCost||0,c:'#7c3aed'},{l:'Disposal',v:b.dispCost||0,c:'var(--gn)'},{l:'Materials',v:b.matCost||0,c:'#d97706'},{l:'Subs',v:b.subCost||0,c:'var(--t3)'}].filter(x=>x.v>0);
-  if(bars.length){html+=`<div class="card"><div class="ch">Desglose — ${fmt(b.totalCost)}</div>
-    <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:14px;gap:1px;">${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px 20px;">${bars.map(x=>`<div style="display:flex;align-items:center;gap:7px;font-size:12.5px;"><div style="width:9px;height:9px;border-radius:3px;background:${x.c};flex-shrink:0;"></div><span style="color:var(--t2);">${x.l}</span><strong>${fmt(x.v)}</strong><span style="color:var(--t3);font-size:11px;">${Math.round(x.v/tot*100)}%</span></div>`).join('')}</div></div>`;}
-  if(b.laborRows.length)html+=sectionTable('👷 Labor',['Labor Type','Rate ($/hr)','Horas','Costo'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost),'Total Labor');
-  if(b.equipRows.length)html+=sectionTable('🚜 Equipment',['Equipo','Unit','Qty','Rate','Costo'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)),'Total Equipment');
-  if(b.truckRows.length)html+=sectionTable('🚛 Trucks',['Type','Loads','Rate','Costo'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost),'Total Trucks');
-  if(b.dispRows.length)html+=sectionTable('🗑️ Disposal',['Type','Facility','Qty','Unit','$/Unit','Costo'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost),'Total Disposal');
-  if(b.matRows.length)html+=sectionTable('🧱 Materials',['Material','Qty','Rate','Cost'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost),'Total Materials');
-  html+=`<div class="card"><div class="ch">💰 Final Summary Budget #${b.num}</div><div style="max-width:420px;">
-    ${b.laborCost>0?srRow('Labor',fmt(b.laborCost)):''}
-    ${(b.ownedEquipC+b.rentalEquipC)>0?srRow('Equipment',fmt(b.ownedEquipC+b.rentalEquipC)):''}
-    ${b.trucksCost>0?srRow('Trucks',fmt(b.trucksCost)):''}
-    ${b.dispCost>0?srRow('Disposal',fmt(b.dispCost)):''}
-    ${b.matCost>0?srRow('Materials',fmt(b.matCost)):''}
-    ${b.subCost>0?srRow('Subcontractors',fmt(b.subCost)):''}
-    ${srRow('Total Costo Directo','<strong>'+fmt(b.totalCost)+'</strong>')}
-    <div class="sr"><span class="sl" style="color:var(--ac);">+ Markup / Profit</span><span class="sv" style="color:var(--ac);">${fmt(b.totalProfit)}</span></div>
-    <div class="sr grand"><span class="sl">TOTAL BUDGET #${b.num}</span><span class="sv">${fmt(b.grandTotal)}</span></div>
-  </div></div>`;
-  document.getElementById('bpg-content').innerHTML=html;
-  navTo('budget');
-}
-
-// ─── KEY PAGE ─────────────────────────────────────────────────
-function buildKeyPage(p){
-  const k=p.key;let html='';
-  if(k.laborProd.length)html+=`<div class="card"><div class="ch">Labor Production Rates</div><table><thead><tr><th>Type</th><th class="tr">Standard ($/hr)</th><th class="tr">OT ($/hr)</th></tr></thead><tbody>${k.laborProd.map(l=>`<tr><td>${l.type}</td><td class="tr">$${l.st.toFixed(2)}</td><td class="tr">${l.ot>0?'$'+l.ot.toFixed(2):'—'}</td></tr>`).join('')}</tbody></table></div>`;
-  if(k.laborTM.length)html+=`<div class="card"><div class="ch">Labor T&M Rates</div><table><thead><tr><th>Type</th><th class="tr">Straight Time</th><th class="tr">OT</th><th class="tr">Travel</th></tr></thead><tbody>${k.laborTM.map(l=>`<tr><td>${l.type}</td><td class="tr">$${l.st.toFixed(2)}</td><td class="tr">${l.ot>0?'$'+l.ot.toFixed(2):'—'}</td><td class="tr">${l.tt>0?'$'+l.tt.toFixed(2):'—'}</td></tr>`).join('')}</tbody></table></div>`;
-  if(k.equipment.length)html+=`<div class="card"><div class="ch">Equipment (${k.equipment.length})</div><table><thead><tr><th>Equipo</th><th class="tr">Daily ($)</th><th class="tr">Weekly ($)</th><th class="tr">T&M Daily ($)</th></tr></thead><tbody>${k.equipment.map(e=>`<tr><td>${e.name}</td><td class="tr">$${e.daily.toFixed(0)}</td><td class="tr">${e.weekly>0?'$'+e.weekly.toFixed(0):'—'}</td><td class="tr">${e.tm>0?'$'+e.tm.toFixed(0):'—'}</td></tr>`).join('')}</tbody></table></div>`;
-  if(k.materials.length)html+=`<div class="card"><div class="ch">Materials (${k.materials.length})</div><table><thead><tr><th>Material</th><th>Unit</th><th class="tr">Price ($)</th></tr></thead><tbody>${k.materials.map(m=>`<tr><td>${m.name}</td><td style="font-size:11px;color:var(--t3)">${m.unit}</td><td class="tr">$${m.price.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`;
-  if(k.disposal.length)html+=`<div class="card"><div class="ch">Disposal</div><table><thead><tr><th>Type</th><th>Facility</th><th class="tr">$/Unit</th></tr></thead><tbody>${k.disposal.map(d=>`<tr><td><span class="tag">${d.type}</span></td><td>${d.facility}</td><td class="tr">$${d.price.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`;
-  document.getElementById('key-content').innerHTML=html||'<div style="padding:40px;text-align:center;color:var(--t3);">No se pudo extraer Key</div>';
-  document.getElementById('key-meta').textContent=p.proj.name||p.filename;
-}
-
-// ─── PROPOSAL ────────────────────────────────────────────────
-function buildProposalPage(p){
-  const budgets=p.budgets,scopes=p.scopes,proj=p.proj;
-  const grand=projGrand(p);
-  const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  const name=p.customName||proj.name||p.filename;
-  document.getElementById('prop-meta').textContent=name;
-  document.getElementById('prop-content').innerHTML=`<div class="prop-wrap">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;">
-      <div><div style="font-size:24px;font-weight:700;">ZLC Corporation</div>
-        <div style="font-size:13px;color:var(--t2);margin-top:4px;">1027 Detroit Ave, Ste A · Concord, CA 94518</div>
-        <div style="font-size:13px;color:var(--t2);">Phone: 925-465-6663 · CA License 890327</div></div>
-      <div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:var(--ac);">PROPOSAL</div>
-        <div style="font-size:13px;color:var(--t2);margin-top:4px;">Date: ${today}</div>
-        ${proj.jobNum?`<div style="font-size:12px;color:var(--t2);">Job #: ${esc(proj.jobNum)}</div>`:''}</div>
-    </div>
-    <div style="padding:14px 16px;background:var(--s2);border-radius:var(--r);margin-bottom:26px;">
-      <div class="g2"><div>
-        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Project</div>
-        <div style="font-weight:700;font-size:15px;">${esc(name)}</div>
-        ${proj.address?`<div style="font-size:13px;color:var(--t2);">${esc(proj.address)}</div>`:''}
-        ${proj.planDate?`<div style="font-size:12px;color:var(--t3);">Plans: ${esc(proj.planDate)}</div>`:''}</div>
-      <div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Client</div>
-        <div style="font-weight:700;font-size:15px;">${esc(proj.client||'—')}</div>
-        ${proj.pm?`<div style="font-size:13px;color:var(--t2);">PM: ${esc(proj.pm)}</div>`:''}
-        ${proj.city?`<div style="font-size:12px;color:var(--t3);">${esc(proj.city)}</div>`:''}</div></div></div>
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Scope of Work — Schedule of Values</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-      <thead><tr style="border-bottom:2px solid var(--b2);">
-        <th style="text-align:left;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;min-width:110px;">Budget</th>
-        <th style="text-align:left;padding:10px 10px;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Description</th>
-        <th style="text-align:right;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Amount</th>
-      </tr></thead>
-      <tbody>${budgets.map(b=>{
-        const s=scopes.find(sc=>b.scopeCode&&b.scopeCode.includes(sc.code.split('_')[0]));
-        const desc=b.description&&b.description.trim()?b.description:(s?s.description:b.scopeCode||b.sheetName);
-        return `<tr style="border-bottom:1px solid var(--bd);">
-          <td style="padding:12px 0;vertical-align:top;"><div style="font-family:var(--m);font-size:11px;color:var(--t2);">${esc(b.sheetName)}</div><div style="font-size:11px;color:var(--t3);margin-top:1px;">${esc(b.scopeCode)}</div></td>
-          <td style="padding:12px 10px;font-size:13px;vertical-align:top;line-height:1.65;">${esc(desc)}</td>
-          <td style="padding:12px 0;text-align:right;font-family:var(--m);font-weight:700;vertical-align:top;font-size:14px;">${fmt(b.grandTotal)}</td>
-        </tr>`;}).join('')}
-      </tbody>
-      <tfoot><tr style="border-top:2px solid var(--tx);">
-        <td colspan="2" style="padding:16px 0;font-size:16px;font-weight:700;">TOTAL PROPOSAL</td>
-        <td style="text-align:right;font-family:var(--m);font-size:21px;font-weight:700;color:var(--ac);">${fmt(grand)}</td>
-      </tr></tfoot>
-    </table>
-    <div style="padding:14px;border:1px solid var(--bd);border-radius:var(--r);font-size:12.5px;color:var(--t2);line-height:1.8;"><strong>Notes:</strong> This proposal is based on plans and specifications as described above. Any work not specifically listed is excluded. Prices are valid for 30 days from date of proposal.</div>
-    <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
-      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">ZLC Corporation — Authorized Signature / Date</div>
-      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">Client Acceptance / Date</div>
-    </div></div>`;
 }
 
 // ─── SIDEBAR ─────────────────────────────────────────────────
 function rebuildSidebar(){
   const list=document.getElementById('proj-list-sb');
-  if(!projects.length){list.innerHTML='<div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>';return;}
+  if(!projects.length){list.innerHTML='<div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Sube un archivo para comenzar</div>';return;}
   list.innerHTML=projects.map(p=>`
-    <div class="pi pi-${p.status.toLowerCase()} ${p.id===curProjId?'active':''} ${needsFollowup(p)?'pi-followup':''}" id="pi-${p.id}" onclick="openProject('${p.id}')">
+    <div class="pi pi-${p.status.toLowerCase()} ${p.id===curProjId?'active':''}" id="pi-${p.id}" onclick="openProject('${p.id}')">
       <div class="pi-dot"></div>
       <div style="overflow:hidden;min-width:0;">
-        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;">${esc(p.customName||p.proj.name||p.filename)}</div>
-        <div style="font-size:10.5px;opacity:.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.proj.client||p.status}</div>
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;">${esc(p.proj.name||p.filename)}</div>
+        <div style="font-size:10.5px;opacity:.55;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.proj.client||p.status)}</div>
       </div>
     </div>`).join('');
 }
@@ -1028,38 +1150,19 @@ function navTo(page){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('pg-'+page);if(pg)pg.classList.add('active');
   const nv=document.getElementById('nav-'+page);if(nv)nv.classList.add('active');
-  if(page==='lost-page')renderLostPage();
 }
 
 // ─── UTILS ───────────────────────────────────────────────────
-function projGrand(p){return(p.budgets||[]).reduce((s,b)=>s+b.grandTotal,0);}
-function projCost(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalCost,0);}
-function projProfit(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalProfit,0);}
-function totalDays(p){return(p.budgets||[]).reduce((s,b)=>s+(b.days||0),0);}
 function fmt(n){if(!n||isNaN(n))return '$0';return '$'+Math.round(n).toLocaleString('en-US');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showProg(msg,p){document.getElementById('prog').classList.add('show');document.getElementById('prog-msg').textContent=msg;document.getElementById('prog-fill').style.width=p+'%';}
 function hideProg(){document.getElementById('prog').classList.remove('show');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
-function srRow(l,v){return `<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`;}
-function sectionTable(title,headers,rows,total,totalLabel){
-  return `<div class="card"><div class="ch">${title}</div>
-    <table><thead><tr>${headers.map(h=>`<th${h==='Costo'||h==='Rate'||h==='$/Unit'||h==='Total'?' class="tr"':''}>${h}</th>`).join('')}</tr></thead>
-    <tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i===r.length-1?' class="tr tac"':''} style="font-size:13px;">${c}</td>`).join('')}</tr>`).join('')}
-    <tr style="border-top:2px solid var(--bd);font-weight:700;"><td colspan="${headers.length-1}">${totalLabel}</td><td class="tr tac">${total}</td></tr>
-    </tbody></table></div>`;
-}
-
-document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeEditModal();});
-document.getElementById('won-modal').addEventListener('click',function(e){if(e.target===this)closeWonModal();});
 
 // ─── INIT ─────────────────────────────────────────────────────
-loadProjects();
+loadPersist();
 rebuildSidebar();
-if(projects.length){
-  document.getElementById('empty-state').style.display='none';
-  renderDashboard();navTo('dashboard');
-}
+if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();navTo('dashboard');}
 </script>
 </body>
 </html>

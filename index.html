@@ -802,80 +802,79 @@ function cycleStatus(id){
 // ─── WON QUEUE (for PM App) ───────────────────────────────────
 // Writes to localStorage key 'zlc_est_won_queue' which the PM app reads
 function buildQueueEntry(p){
-  // Helper: extract 3-digit code from scopeCode like "T001_Hard_Demo" → "001"
-  // or from description like "001 Hard Demolition" → "001"
+  const shifts = 8; // hours per shift/day
+
+  // Extract 3-digit code — priority: description prefix > scopeCode > budget num
   function extractCode(b){
-    // Try scopeCode first: T001_Hard_Demo → 001
-    if(b.scopeCode){
-      const m=b.scopeCode.match(/T?(\d{3})/);
-      if(m)return m[1];
-    }
-    // Try description: "001 Hard Demolition..." → 001
+    // Description like "004 Concrete: ..." or "001 Hard Demolition..."
     if(b.description){
-      const m=b.description.match(/^(\d{3})/);
-      if(m)return m[1];
+      const m = b.description.match(/^(\d{3})\s/);
+      if(m) return m[1];
     }
-    // Try sheetName: "Budget #2" → use budget num padded
+    // scopeCode like "T001_Hard_Demo" → "001"
+    if(b.scopeCode){
+      const m = b.scopeCode.match(/T?(\d{3})/);
+      if(m) return m[1];
+    }
     return String(b.num||1).padStart(3,'0');
   }
 
-  // Calculate foreman and laborer days from labor rows
-  // Each labor row: {laborType, days, shifts, count}
-  // Foreman rows have "Foreman" in the type, laborers have "Laborer"
+  // Calculate foreman and laborer days from labor rows (hours / shifts per day)
   function calcManDays(b){
-    let foremanDays=0,laborerDays=0;
+    let fHours=0, lHours=0;
     (b.laborRows||[]).forEach(r=>{
-      const isForeman=/foreman/i.test(r.laborType||r.type||'');
-      const isLaborer=/laborer|concrete.*worker|labor(?!.*foreman)/i.test(r.laborType||r.type||'');
-      const days=(r.days||1)*(r.count||1);
-      if(isForeman)foremanDays+=days;
-      else if(isLaborer)laborerDays+=days;
+      const t=(r.type||'').toLowerCase();
+      const h=r.hours||0;
+      // Only count straight time (not OT, not Travel Time) to avoid double-counting
+      if(t.includes('travel')||t.includes(' ot')||t.includes('(ot)')) return;
+      if(t.includes('foreman')) fHours += h;
+      else if(t.includes('laborer')||t.includes('concrete worker')) lHours += h;
     });
-    // Fallback: if no labor rows but crew is set, estimate from crew + days
-    if(!foremanDays&&!laborerDays&&b.crew&&b.days){
-      const crew=S&&S.key&&S.key.crews?S.key.crews.find(c=>c.name===b.crew):null;
-      if(crew){foremanDays=crew.foremans*(b.days||1);laborerDays=crew.laborers*(b.days||1);}
-    }
-    return{foremanDays,laborerDays};
+    const sh = b.shifts || shifts;
+    return {
+      foremanDays:  Math.round(fHours / sh),
+      laborerDays:  Math.round(lHours / sh),
+    };
   }
 
+  // Build one entry per budget
+  const codeEntries = p.budgets.map(b=>{
+    const {foremanDays, laborerDays} = calcManDays(b);
+    return {
+      code:          extractCode(b),
+      description:   b.description || b.scopeCode || b.sheetName,
+      value:         Math.round(b.grandTotal || 0),
+      estimatedCost: Math.round(b.totalCost  || 0),
+      profit:        Math.round(b.totalProfit|| 0),
+      days:          b.days   || 0,
+      crew:          b.crew   || '',
+      type:          b.type   || '',
+      foremanDays,
+      laborerDays,
+      _budget:       b.sheetName,
+    };
+  });
+
   return {
-    id:             p.proj.jobNum || p.id,
-    num:            p.proj.jobNum || '',
-    name:           p.proj.name   || p.filename,
-    client:         p.proj.client || '',
-    pm:             p.proj.pm     || '',
-    address:        p.proj.address|| '',
-    city:           p.proj.city   || '',
-    pmEmail:        p.proj.pmEmail|| '',
-    pmPhone:        p.proj.pmPhone|| '',
-    notes:          p.notes       || '',
-    wonDate:        p.wonDate     || new Date().toISOString(),
-    _estimatingId:  p.id,
-
-    // Cost codes in PM format: {code:'001', value, foremanDays, laborerDays}
-    codes: p.budgets.map(b=>{
-      const{foremanDays,laborerDays}=calcManDays(b);
-      return{
-        code:        extractCode(b),          // "001" "002" etc — PM CODES_MAP format
-        description: b.description||b.scopeCode||b.sheetName,
-        value:       Math.round(b.grandTotal||0),  // rounded — no decimals
-        estimatedCost: Math.round(b.totalCost||0),
-        profit:      Math.round(b.totalProfit||0),
-        days:        b.days||0,
-        crew:        b.crew||'',
-        type:        b.type||'',
-        foremanDays,
-        laborerDays,
-      };
-    }),
-
+    id:            p.proj.jobNum || p.id,
+    num:           p.proj.jobNum || '',
+    name:          p.proj.name   || p.filename,
+    client:        p.proj.client || '',
+    pm:            p.proj.pm     || '',
+    address:       p.proj.address|| '',
+    city:          p.proj.city   || '',
+    pmEmail:       p.proj.pmEmail|| '',
+    pmPhone:       p.proj.pmPhone|| '',
+    notes:         p.notes       || '',
+    wonDate:       p.wonDate     || new Date().toISOString(),
+    _estimatingId: p.id,
+    codes:         codeEntries,
     contractValue:   projGrand(p),
     estimatedCost:   projCost(p),
     estimatedProfit: projProfit(p),
-    estimatedMargin: projGrand(p)>0?projProfit(p)/projGrand(p):0,
+    estimatedMargin: projGrand(p)>0 ? projProfit(p)/projGrand(p) : 0,
     ...buildPMFinancialExport(p),
-    cos:[],rfis:[],subs:[],
+    cos:[], rfis:[], subs:[],
   };
 }
 

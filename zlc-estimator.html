@@ -161,7 +161,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     </div>
     <div id="pm-queue-status" style="display:none;background:rgba(45,122,79,.2);border:1px solid rgba(45,122,79,.4);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px;color:#6ee7a0;cursor:pointer;" onclick="openPMQueuePanel()">
       <div style="font-weight:700;">🏆 <span id="pm-queue-count">0</span> in queue for PM</div>
-      <div style="font-size:10px;opacity:.7;margin-top:2px;">Open the PM App to import</div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Open PM App to import</div>
     </div>
     <button class="ubtn" onclick="document.getElementById('file-in').click()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -262,7 +262,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Do you want to see the full summary with a breakdown of labor, materials, equipment, and disposal?</p>
     <div class="mo-actions">
       <button class="btn" onclick="closeWonModal()">Just save</button>
-      <button class="btn bp" onclick="goToWinSummary()">📋 Ver Job Summary</button>
+      <button class="btn bp" onclick="goToWinSummary()">📋 View Job Summary</button>
     </div>
   </div>
 </div>
@@ -308,11 +308,11 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">These Won projects are ready to import in the PM App. Open the PM App on the same computer and they will appear automatically.</p>
     <div id="pm-queue-list" style="margin-bottom:16px;"></div>
     <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--t2);">
-      <strong>How does it work?</strong> Both apps share the same browser. The PM App automatically detects when there are Won projects and shows a green notification to import them.
+      <strong>How does it work?</strong> Both apps share the same browser. The PM App automatically detects Won projects and shows a green notification to import them.
     </div>
     <div style="background:var(--bll);border:1px solid #b0c8e8;border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:8px;">☁️ Google Sheets Backup</div>
-      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Manual backup of all projects to the Sheet. This happens automatically when loading a file or marking Won.</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Manual backup of all projects to the Sheet. Happens automatically when loading a file or marking Won.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button id="cloud-backup-btn2" class="btn bsm bp" onclick="backupAllToSheet()">☁️ Save all to Sheet</button>
         <button id="cloud-restore-btn" class="btn bsm" onclick="restoreFromSheet()">⬇ Restore from Sheet</button>
@@ -345,14 +345,105 @@ let pendingWonId=null;
 const STATUS=['Pending','Won','Lost'];
 const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
 
-function savePersist(){try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}}
+// ─── CLOUD-FIRST PERSISTENCE ─────────────────────────────────
+// Primary store = Google Sheets via Apps Script.
+// localStorage is kept only as a fast session cache so the UI
+// doesn't flash empty while the cloud fetch is in-flight.
+
+function savePersist(){
+  try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
+  // push every project to cloud (fire-and-forget)
+  projects.forEach(p=>{ autoBackup(p); });
+}
+
 function loadPersist(){
+  // 1. Seed UI instantly from local cache
   try{
-    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3']
+      .forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
     const s=localStorage.getItem('zlc_v7');
     if(s){const parsed=JSON.parse(s);projects=Array.isArray(parsed)?parsed:[];}
     else projects=[];
   }catch(e){projects=[];}
+  // 2. Then sync from cloud in background
+  loadFromCloud();
+}
+
+async function loadFromCloud(){
+  try{
+    updateCloudStatus(null);
+    const rows = await new Promise((resolve,reject)=>{
+      if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
+      const cbName='_initCb_'+Date.now();
+      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
+      const script=document.createElement('script');
+      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
+      window[cbName]=function(result){
+        clearTimeout(timer);delete window[cbName];script.remove();
+        if(result&&result.ok)resolve(result.rows||[]);
+        else reject(result?.error||'Load failed');
+      };
+      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
+      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
+      document.head.appendChild(script);
+    });
+
+    let added=0;
+    rows.forEach(r=>{
+      const estId=String(r['Estimating ID']||'').trim();
+      if(estId&&projects.find(x=>x.id===estId))return; // already loaded from xlsx
+      const scopes=r['Scopes JSON']||[];
+      projects.push({
+        id:       estId||'cloud_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        filename: String(r['Project Name']||r['Job #']||'Cloud Project'),
+        status:   String(r['Status']||'Pending'),
+        bidDate:  String(r['Bid Date']||'')||null,
+        notes:    String(r['Notes']||''),
+        wonDate:  String(r['Won Date']||'')||null,
+        loadedAt: String(r['Sent At']||new Date().toISOString()),
+        sentToPM:false, followupDismissed:false,
+        proj:{
+          name:    String(r['Project Name']||''),
+          jobNum:  String(r['Job #']||''),
+          client:  String(r['Client']||''),
+          pm:      String(r['PM']||''),
+          pmEmail: String(r['PM Email']||''),
+          pmPhone: String(r['PM Phone']||''),
+          address: String(r['Address']||''),
+          city:    String(r['City']||''),
+          planDate:'',startDate:'',endDate:'',
+          architect:'',addendum:'',siteVisit:'',travelTime:0,
+        },
+        budgets:scopes.map((s,i)=>({
+          sheetName:   s.budgetNumber||'Budget #'+(i+1),
+          num:i+1, scopeCode:s.scopeCode||'', description:s.description||'',
+          type:s.type||'Standard', crew:s.crew||'', days:s.days||0,
+          shifts:8, travel:0,
+          grandTotal:s.total||0, totalCost:s.cost||0, totalProfit:s.profit||0,
+          laborCost:s.labor||0, ownedEquipC:s.equipment||0,
+          rentalEquipC:0, trucksCost:s.trucks||0, dispCost:s.disposal||0,
+          matCost:s.materials||0, subCost:0, markupPct:0.45,
+          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
+        })),
+        changeOrders:[],scopes:[],
+        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+        _restoredFromSheet:true,
+      });
+      added++;
+    });
+
+    if(added>0){
+      try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
+      rebuildSidebar(); renderDashboard(); renderFollowUpAlerts();
+      document.getElementById('empty-state').style.display='none';
+      navTo('dashboard');
+      toast(`☁️ ${added} project${added!==1?'s':''} loaded from cloud`);
+    }
+    updateCloudStatus(true);
+  }catch(err){
+    console.warn('Cloud load failed:',err);
+    updateCloudStatus(false);
+  }
 }
 
 // ─── DROP ─────────────────────────────────────────────────────
@@ -950,7 +1041,7 @@ function openProject(id){
           ['Job / Project #',p.proj.jobNum],
           ['Dirección',p.proj.address],
           ['Ciudad',p.proj.city],
-          ['Client',p.proj.client],
+          ['Cliente',p.proj.client],
           ['Client PO#',p.proj.clientPO],
           ['Architect / Consultant',p.proj.architect],
           ['Sheets / Plan Date',p.proj.planDate],
@@ -969,7 +1060,7 @@ function openProject(id){
           ['jobNum','Job / Project #',p.proj.jobNum,'text'],
           ['address','Dirección',p.proj.address,'text'],
           ['city','Ciudad',p.proj.city,'text'],
-          ['client','Client',p.proj.client,'text'],
+          ['client','Cliente',p.proj.client,'text'],
           ['clientPO','Client PO#',p.proj.clientPO,'text'],
           ['architect','Architect / Consultant',p.proj.architect,'text'],
           ['planDate','Sheets / Plan Date',p.proj.planDate,'text'],
@@ -1060,7 +1151,7 @@ function openProject(id){
       <!-- Per-budget breakdown -->
       <table style="margin-bottom:20px;">
         <thead><tr>
-          <th>Budget</th><th>Description</th>
+          <th>Budget</th><th>Descripción</th>
           <th class="tr">Labor</th><th class="tr">Equipment</th><th class="tr">Trucks</th>
           <th class="tr">Disposal</th><th class="tr">Materials</th>
           <th class="tr">Subs</th><th class="tr">Markup</th><th class="tr">Total</th>
@@ -1188,9 +1279,9 @@ function openBudget(projId,idx){
   }
 
   if(b.laborRows.length){html+=mkTable('👷 Labor',['Labor Type','Rate ($/hr)','Hours','Cost'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost));}
-  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipo','Unit','Qty','Rate','Cost'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
-  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Tipo','Loads','Rate','Cost'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
-  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Tipo','Facilidad','Qty','Unit','$/Unit','Cost'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
+  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipment','Unit','Qty','Rate','Cost'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
+  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Type','Loads','Rate','Cost'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
+  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Type','Facility','Qty','Unit','$/Unit','Cost'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
   if(b.matRows.length){html+=mkTable('🧱 Materials',['Material','Qty','Rate','Cost'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost));}
 
   html+=`<div class="card"><div class="ch">💰 Summary — ${b.sheetName}</div>
@@ -1506,7 +1597,7 @@ function saveEditModal(){
   savePersist();closeEditModal();
   openProject(curProjId);renderDashboard();rebuildSidebar();
   renderFollowUpAlerts();
-  toast('Proyecto actualizado ✓');
+  toast('Project updated ✓');
 }
 
 // ─── WON MODAL ────────────────────────────────────────────────
@@ -1529,7 +1620,7 @@ function estSheetWrite(action, payload){
     const timer  = setTimeout(()=>{ delete window[cbName]; script.remove(); reject('timeout'); }, 15000);
     window[cbName] = function(result){
       clearTimeout(timer); delete window[cbName]; script.remove();
-      if(result && result.success) resolve(result);
+      if(result && (result.ok || result.success)) resolve(result);
       else reject(result?.error || 'Sheet write failed');
     };
     script.src = PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
@@ -1608,7 +1699,7 @@ async function backupAllToSheet(){
     await new Promise(r=>setTimeout(r,600)); // throttle
   }
   if(btn){btn.textContent='☁️ Backup Sheet';btn.disabled=false;}
-  const msg=`☁️ Backup: ${ok} guardados${fail?', '+fail+' fallaron':''}`;
+  const msg=`☁️ Backup: ${ok} saved${fail?', '+fail+' failed':''}`;
   toast(msg);
   updateCloudStatus(ok>0);
 }
@@ -1630,7 +1721,7 @@ function updateCloudStatus(success){
     el.textContent=`☁️ Synced ${now}`;
     el.style.color='var(--gn)';
   }else{
-    el.textContent='☁️ Sin conexión';
+    el.textContent='☁️ Offline';
     el.style.color='var(--t3)';
   }
 }
@@ -1657,7 +1748,7 @@ async function restoreFromSheet(){
       document.head.appendChild(script);
     });
 
-    if(!rows.length){toast('Sheet vacío — no hay datos para restaurar');return;}
+    if(!rows.length){toast('Sheet is empty — no data to restore');return;}
 
     // Convert sheet rows back to project format
     let added=0;
@@ -1785,7 +1876,7 @@ function openPMModal(id){
   const valDiv=document.getElementById('pm-validation');
   if(errors.length){
     valDiv.style.display='';
-    valDiv.innerHTML='<strong>⚠️ Complete this information before sending:</strong><ul style="margin-top:6px;padding-left:18px;">'
+    valDiv.innerHTML='<strong>⚠️ Complete this info before sending:</strong><ul style="margin-top:6px;padding-left:18px;">'
       +errors.map(e=>`<li>${e}</li>`).join('')+'</ul>';
   }else{
     valDiv.style.display='none';
@@ -1865,11 +1956,11 @@ async function sendToPM(){
   const errors=[];
   if(!data.projectName)  errors.push('Missing project name');
   if(!data.client)       errors.push('Missing client');
-  if(projGrand(p)===0)   errors.push('Grand Total is $0');
+  if(projGrand(p)===0)   errors.push('Grand Total es $0');
   if(!url){
     // No URL — just copy JSON and show confirmation
     copyJson();
-    toast('No URL configured — JSON copied to clipboard');
+    toast('No URL set — JSON copied to clipboard');
     return;
   }
   if(!/^https?:\/\/.+/.test(url)){ toast('Invalid URL — must start with https://'); return; }
@@ -1896,7 +1987,7 @@ async function sendToPM(){
     sentBadge.style.display='';
     sentBadge.innerHTML=`✅ Sent on ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
 
-    toast('✅ Successfully sent to PM');
+    toast('✅ Sent to PM successfully');
     rebuildSidebar();
     // Refresh project view to show badge
     if(curProjId)openProject(curProjId);

@@ -154,6 +154,15 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Sube un archivo para comenzar</div>
   </div>
   <div class="sbot">
+    <!-- Cloud backup status -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
+      <span id="cloud-status" style="font-size:11px;color:var(--t3);">☁️ Sin datos</span>
+      <button id="cloud-backup-btn" class="btn bsm" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.6);" onclick="backupAllToSheet()">☁️ Backup Sheet</button>
+    </div>
+    <div id="pm-queue-status" style="display:none;background:rgba(45,122,79,.2);border:1px solid rgba(45,122,79,.4);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px;color:#6ee7a0;cursor:pointer;" onclick="openPMQueuePanel()">
+      <div style="font-weight:700;">🏆 <span id="pm-queue-count">0</span> en cola para PM</div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Abre el PM App para importar</div>
+    </div>
     <button class="ubtn" onclick="document.getElementById('file-in').click()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Cargar Master Sheet
@@ -258,11 +267,78 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
   </div>
 </div>
 
+<!-- SEND TO PM MODAL -->
+<div class="mo-overlay" id="pm-modal">
+  <div class="mo-box" style="width:560px;max-width:96vw;">
+    <h3>📤 Send to PM</h3>
+    <div id="pm-validation" style="display:none;background:var(--rdl);border:1px solid #fca5a5;border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--rd);"></div>
+
+    <!-- Project summary preview -->
+    <div id="pm-preview" style="background:var(--s2);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;"></div>
+
+    <!-- Webhook URL -->
+    <div class="form-row">
+      <label>Endpoint URL <span style="font-weight:400;color:var(--t3);">(webhook, Zapier, Make, etc.)</span></label>
+      <input type="url" id="pm-url" placeholder="https://hooks.zapier.com/hooks/catch/..." oninput="savePMUrl(this.value)">
+    </div>
+
+    <!-- JSON preview toggle -->
+    <div style="margin-bottom:14px;">
+      <button class="btn bsm" onclick="toggleJsonPreview()" id="pm-json-toggle">{ } Ver JSON</button>
+      <button class="btn bsm" onclick="copyJson()" style="margin-left:6px;">📋 Copiar JSON</button>
+    </div>
+    <div id="pm-json-wrap" style="display:none;background:#1a1916;border-radius:var(--r);padding:14px;margin-bottom:14px;max-height:260px;overflow-y:auto;">
+      <pre id="pm-json-content" style="font-family:var(--m);font-size:11px;color:#f5f4f0;white-space:pre-wrap;word-break:break-all;margin:0;"></pre>
+    </div>
+
+    <!-- Sent status -->
+    <div id="pm-sent-badge" style="display:none;background:var(--gl);border-radius:var(--r);padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--gn);"></div>
+
+    <div class="mo-actions">
+      <button class="btn" onclick="closePMModal()">Cancelar</button>
+      <button class="btn bp" id="pm-send-btn" onclick="sendToPM()">📤 Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PM QUEUE PANEL -->
+<div class="mo-overlay" id="pm-queue-modal">
+  <div class="mo-box" style="width:560px;max-width:96vw;">
+    <h3>🏆 Cola para Project Manager</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">Estos proyectos Won están listos para importarse en el PM App. Abre el PM App en la misma computadora y los verás automáticamente.</p>
+    <div id="pm-queue-list" style="margin-bottom:16px;"></div>
+    <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--t2);">
+      <strong>¿Cómo funciona?</strong> Ambas apps comparten el mismo browser. El PM App detecta automáticamente cuando hay proyectos Won y muestra una notificación verde para importarlos.
+    </div>
+    <div style="background:var(--bll);border:1px solid #b0c8e8;border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:8px;">☁️ Google Sheets Backup</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Backup manual de todos los proyectos al Sheet. Se hace automático al cargar un archivo o marcar Won.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="cloud-backup-btn2" class="btn bsm bp" onclick="backupAllToSheet()">☁️ Guardar todo al Sheet</button>
+        <button id="cloud-restore-btn" class="btn bsm" onclick="restoreFromSheet()">⬇ Restaurar del Sheet</button>
+      </div>
+    </div>
+    <div class="mo-actions">
+      <button class="btn" onclick="clearWonQueue()">Limpiar cola</button>
+      <button class="btn bp" onclick="window.open('https://mariazlc23.github.io/zlc-pm/','_blank');closeModal('pm-queue-modal')">Abrir PM App →</button>
+    </div>
+  </div>
+</div>
+
 <div id="prog"><div class="prog-box"><h3>Leyendo archivo...</h3><p id="prog-msg">Extrayendo datos</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
 <div id="toast"></div>
 
 <script>
 // ─── STATE ────────────────────────────────────────────────────
+// ─── GOOGLE SHEETS BACKUP CONFIG ─────────────────────────────
+// Sheet: https://docs.google.com/spreadsheets/d/1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro
+const EST_SHEET_ID     = '1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro';
+// Shared Apps Script URL with PM App (handles both PM and Estimator writes)
+const PM_APPS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbylgsY5Nd3F3DlPQijFjwlNz3D11i2Jz2lET4F5QfjCuPbuTxCEqLlGWrcSArfmf9dGrQ/exec';
+// Google Sheets API Key (read-only) — get one at console.cloud.google.com
+// Enable: Google Sheets API → Credentials → API Key → restrict to Sheets API
+const SHEETS_API_KEY   = '';  // ← paste your API key here
+
 let projects=[];
 let curProjId=null;
 let pendingWonId=null;
@@ -312,6 +388,8 @@ function handleFile(file){
       openProject(p.id);
       document.getElementById('file-in').value='';
       toast('Proyecto cargado ✓');
+      // Auto-backup to Google Sheet
+      setTimeout(()=>autoBackup(p),1000);
     }catch(err){hideProg();console.error(err);toast('Error: '+err.message);}
   };
   reader.readAsArrayBuffer(file);
@@ -704,10 +782,91 @@ function cycleStatus(id){
   const p=projects.find(x=>x.id===id);if(!p)return;
   const newStatus=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
   p.status=newStatus;
-  savePersist();renderDashboard();rebuildSidebar();renderFollowUpAlerts();
-  if(newStatus==='Won'){pendingWonId=id;document.getElementById('won-modal').classList.add('show');}
-  else{if(curProjId===id)openProject(id);}
+  p.wonDate = newStatus==='Won' ? new Date().toISOString() : (p.wonDate||null);
+  savePersist();renderDashboard();rebuildSidebar();renderFollowUpAlerts();updateQueueBadge();
+  if(newStatus==='Won'){
+    pushToWonQueue(p);
+    setTimeout(()=>autoBackup(p),800); // backup Won projects immediately
+    // Also update status in sheet
+    estSheetWrite('updateEstimate',{estimatingId:p.id,status:'Won',wonDate:p.wonDate||new Date().toISOString()}).catch(()=>{});
+    pendingWonId=id;
+    document.getElementById('won-modal').classList.add('show');
+  } else {
+    // If un-winning, remove from queue
+    if(p.status!=='Won') removeFromWonQueue(id);
+    if(curProjId===id)openProject(id);
+  }
   toast('Status: '+newStatus);
+}
+
+// ─── WON QUEUE (for PM App) ───────────────────────────────────
+// Writes to localStorage key 'zlc_est_won_queue' which the PM app reads
+function buildQueueEntry(p){
+  return {
+    // PM app required fields
+    id:             p.proj.jobNum || p.id,
+    num:            p.proj.jobNum || '',
+    name:           p.proj.name   || p.filename,
+    client:         p.proj.client || '',
+    pm:             p.proj.pm     || '',
+    address:        p.proj.address|| '',
+    city:           p.proj.city   || '',
+    pmEmail:        p.proj.pmEmail|| '',
+    pmPhone:        p.proj.pmPhone|| '',
+    notes:          p.notes       || '',
+    wonDate:        p.wonDate     || new Date().toISOString(),
+    _estimatingId:  p.id,
+
+    // Cost codes — one per budget, using scopeCode as code and grandTotal as value
+    codes: p.budgets.map(b=>({
+      code:           b.scopeCode  || b.sheetName,
+      description:    b.description|| b.scopeCode || b.sheetName,
+      value:          b.grandTotal || 0,
+      estimatedCost:  b.totalCost  || 0,
+      profit:         b.totalProfit|| 0,
+      days:           b.days       || 0,
+      crew:           b.crew       || '',
+      type:           b.type       || '',
+    })),
+
+    // Financial summary
+    contractValue:   projGrand(p),
+    estimatedCost:   projCost(p),
+    estimatedProfit: projProfit(p),
+    estimatedMargin: projGrand(p)>0 ? projProfit(p)/projGrand(p) : 0,
+
+    // Full PM export
+    ...buildPMFinancialExport(p),
+
+    cos: [],
+    rfis: [],
+    subs: [],
+  };
+}
+
+function pushToWonQueue(p){
+  try{
+    const queue = JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    // Remove if already in queue (avoid duplicates)
+    const filtered = queue.filter(x=>x._estimatingId!==p.id);
+    filtered.unshift(buildQueueEntry(p));
+    localStorage.setItem('zlc_est_won_queue', JSON.stringify(filtered));
+    localStorage.setItem('zlc_est_won_time', new Date().toISOString());
+    console.log('✓ Project pushed to PM queue:', p.proj.name||p.filename);
+  }catch(e){ console.warn('Won queue write error:', e); }
+}
+
+function removeFromWonQueue(projId){
+  try{
+    const queue = JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    const filtered = queue.filter(x=>x._estimatingId!==projId);
+    localStorage.setItem('zlc_est_won_queue', JSON.stringify(filtered));
+  }catch(e){}
+}
+
+function getWonQueueCount(){
+  try{ return JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]').length; }
+  catch(e){ return 0; }
 }
 function delProj(id){
   if(!confirm('¿Eliminar proyecto?'))return;
@@ -740,6 +899,7 @@ function openProject(id){
     </button>
     ${bidLabel?`<span style="font-size:12px;color:var(--t2);background:var(--s2);padding:3px 10px;border-radius:100px;">📅 ${bidLabel}</span>`:''}
     ${p.notes?`<span style="font-size:12px;color:var(--t2);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(p.notes)}">📝 ${esc(p.notes)}</span>`:''}
+    ${p.sentToPMAt?`<span style="font-size:12px;background:var(--gl);color:var(--gn);padding:3px 10px;border-radius:100px;">✅ Sent to PM: ${new Date(p.sentToPMAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
     <button class="btn bsm np" onclick="openEditModal('${p.id}')" style="margin-left:auto;">✏️ Editar Bid</button>
   </div>`;
 
@@ -953,6 +1113,9 @@ function openProject(id){
   html+=`<div style="display:flex;gap:10px;margin-top:4px;">
     <button class="btn bsm" onclick="navTo('proposal')">📄 Ver Proposal completo</button>
     <button class="btn bsm bp np" onclick="printSummary('${p.id}')">🖨️ Imprimir Resumen</button>
+    <button class="btn bsm np" onclick="openPMModal('${p.id}')" style="background:var(--bl);border-color:var(--bl);color:#fff;">
+      ${p.sentToPM?'✅':'📤'} Send to PM
+    </button>
   </div>`;
 
   document.getElementById('proj-pg-content').innerHTML=html;
@@ -1320,6 +1483,445 @@ function saveEditModal(){
 function closeWonModal(){document.getElementById('won-modal').classList.remove('show');pendingWonId=null;}
 function goToWinSummary(){closeWonModal();if(pendingWonId){printSummary(pendingWonId);}pendingWonId=null;}
 
+
+
+// ─── CLOUD BACKUP (Google Sheets) ────────────────────────────
+// Saves project data to Google Sheet via Apps Script
+// Sheet columns mirror PM App format so both apps share the same data
+
+function estSheetWrite(action, payload){
+  return new Promise((resolve,reject)=>{
+    if(!PM_APPS_SCRIPT){ reject('No Apps Script URL'); return; }
+    const cbName = '_estCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const data   = JSON.stringify({action, ...payload});
+    const encoded= encodeURIComponent(data);
+    const script = document.createElement('script');
+    const timer  = setTimeout(()=>{ delete window[cbName]; script.remove(); reject('timeout'); }, 15000);
+    window[cbName] = function(result){
+      clearTimeout(timer); delete window[cbName]; script.remove();
+      if(result && result.success) resolve(result);
+      else reject(result?.error || 'Sheet write failed');
+    };
+    script.src = PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
+    script.onerror = ()=>{ clearTimeout(timer); delete window[cbName]; reject('Script load error'); };
+    document.head.appendChild(script);
+  });
+}
+
+// Backup a single project to Google Sheet
+async function backupProjectToSheet(p){
+  try{
+    const grand = projGrand(p);
+    const today = new Date();
+    const fullDate = `${today.getMonth()+1}/1/${today.getFullYear()}`;
+
+    // Build codes array from budgets — each budget = one cost code line
+    const codes = p.budgets.map(b=>({
+      code:        b.scopeCode ? b.scopeCode.replace(/[^0-9]/g,'').slice(0,3) : b.num.toString().padStart(3,'0'),
+      description: b.description || b.scopeCode || b.sheetName,
+      value:       b.grandTotal  || 0,
+      estimatedCost: b.totalCost || 0,
+    })).filter(c=>c.value>0);
+
+    // Write to sheet via Apps Script (same action as PM app uses)
+    await estSheetWrite('addEstimate', {
+      // Field names match Apps Script addEstimate() exactly
+      estimatingId: p.id,
+      jobNum:       p.proj.jobNum  || '',
+      name:         p.proj.name    || p.filename,
+      client:       p.proj.client  || '',
+      pm:           p.proj.pm      || '',
+      pmEmail:      p.proj.pmEmail || '',
+      pmPhone:      p.proj.pmPhone || '',
+      address:      p.proj.address || '',
+      city:         p.proj.city    || '',
+      status:       p.status,
+      grand,
+      estimatedCost: projCost(p),
+      profit:       projProfit(p),
+      bidDate:      p.bidDate      || '',
+      notes:        p.notes        || '',
+      wonDate:      p.wonDate      || '',
+      sentAt:       new Date().toISOString(),
+      scopes: p.budgets.map(b=>({
+        budgetNumber: b.sheetName,
+        scopeCode:    b.scopeCode,
+        description:  b.description,
+        type:         b.type,
+        crew:         b.crew,
+        days:         b.days,
+        total:        b.grandTotal,
+        cost:         b.totalCost,
+        profit:       b.totalProfit,
+        labor:        b.laborCost    || 0,
+        equipment:    (b.ownedEquipC||0)+(b.rentalEquipC||0),
+        trucks:       b.trucksCost   || 0,
+        disposal:     b.dispCost     || 0,
+        materials:    b.matCost      || 0,
+      })),
+    });
+    return true;
+  }catch(err){
+    console.warn('Sheet backup failed:', err);
+    return false;
+  }
+}
+
+// Backup ALL projects to sheet
+async function backupAllToSheet(){
+  const btn=document.getElementById('cloud-backup-btn');
+  if(btn){btn.textContent='☁️ Guardando...';btn.disabled=true;}
+  let ok=0,fail=0;
+  for(const p of projects){
+    const success=await backupProjectToSheet(p);
+    if(success)ok++;else fail++;
+    await new Promise(r=>setTimeout(r,600)); // throttle
+  }
+  if(btn){btn.textContent='☁️ Backup Sheet';btn.disabled=false;}
+  const msg=`☁️ Backup: ${ok} guardados${fail?', '+fail+' fallaron':''}`;
+  toast(msg);
+  updateCloudStatus(ok>0);
+}
+
+// Auto-backup when a project is loaded or status changes
+async function autoBackup(p){
+  if(!p)return;
+  const ok=await backupProjectToSheet(p);
+  if(ok){
+    updateCloudStatus(true);
+  }
+}
+
+function updateCloudStatus(success){
+  const el=document.getElementById('cloud-status');
+  if(!el)return;
+  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if(success){
+    el.textContent=`☁️ Synced ${now}`;
+    el.style.color='var(--gn)';
+  }else{
+    el.textContent='☁️ Sin conexión';
+    el.style.color='var(--t3)';
+  }
+}
+
+// Read projects back from sheet (restore)
+async function restoreFromSheet(){
+  const btn=document.getElementById('cloud-restore-btn');
+  if(btn){btn.textContent='⏳ Leyendo...';btn.disabled=true;}
+  try{
+    // Use Apps Script loadEstimates action — no API key needed
+    const rows = await new Promise((resolve,reject)=>{
+      if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
+      const cbName='_restoreCb_'+Date.now();
+      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
+      const script=document.createElement('script');
+      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
+      window[cbName]=function(result){
+        clearTimeout(timer);delete window[cbName];script.remove();
+        if(result&&result.ok)resolve(result.rows||[]);
+        else reject(result?.error||'Load failed');
+      };
+      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
+      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
+      document.head.appendChild(script);
+    });
+
+    if(!rows.length){toast('Sheet vacío — no hay datos para restaurar');return;}
+
+    // Convert sheet rows back to project format
+    let added=0;
+    rows.forEach(r=>{
+      const estId=String(r['Estimating ID']||'');
+      // Skip if already loaded
+      if(estId&&projects.find(x=>x.id===estId))return;
+      const scopes=r['Scopes JSON']||[];
+      projects.push({
+        id:             estId||'restored_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        filename:       String(r['Project Name']||r['Job #']||'Restored Project'),
+        status:         String(r['Status']||'Pending'),
+        bidDate:        String(r['Bid Date']||'')||null,
+        notes:          String(r['Notes']||''),
+        wonDate:        String(r['Won Date']||'')||null,
+        loadedAt:       String(r['Sent At']||new Date().toISOString()),
+        sentToPM:       false,
+        followupDismissed:false,
+        proj:{
+          name:    String(r['Project Name']||''),
+          jobNum:  String(r['Job #']||''),
+          client:  String(r['Client']||''),
+          pm:      String(r['PM']||''),
+          pmEmail: String(r['PM Email']||''),
+          pmPhone: String(r['PM Phone']||''),
+          address: String(r['Address']||''),
+          city:    String(r['City']||''),
+          planDate:'',startDate:'',endDate:'',
+          architect:'',addendum:'',siteVisit:'',travelTime:0,
+        },
+        // Restore budgets from scopes JSON if available
+        budgets: scopes.map((s,i)=>({
+          sheetName:   s.budgetNumber||'Budget #'+(i+1),
+          num:         i+1,
+          scopeCode:   s.scopeCode||'',
+          description: s.description||'',
+          type:        s.type||'Standard',
+          crew:        s.crew||'',
+          days:        s.days||0,
+          shifts:      8,travel:0,
+          grandTotal:  s.total||0,
+          totalCost:   s.cost||0,
+          totalProfit: s.profit||0,
+          laborCost:   s.labor||0,
+          ownedEquipC: s.equipment||0,
+          rentalEquipC:0,trucksCost:s.trucks||0,
+          dispCost:    s.disposal||0,
+          matCost:     s.materials||0,
+          subCost:     0,markupPct:0.45,
+          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
+        })),
+        changeOrders:[],scopes:[],
+        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+        _restoredFromSheet:true,
+      });
+      added++;
+    });
+
+    savePersist();rebuildSidebar();renderDashboard();
+    toast(`✓ ${added} proyecto${added!==1?'s':''} restaurado${added!==1?'s':''} del Sheet`);
+  }catch(err){
+    console.error('Restore error:',err);
+    toast('Error: '+err.message);
+  }finally{
+    if(btn){btn.textContent='⬇ Restaurar del Sheet';btn.disabled=false;}
+  }
+}
+
+function parseSheetToProjects(rows){
+  // Headers row defines columns
+  const hdr=(rows[0]||[]).map(h=>String(h||'').toLowerCase().trim());
+  const get=(r,name)=>{const i=hdr.indexOf(name);return i>=0?(r[i]||''):''};
+  const projects=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const id=get(r,'id')||get(r,'project id');
+    const name=get(r,'name')||get(r,'project name');
+    if(!id&&!name)continue;
+    projects.push({
+      id:'restored_'+Date.now()+'_'+i,
+      filename:name||id,
+      status:get(r,'status')||'Pending',
+      bidDate:get(r,'biddate')||null,
+      notes:get(r,'notes')||'',
+      loadedAt:get(r,'sentat')||new Date().toISOString(),
+      sentToPM:false,
+      followupDismissed:false,
+      proj:{
+        name:name,
+        jobNum:id,
+        client:get(r,'client'),
+        pm:get(r,'pm'),
+        pmEmail:get(r,'pmemail'),
+        pmPhone:get(r,'pmphone'),
+        address:get(r,'address'),
+        city:get(r,'city'),
+        planDate:'',startDate:'',endDate:'',
+        architect:'',addendum:'',siteVisit:'',travelTime:0,
+      },
+      budgets:[],changeOrders:[],scopes:[],
+      key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+    });
+  }
+  return projects;
+}
+
+// ─── SEND TO PM ───────────────────────────────────────────────
+const PM_URL_KEY = 'zlc_pm_webhook_url';
+
+function savePMUrl(v){ try{localStorage.setItem(PM_URL_KEY,v);}catch(e){} }
+function loadPMUrl(){ try{return localStorage.getItem(PM_URL_KEY)||'';}catch(e){return '';} }
+
+function openPMModal(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  curProjId=id;
+
+  // ── 6. Validate before opening ──────────────────────────────
+  const errors=[];
+  if(!p.proj.name&&!p.filename)  errors.push('Falta: nombre del proyecto');
+  if(!p.proj.client)             errors.push('Falta: cliente');
+  if(!p.proj.pm&&!p.proj.pmEmail)errors.push('Falta: PM o email del PM');
+  if(!p.budgets||!p.budgets.length)errors.push('El proyecto no tiene budgets activos');
+  if(projGrand(p)===0)           errors.push('El Grand Total es $0 — verifica los budgets');
+
+  const valDiv=document.getElementById('pm-validation');
+  if(errors.length){
+    valDiv.style.display='';
+    valDiv.innerHTML='<strong>⚠️ Completa estos datos antes de enviar:</strong><ul style="margin-top:6px;padding-left:18px;">'
+      +errors.map(e=>`<li>${e}</li>`).join('')+'</ul>';
+  }else{
+    valDiv.style.display='none';
+  }
+
+  // ── 4. Preview ──────────────────────────────────────────────
+  const data=buildPMFinancialExport(p);
+  const pct=n=>Math.round((n/data.financials.estimatedCost||0)*100);
+  document.getElementById('pm-preview').innerHTML=`
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;">${esc(data.projectName)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="font-size:12px;color:var(--t2);">Cliente</div><div style="font-size:12px;font-weight:600;">${esc(data.client||'—')}</div>
+      <div style="font-size:12px;color:var(--t2);">PM</div><div style="font-size:12px;font-weight:600;">${esc(data.pm||'—')} ${data.pmEmail?'<span style="color:var(--t3);">'+esc(data.pmEmail)+'</span>':''}</div>
+      <div style="font-size:12px;color:var(--t2);">Contract Value</div><div style="font-size:13px;font-weight:700;color:var(--gn);">${fmt(data.financials.contractValue)}</div>
+      <div style="font-size:12px;color:var(--t2);">Est. Cost</div><div style="font-size:12px;">${fmt(data.financials.estimatedCost)}</div>
+      <div style="font-size:12px;color:var(--t2);">Profit</div><div style="font-size:12px;color:var(--ac);font-weight:600;">${fmt(data.financials.estimatedProfit)} <span style="color:var(--t3);">(${Math.round(data.financials.estimatedMargin*100)}%)</span></div>
+      <div style="font-size:12px;color:var(--t2);">Scopes</div><div style="font-size:12px;">${data.scopes.length} budgets</div>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:6px;">
+      ${[
+        ['Labor',data.financials.estimatedLaborCost],
+        ['Equipment',data.financials.estimatedEquipmentCost],
+        ['Trucks',data.financials.estimatedTruckCost],
+        ['Disposal',data.financials.estimatedDisposalCost],
+        ['Materials',data.financials.estimatedMaterialCost],
+      ].filter(([,v])=>v>0).map(([l,v])=>`<span style="font-size:11px;background:var(--sf);border:1px solid var(--bd);padding:2px 8px;border-radius:100px;">${l}: <strong>${fmt(v)}</strong></span>`).join('')}
+    </div>`;
+
+  // JSON preview
+  document.getElementById('pm-json-content').textContent=JSON.stringify(data,null,2);
+  document.getElementById('pm-json-wrap').style.display='none';
+  document.getElementById('pm-json-toggle').textContent='{ } Ver JSON';
+
+  // Restore saved URL
+  document.getElementById('pm-url').value=loadPMUrl();
+
+  // Sent badge
+  const sentBadge=document.getElementById('pm-sent-badge');
+  if(p.sentToPMAt){
+    sentBadge.style.display='';
+    sentBadge.innerHTML=`✅ Enviado el ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+  }else{
+    sentBadge.style.display='none';
+  }
+
+  document.getElementById('pm-modal').classList.add('show');
+}
+
+function closePMModal(){ document.getElementById('pm-modal').classList.remove('show'); }
+
+function toggleJsonPreview(){
+  const wrap=document.getElementById('pm-json-wrap');
+  const btn=document.getElementById('pm-json-toggle');
+  const hidden=wrap.style.display==='none';
+  wrap.style.display=hidden?'':'none';
+  btn.textContent=hidden?'{ } Ocultar JSON':'{ } Ver JSON';
+}
+
+function copyJson(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const json=JSON.stringify(buildPMFinancialExport(p),null,2);
+  navigator.clipboard.writeText(json).then(()=>toast('JSON copiado ✓')).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');ta.value=json;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    toast('JSON copiado ✓');
+  });
+}
+
+// ── 2. sendToPM ───────────────────────────────────────────────
+async function sendToPM(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const url=document.getElementById('pm-url').value.trim();
+  const data=buildPMFinancialExport(p);
+  const btn=document.getElementById('pm-send-btn');
+
+  // ── 6. Re-validate ──────────────────────────────────────────
+  const errors=[];
+  if(!data.projectName)  errors.push('Falta nombre del proyecto');
+  if(!data.client)       errors.push('Falta cliente');
+  if(projGrand(p)===0)   errors.push('Grand Total es $0');
+  if(!url){
+    // No URL — just copy JSON and show confirmation
+    copyJson();
+    toast('Sin URL configurada — JSON copiado al clipboard');
+    return;
+  }
+  if(!/^https?:\/\/.+/.test(url)){ toast('URL inválida — debe empezar con https://'); return; }
+  if(errors.length){ toast('⚠️ '+errors[0]); return; }
+
+  // ── Send ────────────────────────────────────────────────────
+  btn.textContent='Enviando...';btn.disabled=true;
+  try{
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+
+    // ── 5. Save sentToPM / sentToPMAt ───────────────────────
+    p.sentToPM=true;
+    p.sentToPMAt=new Date().toISOString();
+    // Also write to won queue so PM app gets notified
+    if(p.status==='Won') pushToWonQueue(p);
+    savePersist();
+
+    const sentBadge=document.getElementById('pm-sent-badge');
+    sentBadge.style.display='';
+    sentBadge.innerHTML=`✅ Enviado el ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+
+    toast('✅ Enviado al PM correctamente');
+    rebuildSidebar();
+    // Refresh project view to show badge
+    if(curProjId)openProject(curProjId);
+  }catch(err){
+    toast('❌ Error al enviar: '+err.message);
+    console.error(err);
+  }finally{
+    btn.textContent='📤 Enviar';btn.disabled=false;
+  }
+}
+
+
+// ─── PM QUEUE UI ──────────────────────────────────────────────
+function updateQueueBadge(){
+  const n=getWonQueueCount();
+  const el=document.getElementById('pm-queue-status');
+  const cnt=document.getElementById('pm-queue-count');
+  if(!el)return;
+  if(n>0){ el.style.display=''; if(cnt)cnt.textContent=n; }
+  else{ el.style.display='none'; }
+}
+
+function openPMQueuePanel(){
+  try{
+    const queue=JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    const list=document.getElementById('pm-queue-list');
+    if(!list)return;
+    if(!queue.length){
+      list.innerHTML='<div style="color:var(--t3);font-size:13px;padding:8px 0;">La cola está vacía.</div>';
+    }else{
+      list.innerHTML=queue.map((q,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--s2);border-radius:var(--r);margin-bottom:8px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">${esc(q.name||'—')}</div>
+            <div style="font-size:11px;color:var(--t3);">${esc(q.client||'')} · ${esc(q.num||q.id||'')} · ${q.codes?q.codes.length+' scopes':''}</div>
+            <div style="font-size:11px;color:var(--gn);margin-top:2px;">Total: ${fmt(q.contractValue||0)}</div>
+          </div>
+          <button class="btn bsm" style="color:var(--rd);border-color:var(--rd);" onclick="removeFromWonQueue('${q._estimatingId}');updateQueueBadge();openPMQueuePanel();">✕</button>
+        </div>`).join('');
+    }
+  }catch(e){}
+  document.getElementById('pm-queue-modal').classList.add('show');
+}
+
+function clearWonQueue(){
+  if(!confirm('¿Limpiar la cola? Los proyectos no se importarán al PM App.'))return;
+  localStorage.removeItem('zlc_est_won_queue');
+  localStorage.removeItem('zlc_est_won_time');
+  updateQueueBadge();
+  openPMQueuePanel();
+  toast('Cola limpiada');
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
 // ─── SIDEBAR ─────────────────────────────────────────────────
 function rebuildSidebar(){
   const list=document.getElementById('proj-list-sb');
@@ -1354,6 +1956,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 loadPersist();
 rebuildSidebar();
 if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();renderFollowUpAlerts();navTo('dashboard');}
+updateQueueBadge();
 </script>
 </body>
 </html>

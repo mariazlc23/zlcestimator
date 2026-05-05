@@ -259,7 +259,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <div class="mo-overlay" id="won-modal">
   <div class="mo-box">
     <h3>🎉 Project Won!</h3>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Do you want to see the full summary with a breakdown of labor, materials, equipment, and disposal?</p>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Do you want to view the full summary with a breakdown of labor, materials, equipment, and disposal?</p>
     <div class="mo-actions">
       <button class="btn" onclick="closeWonModal()">Just save</button>
       <button class="btn bp" onclick="goToWinSummary()">📋 View Job Summary</button>
@@ -305,7 +305,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <div class="mo-overlay" id="pm-queue-modal">
   <div class="mo-box" style="width:560px;max-width:96vw;">
     <h3>🏆 Queue for Project Manager</h3>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">These Won projects are ready to import in the PM App. Open the PM App on the same computer and they will appear automatically.</p>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">These Won projects are ready to import into the PM App. Open the PM App on the same computer and they will appear automatically.</p>
     <div id="pm-queue-list" style="margin-bottom:16px;"></div>
     <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--t2);">
       <strong>How does it work?</strong> Both apps share the same browser. The PM App automatically detects Won projects and shows a green notification to import them.
@@ -345,105 +345,14 @@ let pendingWonId=null;
 const STATUS=['Pending','Won','Lost'];
 const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
 
-// ─── CLOUD-FIRST PERSISTENCE ─────────────────────────────────
-// Primary store = Google Sheets via Apps Script.
-// localStorage is kept only as a fast session cache so the UI
-// doesn't flash empty while the cloud fetch is in-flight.
-
-function savePersist(){
-  try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
-  // push every project to cloud (fire-and-forget)
-  projects.forEach(p=>{ autoBackup(p); });
-}
-
+function savePersist(){try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}}
 function loadPersist(){
-  // 1. Seed UI instantly from local cache
   try{
-    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3']
-      .forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
     const s=localStorage.getItem('zlc_v7');
     if(s){const parsed=JSON.parse(s);projects=Array.isArray(parsed)?parsed:[];}
     else projects=[];
   }catch(e){projects=[];}
-  // 2. Then sync from cloud in background
-  loadFromCloud();
-}
-
-async function loadFromCloud(){
-  try{
-    updateCloudStatus(null);
-    const rows = await new Promise((resolve,reject)=>{
-      if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
-      const cbName='_initCb_'+Date.now();
-      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
-      const script=document.createElement('script');
-      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
-      window[cbName]=function(result){
-        clearTimeout(timer);delete window[cbName];script.remove();
-        if(result&&result.ok)resolve(result.rows||[]);
-        else reject(result?.error||'Load failed');
-      };
-      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
-      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
-      document.head.appendChild(script);
-    });
-
-    let added=0;
-    rows.forEach(r=>{
-      const estId=String(r['Estimating ID']||'').trim();
-      if(estId&&projects.find(x=>x.id===estId))return; // already loaded from xlsx
-      const scopes=r['Scopes JSON']||[];
-      projects.push({
-        id:       estId||'cloud_'+Date.now()+'_'+Math.random().toString(36).slice(2),
-        filename: String(r['Project Name']||r['Job #']||'Cloud Project'),
-        status:   String(r['Status']||'Pending'),
-        bidDate:  String(r['Bid Date']||'')||null,
-        notes:    String(r['Notes']||''),
-        wonDate:  String(r['Won Date']||'')||null,
-        loadedAt: String(r['Sent At']||new Date().toISOString()),
-        sentToPM:false, followupDismissed:false,
-        proj:{
-          name:    String(r['Project Name']||''),
-          jobNum:  String(r['Job #']||''),
-          client:  String(r['Client']||''),
-          pm:      String(r['PM']||''),
-          pmEmail: String(r['PM Email']||''),
-          pmPhone: String(r['PM Phone']||''),
-          address: String(r['Address']||''),
-          city:    String(r['City']||''),
-          planDate:'',startDate:'',endDate:'',
-          architect:'',addendum:'',siteVisit:'',travelTime:0,
-        },
-        budgets:scopes.map((s,i)=>({
-          sheetName:   s.budgetNumber||'Budget #'+(i+1),
-          num:i+1, scopeCode:s.scopeCode||'', description:s.description||'',
-          type:s.type||'Standard', crew:s.crew||'', days:s.days||0,
-          shifts:8, travel:0,
-          grandTotal:s.total||0, totalCost:s.cost||0, totalProfit:s.profit||0,
-          laborCost:s.labor||0, ownedEquipC:s.equipment||0,
-          rentalEquipC:0, trucksCost:s.trucks||0, dispCost:s.disposal||0,
-          matCost:s.materials||0, subCost:0, markupPct:0.45,
-          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
-        })),
-        changeOrders:[],scopes:[],
-        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
-        _restoredFromSheet:true,
-      });
-      added++;
-    });
-
-    if(added>0){
-      try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
-      rebuildSidebar(); renderDashboard(); renderFollowUpAlerts();
-      document.getElementById('empty-state').style.display='none';
-      navTo('dashboard');
-      toast(`☁️ ${added} project${added!==1?'s':''} loaded from cloud`);
-    }
-    updateCloudStatus(true);
-  }catch(err){
-    console.warn('Cloud load failed:',err);
-    updateCloudStatus(false);
-  }
 }
 
 // ─── DROP ─────────────────────────────────────────────────────
@@ -869,7 +778,7 @@ function buildPMFinancialExport(p) {
   };
 }
 
-function cycleStatus(id){
+async function cycleStatus(id){
   const p=projects.find(x=>x.id===id);if(!p)return;
   const newStatus=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
   p.status=newStatus;
@@ -877,17 +786,24 @@ function cycleStatus(id){
   savePersist();renderDashboard();rebuildSidebar();renderFollowUpAlerts();updateQueueBadge();
   if(newStatus==='Won'){
     pushToWonQueue(p);
-    setTimeout(()=>autoBackup(p),800); // backup Won projects immediately
-    // Also update status in sheet
-    estSheetWrite('updateEstimate',{estimatingId:p.id,status:'Won',wonDate:p.wonDate||new Date().toISOString()}).catch(()=>{});
+    toast('🏆 Won — saving to cloud...');
+    // Full backup immediately (not delayed) so PM App sees it right away
+    const ok = await backupProjectToSheet(p);
+    if(ok){
+      toast('✅ Won — saved to cloud!');
+      updateCloudStatus(true);
+    }else{
+      toast('⚠️ Won saved locally — cloud sync failed, try Backup Sheet');
+    }
     pendingWonId=id;
     document.getElementById('won-modal').classList.add('show');
   } else {
-    // If un-winning, remove from queue
     if(p.status!=='Won') removeFromWonQueue(id);
     if(curProjId===id)openProject(id);
+    toast('Status: '+newStatus);
+    // Also update status in sheet
+    backupProjectToSheet(p).catch(()=>{});
   }
-  toast('Status: '+newStatus);
 }
 
 // ─── WON QUEUE (for PM App) ───────────────────────────────────
@@ -1197,7 +1113,7 @@ function openProject(id){
           <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;">
             <div style="font-size:12px;color:var(--t2);margin-bottom:4px;">${l}</div>
             <div style="font-size:17px;font-weight:700;color:${c};">${fmt(v)}</div>
-            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(v/cost*100):'0'}% del costo</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(v/cost*100):'0'}% of cost</div>
           </div>`).join('')}
         <div style="background:var(--al);border-radius:var(--r);padding:12px 14px;border:1px solid var(--ac);">
           <div style="font-size:12px;color:var(--ac);margin-bottom:4px;">💰 Markup Total</div>
@@ -1610,23 +1526,42 @@ function goToWinSummary(){closeWonModal();if(pendingWonId){printSummary(pendingW
 // Saves project data to Google Sheet via Apps Script
 // Sheet columns mirror PM App format so both apps share the same data
 
-function estSheetWrite(action, payload){
-  return new Promise((resolve,reject)=>{
-    if(!PM_APPS_SCRIPT){ reject('No Apps Script URL'); return; }
-    const cbName = '_estCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const data   = JSON.stringify({action, ...payload});
-    const encoded= encodeURIComponent(data);
-    const script = document.createElement('script');
-    const timer  = setTimeout(()=>{ delete window[cbName]; script.remove(); reject('timeout'); }, 15000);
-    window[cbName] = function(result){
-      clearTimeout(timer); delete window[cbName]; script.remove();
-      if(result && (result.ok || result.success)) resolve(result);
-      else reject(result?.error || 'Sheet write failed');
-    };
-    script.src = PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
-    script.onerror = ()=>{ clearTimeout(timer); delete window[cbName]; reject('Script load error'); };
-    document.head.appendChild(script);
-  });
+// ─── SHEET COMMUNICATION ─────────────────────────────────────
+// Uses fetch (POST) as primary — Apps Script must be deployed as
+// "Execute as Me, Anyone can access (even anonymous)".
+// Falls back to JSONP if fetch is blocked by CORS preflight.
+async function estSheetWrite(action, payload){
+  if(!PM_APPS_SCRIPT) throw new Error('No Apps Script URL');
+  const body = JSON.stringify({action, ...payload});
+
+  // Try fetch POST first (works when Apps Script CORS is open)
+  try{
+    const res = await fetch(PM_APPS_SCRIPT, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'}, // avoid CORS preflight
+      body
+    });
+    const json = await res.json();
+    if(json.ok || json.success) return json;
+    throw new Error(json.error||'Sheet error');
+  }catch(fetchErr){
+    // Fallback: JSONP GET (read-only friendly, works for writes too
+    // when Apps Script doGet handles the data param)
+    return new Promise((resolve,reject)=>{
+      const cbName='_estCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      const encoded=encodeURIComponent(body);
+      const script=document.createElement('script');
+      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},15000);
+      window[cbName]=function(result){
+        clearTimeout(timer);delete window[cbName];script.remove();
+        if(result&&(result.ok||result.success))resolve(result);
+        else reject(result?.error||'Sheet write failed');
+      };
+      script.src=PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
+      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
+      document.head.appendChild(script);
+    });
+  }
 }
 
 // Backup a single project to Google Sheet
@@ -1717,7 +1652,10 @@ function updateCloudStatus(success){
   const el=document.getElementById('cloud-status');
   if(!el)return;
   const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  if(success){
+  if(success===null){
+    el.textContent='☁️ Syncing...';
+    el.style.color='var(--yw)';
+  }else if(success){
     el.textContent=`☁️ Synced ${now}`;
     el.style.color='var(--gn)';
   }else{
@@ -1726,15 +1664,23 @@ function updateCloudStatus(success){
   }
 }
 
-// Read projects back from sheet (restore)
-async function restoreFromSheet(){
-  const btn=document.getElementById('cloud-restore-btn');
-  if(btn){btn.textContent='⏳ Reading...';btn.disabled=true;}
+// ─── SHARED: load all estimates from Sheets ──────────────────
+async function loadEstimatesFromSheet(){
+  // Try POST first
   try{
-    // Use Apps Script loadEstimates action — no API key needed
-    const rows = await new Promise((resolve,reject)=>{
+    const res=await fetch(PM_APPS_SCRIPT,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'loadEstimates'})
+    });
+    const json=await res.json();
+    if(json.ok) return json.rows||[];
+    throw new Error(json.error||'Load failed');
+  }catch(e){
+    // Fallback JSONP
+    return new Promise((resolve,reject)=>{
       if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
-      const cbName='_restoreCb_'+Date.now();
+      const cbName='_loadCb_'+Date.now();
       const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
       const script=document.createElement('script');
       const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
@@ -1747,6 +1693,16 @@ async function restoreFromSheet(){
       script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
       document.head.appendChild(script);
     });
+  }
+}
+
+// Read projects back from sheet (restore)
+async function restoreFromSheet(){
+  const btn=document.getElementById('cloud-restore-btn');
+  if(btn){btn.textContent='⏳ Reading...';btn.disabled=true;}
+  try{
+    // Use Apps Script loadEstimates action — no API key needed
+    const rows = await loadEstimatesFromSheet();
 
     if(!rows.length){toast('Sheet is empty — no data to restore');return;}
 

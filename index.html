@@ -802,53 +802,49 @@ function cycleStatus(id){
 // ─── WON QUEUE (for PM App) ───────────────────────────────────
 // Writes to localStorage key 'zlc_est_won_queue' which the PM app reads
 function buildQueueEntry(p){
-  const shifts = 8; // hours per shift/day
+  // ── Crew composition (confirmed exact values) ──────────────
+  const CREW_COMP = {
+    'Xolos':     { foremans:1, laborers:3 },
+    'Chingones': { foremans:1, laborers:3 },
+    'Lobos':     { foremans:1, laborers:2 },
+    'Poblanos':  { foremans:1, laborers:3 },
+    'Warriors':  { foremans:1, laborers:1 },
+  };
 
-  // Extract 3-digit code — priority: description prefix > scopeCode > budget num
+  // Also read from key sheet if available (overrides defaults)
+  const crewMap = {...CREW_COMP};
+  (p.key&&p.key.crews||[]).forEach(c=>{
+    crewMap[c.name]={foremans:c.foremans||1, laborers:c.laborers||0};
+  });
+
+  // Extract 3-digit code from description first ("004 Concrete..." → "004")
   function extractCode(b){
-    // Description like "004 Concrete: ..." or "001 Hard Demolition..."
-    if(b.description){
-      const m = b.description.match(/^(\d{3})\s/);
-      if(m) return m[1];
-    }
-    // scopeCode like "T001_Hard_Demo" → "001"
-    if(b.scopeCode){
-      const m = b.scopeCode.match(/T?(\d{3})/);
-      if(m) return m[1];
-    }
+    if(b.description){const m=b.description.match(/^(\d{3})\s/);if(m)return m[1];}
+    if(b.scopeCode){const m=b.scopeCode.match(/T?(\d{3})/);if(m)return m[1];}
     return String(b.num||1).padStart(3,'0');
   }
 
-  // Calculate foreman and laborer days from labor rows (hours / shifts per day)
+  // Man days = crew composition × days worked
   function calcManDays(b){
-    let fHours=0, lHours=0;
-    (b.laborRows||[]).forEach(r=>{
-      const t=(r.type||'').toLowerCase();
-      const h=r.hours||0;
-      // Only count straight time (not OT, not Travel Time) to avoid double-counting
-      if(t.includes('travel')||t.includes(' ot')||t.includes('(ot)')) return;
-      if(t.includes('foreman')) fHours += h;
-      else if(t.includes('laborer')||t.includes('concrete worker')) lHours += h;
-    });
-    const sh = b.shifts || shifts;
+    const crew = crewMap[b.crew] || {foremans:1, laborers:0};
+    const days  = b.days || 0;
     return {
-      foremanDays:  Math.round(fHours / sh),
-      laborerDays:  Math.round(lHours / sh),
+      foremanDays:  crew.foremans * days,
+      laborerDays:  crew.laborers * days,
     };
   }
 
-  // Build one entry per budget
   const codeEntries = p.budgets.map(b=>{
     const {foremanDays, laborerDays} = calcManDays(b);
     return {
       code:          extractCode(b),
       description:   b.description || b.scopeCode || b.sheetName,
-      value:         Math.round(b.grandTotal || 0),
-      estimatedCost: Math.round(b.totalCost  || 0),
-      profit:        Math.round(b.totalProfit|| 0),
-      days:          b.days   || 0,
-      crew:          b.crew   || '',
-      type:          b.type   || '',
+      value:         Math.round(b.grandTotal  || 0),
+      estimatedCost: Math.round(b.totalCost   || 0),
+      profit:        Math.round(b.totalProfit || 0),
+      days:          b.days  || 0,
+      crew:          b.crew  || '',
+      type:          b.type  || '',
       foremanDays,
       laborerDays,
       _budget:       b.sheetName,

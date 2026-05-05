@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -145,27 +145,27 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <div id="app">
 <nav id="sb">
   <div class="slo"><h1>ZLC Estimator</h1><p>Project Manager</p></div>
-  <div class="ss">Vistas</div>
+  <div class="ss">Views</div>
   <div class="ni active" onclick="navTo('dashboard')" id="nav-dashboard">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
   </div>
-  <div class="ss">Proyectos</div>
+  <div class="ss">Projects</div>
   <div class="proj-list" id="proj-list-sb">
-    <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Sube un archivo para comenzar</div>
+    <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>
   </div>
   <div class="sbot">
     <!-- Cloud backup status -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
-      <span id="cloud-status" style="font-size:11px;color:var(--t3);">☁️ Sin datos</span>
+      <span id="cloud-status" style="font-size:11px;color:var(--t3);">☁️ No data</span>
       <button id="cloud-backup-btn" class="btn bsm" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.6);" onclick="backupAllToSheet()">☁️ Backup Sheet</button>
     </div>
     <div id="pm-queue-status" style="display:none;background:rgba(45,122,79,.2);border:1px solid rgba(45,122,79,.4);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px;color:#6ee7a0;cursor:pointer;" onclick="openPMQueuePanel()">
-      <div style="font-weight:700;">🏆 <span id="pm-queue-count">0</span> en cola para PM</div>
-      <div style="font-size:10px;opacity:.7;margin-top:2px;">Abre el PM App para importar</div>
+      <div style="font-weight:700;">🏆 <span id="pm-queue-count">0</span> in queue for PM</div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Open PM App to import</div>
     </div>
     <button class="ubtn" onclick="document.getElementById('file-in').click()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Cargar Master Sheet
+      Load Master Sheet
     </button>
   </div>
 </nav>
@@ -175,30 +175,30 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <div class="drop-card" id="drop-zone" ondragover="onDrag(event)" ondragleave="offDrag(event)" ondrop="onDrop(event)">
       <div style="font-size:52px;margin-bottom:18px;">📊</div>
       <h2>ZLC Estimator</h2>
-      <p>Sube tu <strong>Master Sheet</strong> (.xlsm / .xlsx).<br>Cada archivo = un proyecto diferente.</p>
-      <button class="btn bp" onclick="document.getElementById('file-in').click()" style="font-size:14px;padding:10px 22px;">Seleccionar archivo Excel</button>
-      <p style="margin-top:14px;font-size:12px;color:var(--t3);">o arrastra el archivo aquí</p>
+      <p>Upload your <strong>Master Sheet</strong> (.xlsm / .xlsx).<br>Each file = a different project.</p>
+      <button class="btn bp" onclick="document.getElementById('file-in').click()" style="font-size:14px;padding:10px 22px;">Select Excel File</button>
+      <p style="margin-top:14px;font-size:12px;color:var(--t3);">or drag the file here</p>
     </div>
   </div>
 
   <div id="pg-dashboard" class="pg">
     <div class="mh">
-      <div><h2>Dashboard</h2><div class="mhmeta" id="dash-meta">Todos los proyectos</div></div>
+      <div><h2>Dashboard</h2><div class="mhmeta" id="dash-meta">All projects</div></div>
       <div class="ha np">
-        <button class="btn bsm" onclick="document.getElementById('file-in').click()">+ Cargar proyecto</button>
+        <button class="btn bsm" onclick="document.getElementById('file-in').click()">+ Load project</button>
         <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
       </div>
     </div>
     <div class="cnt">
       <div id="followup-alerts" style="margin-bottom:4px;"></div>
       <div class="g4" id="dash-stats"></div>
-      <div class="card"><div class="ch">Todos los Proyectos</div><div id="all-proj-tbl"></div></div>
+      <div class="card"><div class="ch">All Projects</div><div id="all-proj-tbl"></div></div>
     </div>
   </div>
 
   <div id="pg-project" class="pg">
     <div class="mh">
-      <div><h2 id="proj-pg-name">Proyecto</h2><div class="mhmeta" id="proj-pg-meta"></div></div>
+      <div><h2 id="proj-pg-name">Project</h2><div class="mhmeta" id="proj-pg-meta"></div></div>
       <div class="ha np">
         <button class="btn bsm" onclick="navTo('proposal')" style="color:var(--bl);border-color:var(--bl);">📄 Proposal</button>
         <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
@@ -210,7 +210,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
   <div id="pg-proposal" class="pg">
     <div class="mh">
       <div><h2>Proposal</h2><div class="mhmeta" id="prop-meta"></div></div>
-      <div class="ha np"><button class="btn bp bsm" onclick="window.print()">🖨️ Imprimir / PDF</button></div>
+      <div class="ha np"><button class="btn bp bsm" onclick="window.print()">🖨️ Print / PDF</button></div>
     </div>
     <div class="cnt"><div id="prop-content"></div></div>
   </div>
@@ -228,8 +228,8 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <div class="mh">
       <div><h2>Job Summary</h2><div class="mhmeta" id="ws-meta"></div></div>
       <div class="ha np">
-        <button class="btn bsm" onclick="navTo('project')">← Volver</button>
-        <button class="btn bp bsm" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="btn bsm" onclick="navTo('project')">← Back</button>
+        <button class="btn bp bsm" onclick="window.print()">🖨️ Print</button>
       </div>
     </div>
     <div class="cnt">
@@ -244,13 +244,13 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <!-- EDIT MODAL -->
 <div class="mo-overlay" id="edit-modal">
   <div class="mo-box">
-    <h3>✏️ Editar Proyecto</h3>
-    <div class="form-row"><label>Nombre del Proyecto</label><input type="text" id="em-name" placeholder="Project name"></div>
-    <div class="form-row"><label>Fecha de Bid enviado</label><input type="date" id="em-bid-date"></div>
-    <div class="form-row"><label>Notas</label><textarea id="em-notes" placeholder="Notas adicionales..."></textarea></div>
+    <h3>✏️ Edit Project</h3>
+    <div class="form-row"><label>Project Name</label><input type="text" id="em-name" placeholder="Project name"></div>
+    <div class="form-row"><label>Bid Sent Date</label><input type="date" id="em-bid-date"></div>
+    <div class="form-row"><label>Notes</label><textarea id="em-notes" placeholder="Additional notes..."></textarea></div>
     <div class="mo-actions">
-      <button class="btn" onclick="closeEditModal()">Cancelar</button>
-      <button class="btn bp" onclick="saveEditModal()">Guardar</button>
+      <button class="btn" onclick="closeEditModal()">Cancel</button>
+      <button class="btn bp" onclick="saveEditModal()">Save</button>
     </div>
   </div>
 </div>
@@ -258,11 +258,11 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <!-- WON MODAL -->
 <div class="mo-overlay" id="won-modal">
   <div class="mo-box">
-    <h3>🎉 ¡Proyecto Ganado!</h3>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">El proyecto fue marcado como <strong>Won</strong>. ¿Quieres ver el resumen completo con desglose de labor, materiales, equipo y disposal?</p>
+    <h3>🎉 Project Won!</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Do you want to see the full summary with a breakdown of labor, materials, equipment, and disposal?</p>
     <div class="mo-actions">
-      <button class="btn" onclick="closeWonModal()">Solo guardar</button>
-      <button class="btn bp" onclick="goToWinSummary()">📋 Ver Job Summary</button>
+      <button class="btn" onclick="closeWonModal()">Just save</button>
+      <button class="btn bp" onclick="goToWinSummary()">📋 View Job Summary</button>
     </div>
   </div>
 </div>
@@ -295,8 +295,8 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
     <div id="pm-sent-badge" style="display:none;background:var(--gl);border-radius:var(--r);padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--gn);"></div>
 
     <div class="mo-actions">
-      <button class="btn" onclick="closePMModal()">Cancelar</button>
-      <button class="btn bp" id="pm-send-btn" onclick="sendToPM()">📤 Enviar</button>
+      <button class="btn" onclick="closePMModal()">Cancel</button>
+      <button class="btn bp" id="pm-send-btn" onclick="sendToPM()">📤 Send</button>
     </div>
   </div>
 </div>
@@ -304,28 +304,28 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 <!-- PM QUEUE PANEL -->
 <div class="mo-overlay" id="pm-queue-modal">
   <div class="mo-box" style="width:560px;max-width:96vw;">
-    <h3>🏆 Cola para Project Manager</h3>
-    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">Estos proyectos Won están listos para importarse en el PM App. Abre el PM App en la misma computadora y los verás automáticamente.</p>
+    <h3>🏆 Queue for Project Manager</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">These Won projects are ready to import in the PM App. Open the PM App on the same computer and they will appear automatically.</p>
     <div id="pm-queue-list" style="margin-bottom:16px;"></div>
     <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--t2);">
-      <strong>¿Cómo funciona?</strong> Ambas apps comparten el mismo browser. El PM App detecta automáticamente cuando hay proyectos Won y muestra una notificación verde para importarlos.
+      <strong>How does it work?</strong> Both apps share the same browser. The PM App automatically detects Won projects and shows a green notification to import them.
     </div>
     <div style="background:var(--bll);border:1px solid #b0c8e8;border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
       <div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:8px;">☁️ Google Sheets Backup</div>
-      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Backup manual de todos los proyectos al Sheet. Se hace automático al cargar un archivo o marcar Won.</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Manual backup of all projects to the Sheet. Happens automatically when loading a file or marking Won.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button id="cloud-backup-btn2" class="btn bsm bp" onclick="backupAllToSheet()">☁️ Guardar todo al Sheet</button>
-        <button id="cloud-restore-btn" class="btn bsm" onclick="restoreFromSheet()">⬇ Restaurar del Sheet</button>
+        <button id="cloud-backup-btn2" class="btn bsm bp" onclick="backupAllToSheet()">☁️ Save all to Sheet</button>
+        <button id="cloud-restore-btn" class="btn bsm" onclick="restoreFromSheet()">⬇ Restore from Sheet</button>
       </div>
     </div>
     <div class="mo-actions">
-      <button class="btn" onclick="clearWonQueue()">Limpiar cola</button>
-      <button class="btn bp" onclick="window.open('https://mariazlc23.github.io/zlc-pm/','_blank');closeModal('pm-queue-modal')">Abrir PM App →</button>
+      <button class="btn" onclick="clearWonQueue()">Clear queue</button>
+      <button class="btn bp" onclick="window.open('https://mariazlc23.github.io/zlc-pm/','_blank');closeModal('pm-queue-modal')">Open PM App →</button>
     </div>
   </div>
 </div>
 
-<div id="prog"><div class="prog-box"><h3>Leyendo archivo...</h3><p id="prog-msg">Extrayendo datos</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
+<div id="prog"><div class="prog-box"><h3>Reading file...</h3><p id="prog-msg">Extracting data</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
 <div id="toast"></div>
 
 <script>
@@ -345,14 +345,105 @@ let pendingWonId=null;
 const STATUS=['Pending','Won','Lost'];
 const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
 
-function savePersist(){try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}}
+// ─── CLOUD-FIRST PERSISTENCE ─────────────────────────────────
+// Primary store = Google Sheets via Apps Script.
+// localStorage is kept only as a fast session cache so the UI
+// doesn't flash empty while the cloud fetch is in-flight.
+
+function savePersist(){
+  try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
+  // push every project to cloud (fire-and-forget)
+  projects.forEach(p=>{ autoBackup(p); });
+}
+
 function loadPersist(){
+  // 1. Seed UI instantly from local cache
   try{
-    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3']
+      .forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
     const s=localStorage.getItem('zlc_v7');
     if(s){const parsed=JSON.parse(s);projects=Array.isArray(parsed)?parsed:[];}
     else projects=[];
   }catch(e){projects=[];}
+  // 2. Then sync from cloud in background
+  loadFromCloud();
+}
+
+async function loadFromCloud(){
+  try{
+    updateCloudStatus(null);
+    const rows = await new Promise((resolve,reject)=>{
+      if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
+      const cbName='_initCb_'+Date.now();
+      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
+      const script=document.createElement('script');
+      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
+      window[cbName]=function(result){
+        clearTimeout(timer);delete window[cbName];script.remove();
+        if(result&&result.ok)resolve(result.rows||[]);
+        else reject(result?.error||'Load failed');
+      };
+      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
+      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
+      document.head.appendChild(script);
+    });
+
+    let added=0;
+    rows.forEach(r=>{
+      const estId=String(r['Estimating ID']||'').trim();
+      if(estId&&projects.find(x=>x.id===estId))return; // already loaded from xlsx
+      const scopes=r['Scopes JSON']||[];
+      projects.push({
+        id:       estId||'cloud_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        filename: String(r['Project Name']||r['Job #']||'Cloud Project'),
+        status:   String(r['Status']||'Pending'),
+        bidDate:  String(r['Bid Date']||'')||null,
+        notes:    String(r['Notes']||''),
+        wonDate:  String(r['Won Date']||'')||null,
+        loadedAt: String(r['Sent At']||new Date().toISOString()),
+        sentToPM:false, followupDismissed:false,
+        proj:{
+          name:    String(r['Project Name']||''),
+          jobNum:  String(r['Job #']||''),
+          client:  String(r['Client']||''),
+          pm:      String(r['PM']||''),
+          pmEmail: String(r['PM Email']||''),
+          pmPhone: String(r['PM Phone']||''),
+          address: String(r['Address']||''),
+          city:    String(r['City']||''),
+          planDate:'',startDate:'',endDate:'',
+          architect:'',addendum:'',siteVisit:'',travelTime:0,
+        },
+        budgets:scopes.map((s,i)=>({
+          sheetName:   s.budgetNumber||'Budget #'+(i+1),
+          num:i+1, scopeCode:s.scopeCode||'', description:s.description||'',
+          type:s.type||'Standard', crew:s.crew||'', days:s.days||0,
+          shifts:8, travel:0,
+          grandTotal:s.total||0, totalCost:s.cost||0, totalProfit:s.profit||0,
+          laborCost:s.labor||0, ownedEquipC:s.equipment||0,
+          rentalEquipC:0, trucksCost:s.trucks||0, dispCost:s.disposal||0,
+          matCost:s.materials||0, subCost:0, markupPct:0.45,
+          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
+        })),
+        changeOrders:[],scopes:[],
+        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+        _restoredFromSheet:true,
+      });
+      added++;
+    });
+
+    if(added>0){
+      try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
+      rebuildSidebar(); renderDashboard(); renderFollowUpAlerts();
+      document.getElementById('empty-state').style.display='none';
+      navTo('dashboard');
+      toast(`☁️ ${added} project${added!==1?'s':''} loaded from cloud`);
+    }
+    updateCloudStatus(true);
+  }catch(err){
+    console.warn('Cloud load failed:',err);
+    updateCloudStatus(false);
+  }
 }
 
 // ─── DROP ─────────────────────────────────────────────────────
@@ -362,23 +453,23 @@ function onDrop(e){e.preventDefault();offDrag(e);const f=e.dataTransfer.files[0]
 
 function handleFile(file){
   if(!file)return;
-  showProg('Abriendo...',10);
+  showProg('Opening...',10);
   const reader=new FileReader();
   reader.onload=e=>{
     try{
-      showProg('Parseando hojas...',25);
+      showProg('Parsing sheets...',25);
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
-      showProg('Leyendo Project Settings...',40);
+      showProg('Reading Project Settings...',40);
       const proj=readProjectSettings(wb);
-      showProg('Leyendo Proposal...',55);
+      showProg('Reading Proposal...',55);
       const proposalBudgetNums=readProposalBudgetNums(wb);
-      showProg('Leyendo Budgets...',70);
+      showProg('Reading Budgets...',70);
       const budgets=readBudgets(wb,proj,proposalBudgetNums);
-      showProg('Leyendo Scopes...',85);
+      showProg('Reading Scopes...',85);
       const scopes=readScopes(wb);
-      showProg('Leyendo Key...',92);
+      showProg('Reading Key...',92);
       const key=readKey(wb);
-      showProg('Guardando...',98);
+      showProg('Saving...',98);
       const p={id:'p_'+Date.now(),filename:file.name,status:'Pending',proj,budgets,scopes,key,loadedAt:new Date().toISOString(),bidDate:null,notes:'',followupDismissed:false};
       projects.unshift(p);
       savePersist();
@@ -387,7 +478,7 @@ function handleFile(file){
       renderDashboard();
       openProject(p.id);
       document.getElementById('file-in').value='';
-      toast('Proyecto cargado ✓');
+      toast('Project loaded ✓');
       // Auto-backup to Google Sheet
       setTimeout(()=>autoBackup(p),1000);
     }catch(err){hideProg();console.error(err);toast('Error: '+err.message);}
@@ -663,19 +754,19 @@ function renderDashboard(){
   const totalPend=pend.reduce((s,p)=>s+projGrand(p),0);
   const totalWon=won.reduce((s,p)=>s+projGrand(p),0);
   renderFollowUpAlerts();
-  document.getElementById('dash-meta').textContent=`${projects.length} proyecto${projects.length!==1?'s':''} · ${won.length} Won · ${pend.length} Pending`;
+  document.getElementById('dash-meta').textContent=`${projects.length} project${projects.length!==1?'s':''} · ${won.length} Won · ${pend.length} Pending`;
   const lost=projects.filter(p=>p.status==='Lost');
   const totalLost=lost.reduce((s,p)=>s+projGrand(p),0);
   document.getElementById('dash-stats').innerHTML=`
-    <div class="sc"><div class="sc-l">Pipeline (Pending)</div><div class="sc-v or">${fmt(totalPend)}</div><div class="sc-s">${pend.length} proyecto${pend.length!==1?'s':''}</div></div>
-    <div class="sc"><div class="sc-l">Total Won</div><div class="sc-v gn">${fmt(totalWon)}</div><div class="sc-s">${won.length} proyecto${won.length!==1?'s':''}</div></div>
-    <div class="sc"><div class="sc-l">Total Lost</div><div class="sc-v" style="color:var(--rd);">${fmt(totalLost)}</div><div class="sc-s">${lost.length} proyecto${lost.length!==1?'s':''}</div></div>
-    <div class="sc"><div class="sc-l">Portfolio (Pending+Won)</div><div class="sc-v bl">${fmt(totalPend+totalWon)}</div><div class="sc-s">${projects.length} proyectos total</div></div>`;
+    <div class="sc"><div class="sc-l">Pipeline (Pending)</div><div class="sc-v or">${fmt(totalPend)}</div><div class="sc-s">${pend.length} project${pend.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Won</div><div class="sc-v gn">${fmt(totalWon)}</div><div class="sc-s">${won.length} project${won.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Lost</div><div class="sc-v" style="color:var(--rd);">${fmt(totalLost)}</div><div class="sc-s">${lost.length} project${lost.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Portfolio (Pending+Won)</div><div class="sc-v bl">${fmt(totalPend+totalWon)}</div><div class="sc-s">${projects.length} total projects</div></div>`;
   document.getElementById('all-proj-tbl').innerHTML=`
     <table>
       <thead><tr>
-        <th>Proyecto</th><th>Cliente</th><th>Contacto</th>
-        <th>Bid Date</th><th class="tr">Días</th><th class="tr">Costo Directo</th>
+        <th>Project</th><th>Client</th><th>Contact</th>
+        <th>Bid Date</th><th class="tr">Days</th><th class="tr">Direct Cost</th>
         <th class="tr">Profit</th><th class="tr">Total</th>
         <th>Status</th><th></th>
       </tr></thead>
@@ -899,7 +990,7 @@ function getWonQueueCount(){
   catch(e){ return 0; }
 }
 function delProj(id){
-  if(!confirm('¿Eliminar proyecto?'))return;
+  if(!confirm('Delete project?'))return;
   projects=projects.filter(p=>p.id!==id);
   savePersist();rebuildSidebar();renderDashboard();
   if(curProjId===id){curProjId=null;navTo('dashboard');}
@@ -936,8 +1027,8 @@ function openProject(id){
   // STATS
   html+=`<div class="g4" style="margin-bottom:18px;">
     <div class="sc"><div class="sc-l">Grand Total</div><div class="sc-v gn">${fmt(grand)}</div><div class="sc-s">todos los budgets</div></div>
-    <div class="sc"><div class="sc-l">Costo Directo</div><div class="sc-v bl">${fmt(cost)}</div><div class="sc-s">pre-markup</div></div>
-    <div class="sc"><div class="sc-l">Profit / Markup</div><div class="sc-v or">${fmt(profit)}</div><div class="sc-s">${margin}% margen</div></div>
+    <div class="sc"><div class="sc-l">Direct Cost</div><div class="sc-v bl">${fmt(cost)}</div><div class="sc-s">pre-markup</div></div>
+    <div class="sc"><div class="sc-l">Profit / Markup</div><div class="sc-v or">${fmt(profit)}</div><div class="sc-s">${margin}% margin</div></div>
     <div class="sc"><div class="sc-l">Budgets en Proposal</div><div class="sc-v">${p.budgets.length}</div><div class="sc-s">${totalDays(p)>0?totalDays(p)+' días totales':''}</div></div>
   </div>`;
 
@@ -946,7 +1037,7 @@ function openProject(id){
     <div class="card"><div class="ch">Información del Proyecto <button class="btn bsm np" style="font-weight:400;" onclick="toggleEdit('${p.id}')">✏️ Editar</button></div>
       <div id="proj-info-${p.id}">
         ${[
-          ['Nombre del Proyecto',p.proj.name],
+          ['Project Name',p.proj.name],
           ['Job / Project #',p.proj.jobNum],
           ['Dirección',p.proj.address],
           ['Ciudad',p.proj.city],
@@ -965,7 +1056,7 @@ function openProject(id){
       </div>
       <div id="proj-edit-${p.id}" style="display:none;">
         ${[
-          ['name','Nombre del Proyecto',p.proj.name,'text'],
+          ['name','Project Name',p.proj.name,'text'],
           ['jobNum','Job / Project #',p.proj.jobNum,'text'],
           ['address','Dirección',p.proj.address,'text'],
           ['city','Ciudad',p.proj.city,'text'],
@@ -982,8 +1073,8 @@ function openProject(id){
              onchange="updateProjField('${p.id}','${field}',this.value)"></div>`
         ).join('')}
         <div style="margin-top:10px;display:flex;gap:8px;">
-          <button class="btn bsm bp" onclick="saveEdit('${p.id}')">💾 Guardar</button>
-          <button class="btn bsm" onclick="toggleEdit('${p.id}')">Cancelar</button>
+          <button class="btn bsm bp" onclick="saveEdit('${p.id}')">💾 Save</button>
+          <button class="btn bsm" onclick="toggleEdit('${p.id}')">Cancel</button>
         </div>
       </div>
     </div>
@@ -1013,8 +1104,8 @@ function openProject(id){
   </div>
     <table>
       <thead><tr>
-        <th>#</th><th>Descripción del Scope</th><th>Type</th><th>Crew</th>
-        <th class="tr">Días</th><th class="tr">Costo Directo</th>
+        <th>#</th><th>Scope Description</th><th>Type</th><th>Crew</th>
+        <th class="tr">Days</th><th class="tr">Direct Cost</th>
         <th class="tr">Markup</th><th class="tr">Total</th>
       </tr></thead>
       <tbody>${p.budgets.map((b,i)=>`
@@ -1053,7 +1144,7 @@ function openProject(id){
 
     html+=`<div class="card" style="border:2px solid var(--gn);margin-top:4px;">
       <div class="ch" style="color:var(--gn);">
-        🏆 Resumen — Proyecto Ganado
+        🏆 Summary — Won Project
         <span style="font-weight:400;font-size:11px;color:var(--t3);">${p.budgets.length} budget${p.budgets.length!==1?'s':''}</span>
       </div>
 
@@ -1093,7 +1184,7 @@ function openProject(id){
       </table>
 
       <!-- Category totals visual summary -->
-      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Resumen por Categoría</div>
+      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Category Summary</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;">
         ${[
           ['👷 Labor',totalLabor,'var(--ac)'],
@@ -1111,7 +1202,7 @@ function openProject(id){
         <div style="background:var(--al);border-radius:var(--r);padding:12px 14px;border:1px solid var(--ac);">
           <div style="font-size:12px;color:var(--ac);margin-bottom:4px;">💰 Markup Total</div>
           <div style="font-size:17px;font-weight:700;color:var(--ac);">${fmt(totalMk)}</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(totalMk/cost*100):'0'}% margen</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(totalMk/cost*100):'0'}% margin</div>
         </div>
         <div style="background:var(--gl);border-radius:var(--r);padding:12px 14px;border:1px solid var(--gn);">
           <div style="font-size:12px;color:var(--gn);margin-bottom:4px;">🏆 Grand Total</div>
@@ -1125,7 +1216,7 @@ function openProject(id){
         const bars=[{l:'Labor',v:totalLabor,c:'var(--ac)'},{l:'Equipment',v:totalEquip,c:'var(--bl)'},{l:'Trucks',v:totalTrucks,c:'#7c3aed'},{l:'Disposal',v:totalDisp,c:'var(--gn)'},{l:'Materials',v:totalMat,c:'#d97706'},{l:'Subs',v:totalSub,c:'var(--t2)'}].filter(x=>x.v>0);
         if(!bars.length)return '';
         const tot=cost||1;
-        return `<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Distribución del Costo Directo</div>
+        return `<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Direct Cost Distribution</div>
         <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-bottom:10px;gap:1px;">
           ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
         </div>
@@ -1142,7 +1233,7 @@ function openProject(id){
 
   html+=`<div style="display:flex;gap:10px;margin-top:4px;">
     <button class="btn bsm" onclick="navTo('proposal')">📄 Ver Proposal completo</button>
-    <button class="btn bsm bp np" onclick="printSummary('${p.id}')">🖨️ Imprimir Resumen</button>
+    <button class="btn bsm bp np" onclick="printSummary('${p.id}')">🖨️ Print Summary</button>
     <button class="btn bsm np" onclick="openPMModal('${p.id}')" style="background:var(--bl);border-color:var(--bl);color:#fff;">
       ${p.sentToPM?'✅':'📤'} Send to PM
     </button>
@@ -1164,7 +1255,7 @@ function openBudget(projId,idx){
   let html='';
 
   if(b.description){
-    html+=`<div class="card"><div class="ch">Descripción</div>
+    html+=`<div class="card"><div class="ch">Description</div>
       <p style="font-size:13.5px;line-height:1.75;color:var(--t2);">${esc(b.description)}</p>
       <div style="margin-top:10px;"><span class="tag">${esc(b.scopeCode)}</span></div>
     </div>`;
@@ -1174,7 +1265,7 @@ function openBudget(projId,idx){
   const tot=b.totalCost||1;
   const bars=[{l:'Labor',v:b.laborCost,c:'var(--ac)'},{l:'Equipment',v:(b.ownedEquipC||0)+(b.rentalEquipC||0),c:'var(--bl)'},{l:'Trucks',v:b.trucksCost||0,c:'#7c3aed'},{l:'Disposal',v:b.dispCost||0,c:'var(--gn)'},{l:'Materials',v:b.matCost||0,c:'#d97706'}].filter(x=>x.v>0);
   if(bars.length){
-    html+=`<div class="card"><div class="ch">Desglose — ${fmt(b.totalCost)}</div>
+    html+=`<div class="card"><div class="ch">Breakdown — ${fmt(b.totalCost)}</div>
       <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:14px;gap:1px;">
         ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
       </div>
@@ -1187,13 +1278,13 @@ function openBudget(projId,idx){
       </div></div>`;
   }
 
-  if(b.laborRows.length){html+=mkTable('👷 Labor',['Tipo de Labor','Rate ($/hr)','Horas','Costo'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost));}
-  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipo','Unit','Qty','Rate','Costo'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
-  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Tipo','Loads','Rate','Costo'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
-  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Tipo','Facilidad','Qty','Unit','$/Unit','Costo'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
-  if(b.matRows.length){html+=mkTable('🧱 Materials',['Material','Qty','Rate','Costo'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost));}
+  if(b.laborRows.length){html+=mkTable('👷 Labor',['Labor Type','Rate ($/hr)','Hours','Cost'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost));}
+  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipment','Unit','Qty','Rate','Cost'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
+  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Type','Loads','Rate','Cost'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
+  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Type','Facility','Qty','Unit','$/Unit','Cost'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
+  if(b.matRows.length){html+=mkTable('🧱 Materials',['Material','Qty','Rate','Cost'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost));}
 
-  html+=`<div class="card"><div class="ch">💰 Resumen — ${b.sheetName}</div>
+  html+=`<div class="card"><div class="ch">💰 Summary — ${b.sheetName}</div>
     <div style="max-width:420px;">
       ${b.laborCost>0?srw('Labor',fmt(b.laborCost)):''}
       ${(b.ownedEquipC+b.rentalEquipC)>0?srw('Equipment',fmt(b.ownedEquipC+b.rentalEquipC)):''}
@@ -1201,7 +1292,7 @@ function openBudget(projId,idx){
       ${b.dispCost>0?srw('Disposal',fmt(b.dispCost)):''}
       ${b.matCost>0?srw('Materials',fmt(b.matCost)):''}
       ${b.subCost>0?srw('Subcontractors',fmt(b.subCost)):''}
-      ${srw('Total Costo Directo','<strong>'+fmt(b.totalCost)+'</strong>')}
+      ${srw('Total Direct Cost','<strong>'+fmt(b.totalCost)+'</strong>')}
       <div class="sr"><span class="sl" style="color:var(--ac);">+ Markup / Profit (${Math.round(b.markupPct*100)}%)</span><span class="sv" style="color:var(--ac);">${fmt(b.totalProfit)}</span></div>
       <div class="sr grand"><span class="sl">TOTAL ${esc(b.sheetName)}</span><span class="sv">${fmt(b.grandTotal)}</span></div>
     </div></div>`;
@@ -1316,7 +1407,7 @@ function saveEdit(id){
   toggleEdit(id);
   openProject(id); // re-render with new data
   rebuildSidebar();
-  toast('Información guardada ✓');
+  toast('Info saved ✓');
 }
 
 // ─── WIN SUMMARY — by scope/class code ──────────────────────
@@ -1394,7 +1485,7 @@ function printSummary(id){
         </div>
         <div style="text-align:right;">
           <div style="font-size:18px;font-weight:700;color:var(--gn);">${fmt(b.grandTotal)}</div>
-          <div style="font-size:11px;color:var(--t3);">Costo: ${fmt(b.totalCost)} + Markup: ${fmt(b.totalProfit)}</div>
+          <div style="font-size:11px;color:var(--t3);">Cost: ${fmt(b.totalCost)} + Markup: ${fmt(b.totalProfit)}</div>
         </div>
       </div>
 
@@ -1445,7 +1536,7 @@ function printSummary(id){
     <span class="ws-val">${fmt(grand)}</span>
   </div>
   <div style="margin-top:8px;display:flex;gap:24px;font-size:13px;color:var(--t2);">
-    <span>Costo directo: <strong>${fmt(cost)}</strong></span>
+    <span>Direct cost: <strong>${fmt(cost)}</strong></span>
     <span>Profit: <strong style="color:var(--ac);">${fmt(profit)}</strong></span>
     <span>Margen: <strong>${cost>0?Math.round(profit/cost*100):0}%</strong></span>
   </div>
@@ -1475,7 +1566,7 @@ function renderFollowUpAlerts(){
     const name=p.customName||p.proj.name||p.filename;
     return `<div class="followup-banner">
       <div class="fub-icon">⏰</div>
-      <div class="fub-text"><strong>Follow-up: ${esc(name)}</strong> — Bid enviado hace <strong>${d} días</strong>. Contactar a ${esc(p.proj.client||'el cliente')}.
+      <div class="fub-text"><strong>Follow-up: ${esc(name)}</strong> — Bid sent <strong>${d} days</strong> ago. Contact ${esc(p.proj.client||'the client')}.
       ${p.proj.pmPhone?` <a href="tel:${p.proj.pmPhone}" style="color:var(--ac);">${esc(p.proj.pmPhone)}</a>`:''}</div>
       <span class="fub-dismiss" onclick="dismissFollowup('${p.id}')">Descartar</span>
     </div>`;
@@ -1506,7 +1597,7 @@ function saveEditModal(){
   savePersist();closeEditModal();
   openProject(curProjId);renderDashboard();rebuildSidebar();
   renderFollowUpAlerts();
-  toast('Proyecto actualizado ✓');
+  toast('Project updated ✓');
 }
 
 // ─── WON MODAL ────────────────────────────────────────────────
@@ -1529,7 +1620,7 @@ function estSheetWrite(action, payload){
     const timer  = setTimeout(()=>{ delete window[cbName]; script.remove(); reject('timeout'); }, 15000);
     window[cbName] = function(result){
       clearTimeout(timer); delete window[cbName]; script.remove();
-      if(result && result.success) resolve(result);
+      if(result && (result.ok || result.success)) resolve(result);
       else reject(result?.error || 'Sheet write failed');
     };
     script.src = PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
@@ -1600,7 +1691,7 @@ async function backupProjectToSheet(p){
 // Backup ALL projects to sheet
 async function backupAllToSheet(){
   const btn=document.getElementById('cloud-backup-btn');
-  if(btn){btn.textContent='☁️ Guardando...';btn.disabled=true;}
+  if(btn){btn.textContent='☁️ Saving...';btn.disabled=true;}
   let ok=0,fail=0;
   for(const p of projects){
     const success=await backupProjectToSheet(p);
@@ -1608,7 +1699,7 @@ async function backupAllToSheet(){
     await new Promise(r=>setTimeout(r,600)); // throttle
   }
   if(btn){btn.textContent='☁️ Backup Sheet';btn.disabled=false;}
-  const msg=`☁️ Backup: ${ok} guardados${fail?', '+fail+' fallaron':''}`;
+  const msg=`☁️ Backup: ${ok} saved${fail?', '+fail+' failed':''}`;
   toast(msg);
   updateCloudStatus(ok>0);
 }
@@ -1630,7 +1721,7 @@ function updateCloudStatus(success){
     el.textContent=`☁️ Synced ${now}`;
     el.style.color='var(--gn)';
   }else{
-    el.textContent='☁️ Sin conexión';
+    el.textContent='☁️ Offline';
     el.style.color='var(--t3)';
   }
 }
@@ -1638,7 +1729,7 @@ function updateCloudStatus(success){
 // Read projects back from sheet (restore)
 async function restoreFromSheet(){
   const btn=document.getElementById('cloud-restore-btn');
-  if(btn){btn.textContent='⏳ Leyendo...';btn.disabled=true;}
+  if(btn){btn.textContent='⏳ Reading...';btn.disabled=true;}
   try{
     // Use Apps Script loadEstimates action — no API key needed
     const rows = await new Promise((resolve,reject)=>{
@@ -1657,7 +1748,7 @@ async function restoreFromSheet(){
       document.head.appendChild(script);
     });
 
-    if(!rows.length){toast('Sheet vacío — no hay datos para restaurar');return;}
+    if(!rows.length){toast('Sheet is empty — no data to restore');return;}
 
     // Convert sheet rows back to project format
     let added=0;
@@ -1717,12 +1808,12 @@ async function restoreFromSheet(){
     });
 
     savePersist();rebuildSidebar();renderDashboard();
-    toast(`✓ ${added} proyecto${added!==1?'s':''} restaurado${added!==1?'s':''} del Sheet`);
+    toast(`✓ ${added} project${added!==1?'s':''} restored from Sheet`);
   }catch(err){
     console.error('Restore error:',err);
     toast('Error: '+err.message);
   }finally{
-    if(btn){btn.textContent='⬇ Restaurar del Sheet';btn.disabled=false;}
+    if(btn){btn.textContent='⬇ Restore from Sheet';btn.disabled=false;}
   }
 }
 
@@ -1776,16 +1867,16 @@ function openPMModal(id){
 
   // ── 6. Validate before opening ──────────────────────────────
   const errors=[];
-  if(!p.proj.name&&!p.filename)  errors.push('Falta: nombre del proyecto');
-  if(!p.proj.client)             errors.push('Falta: cliente');
-  if(!p.proj.pm&&!p.proj.pmEmail)errors.push('Falta: PM o email del PM');
-  if(!p.budgets||!p.budgets.length)errors.push('El proyecto no tiene budgets activos');
-  if(projGrand(p)===0)           errors.push('El Grand Total es $0 — verifica los budgets');
+  if(!p.proj.name&&!p.filename)  errors.push('Missing: project name');
+  if(!p.proj.client)             errors.push('Missing: client');
+  if(!p.proj.pm&&!p.proj.pmEmail)errors.push('Missing: PM or PM email');
+  if(!p.budgets||!p.budgets.length)errors.push('The project has no active budgets');
+  if(projGrand(p)===0)           errors.push('Grand Total is $0 — check the budgets');
 
   const valDiv=document.getElementById('pm-validation');
   if(errors.length){
     valDiv.style.display='';
-    valDiv.innerHTML='<strong>⚠️ Completa estos datos antes de enviar:</strong><ul style="margin-top:6px;padding-left:18px;">'
+    valDiv.innerHTML='<strong>⚠️ Complete this info before sending:</strong><ul style="margin-top:6px;padding-left:18px;">'
       +errors.map(e=>`<li>${e}</li>`).join('')+'</ul>';
   }else{
     valDiv.style.display='none';
@@ -1797,7 +1888,7 @@ function openPMModal(id){
   document.getElementById('pm-preview').innerHTML=`
     <div style="font-weight:700;font-size:14px;margin-bottom:10px;">${esc(data.projectName)}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      <div style="font-size:12px;color:var(--t2);">Cliente</div><div style="font-size:12px;font-weight:600;">${esc(data.client||'—')}</div>
+      <div style="font-size:12px;color:var(--t2);">Client</div><div style="font-size:12px;font-weight:600;">${esc(data.client||'—')}</div>
       <div style="font-size:12px;color:var(--t2);">PM</div><div style="font-size:12px;font-weight:600;">${esc(data.pm||'—')} ${data.pmEmail?'<span style="color:var(--t3);">'+esc(data.pmEmail)+'</span>':''}</div>
       <div style="font-size:12px;color:var(--t2);">Contract Value</div><div style="font-size:13px;font-weight:700;color:var(--gn);">${fmt(data.financials.contractValue)}</div>
       <div style="font-size:12px;color:var(--t2);">Est. Cost</div><div style="font-size:12px;">${fmt(data.financials.estimatedCost)}</div>
@@ -1817,7 +1908,7 @@ function openPMModal(id){
   // JSON preview
   document.getElementById('pm-json-content').textContent=JSON.stringify(data,null,2);
   document.getElementById('pm-json-wrap').style.display='none';
-  document.getElementById('pm-json-toggle').textContent='{ } Ver JSON';
+  document.getElementById('pm-json-toggle').textContent='{ } View JSON';
 
   // Restore saved URL
   document.getElementById('pm-url').value=loadPMUrl();
@@ -1826,7 +1917,7 @@ function openPMModal(id){
   const sentBadge=document.getElementById('pm-sent-badge');
   if(p.sentToPMAt){
     sentBadge.style.display='';
-    sentBadge.innerHTML=`✅ Enviado el ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+    sentBadge.innerHTML=`✅ Sent on ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
   }else{
     sentBadge.style.display='none';
   }
@@ -1841,16 +1932,16 @@ function toggleJsonPreview(){
   const btn=document.getElementById('pm-json-toggle');
   const hidden=wrap.style.display==='none';
   wrap.style.display=hidden?'':'none';
-  btn.textContent=hidden?'{ } Ocultar JSON':'{ } Ver JSON';
+  btn.textContent=hidden?'{ } Hide JSON':'{ } View JSON';
 }
 
 function copyJson(){
   const p=projects.find(x=>x.id===curProjId);if(!p)return;
   const json=JSON.stringify(buildPMFinancialExport(p),null,2);
-  navigator.clipboard.writeText(json).then(()=>toast('JSON copiado ✓')).catch(()=>{
+  navigator.clipboard.writeText(json).then(()=>toast('JSON copied ✓')).catch(()=>{
     // fallback
     const ta=document.createElement('textarea');ta.value=json;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-    toast('JSON copiado ✓');
+    toast('JSON copied ✓');
   });
 }
 
@@ -1863,20 +1954,20 @@ async function sendToPM(){
 
   // ── 6. Re-validate ──────────────────────────────────────────
   const errors=[];
-  if(!data.projectName)  errors.push('Falta nombre del proyecto');
-  if(!data.client)       errors.push('Falta cliente');
+  if(!data.projectName)  errors.push('Missing project name');
+  if(!data.client)       errors.push('Missing client');
   if(projGrand(p)===0)   errors.push('Grand Total es $0');
   if(!url){
     // No URL — just copy JSON and show confirmation
     copyJson();
-    toast('Sin URL configurada — JSON copiado al clipboard');
+    toast('No URL set — JSON copied to clipboard');
     return;
   }
-  if(!/^https?:\/\/.+/.test(url)){ toast('URL inválida — debe empezar con https://'); return; }
+  if(!/^https?:\/\/.+/.test(url)){ toast('Invalid URL — must start with https://'); return; }
   if(errors.length){ toast('⚠️ '+errors[0]); return; }
 
   // ── Send ────────────────────────────────────────────────────
-  btn.textContent='Enviando...';btn.disabled=true;
+  btn.textContent='Sending...';btn.disabled=true;
   try{
     const res=await fetch(url,{
       method:'POST',
@@ -1894,17 +1985,17 @@ async function sendToPM(){
 
     const sentBadge=document.getElementById('pm-sent-badge');
     sentBadge.style.display='';
-    sentBadge.innerHTML=`✅ Enviado el ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+    sentBadge.innerHTML=`✅ Sent on ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
 
-    toast('✅ Enviado al PM correctamente');
+    toast('✅ Sent to PM successfully');
     rebuildSidebar();
     // Refresh project view to show badge
     if(curProjId)openProject(curProjId);
   }catch(err){
-    toast('❌ Error al enviar: '+err.message);
+    toast('❌ Send error: '+err.message);
     console.error(err);
   }finally{
-    btn.textContent='📤 Enviar';btn.disabled=false;
+    btn.textContent='📤 Send';btn.disabled=false;
   }
 }
 
@@ -1925,7 +2016,7 @@ function openPMQueuePanel(){
     const list=document.getElementById('pm-queue-list');
     if(!list)return;
     if(!queue.length){
-      list.innerHTML='<div style="color:var(--t3);font-size:13px;padding:8px 0;">La cola está vacía.</div>';
+      list.innerHTML='<div style="color:var(--t3);font-size:13px;padding:8px 0;">The queue is empty.</div>';
     }else{
       list.innerHTML=queue.map((q,i)=>`
         <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--s2);border-radius:var(--r);margin-bottom:8px;">
@@ -1942,12 +2033,12 @@ function openPMQueuePanel(){
 }
 
 function clearWonQueue(){
-  if(!confirm('¿Limpiar la cola? Los proyectos no se importarán al PM App.'))return;
+  if(!confirm('Clear the queue? Projects will not be imported into the PM App.'))return;
   localStorage.removeItem('zlc_est_won_queue');
   localStorage.removeItem('zlc_est_won_time');
   updateQueueBadge();
   openPMQueuePanel();
-  toast('Cola limpiada');
+  toast('Queue cleared');
 }
 
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
@@ -1955,7 +2046,7 @@ function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 // ─── SIDEBAR ─────────────────────────────────────────────────
 function rebuildSidebar(){
   const list=document.getElementById('proj-list-sb');
-  if(!projects.length){list.innerHTML='<div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Sube un archivo para comenzar</div>';return;}
+  if(!projects.length){list.innerHTML='<div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>';return;}
   list.innerHTML=projects.map(p=>`
     <div class="pi pi-${p.status.toLowerCase()} ${p.id===curProjId?'active':''}" id="pi-${p.id}" onclick="openProject('${p.id}')">
       <div class="pi-dot"></div>

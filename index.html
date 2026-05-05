@@ -117,6 +117,26 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 .ws-grand .ws-label{font-size:16px;font-weight:700;color:var(--tx);}
 .ws-grand .ws-val{font-size:22px;color:var(--ac);}
 
+
+/* FOLLOW-UP */
+.followup-banner{background:var(--al);border:1px solid #f5c8ab;border-radius:var(--r);padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.fub-icon{font-size:20px;flex-shrink:0;}
+.fub-text{flex:1;font-size:13px;line-height:1.5;}
+.fub-dismiss{font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline;white-space:nowrap;flex-shrink:0;}
+.pi-followup{position:relative;}
+.pi-followup::after{content:'!';position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--ac);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;text-align:center;line-height:16px;}
+/* MODAL */
+.mo-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:center;justify-content:center;}
+.mo-overlay.show{display:flex;}
+.mo-box{background:var(--sf);border-radius:var(--rl);padding:28px;width:460px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.2);}
+.mo-box h3{font-size:16px;font-weight:700;margin-bottom:18px;}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+.form-row input,.form-row textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:13.5px;color:var(--tx);background:var(--sf);}
+.form-row input:focus,.form-row textarea:focus{outline:none;border-color:var(--ac);}
+.form-row textarea{resize:vertical;min-height:70px;}
+.mo-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
 @media print{#sb,#prog,.np{display:none!important;}#mn{overflow:visible;}body{background:#fff;}.mh{position:static;}}
 </style>
 </head>
@@ -161,6 +181,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
       </div>
     </div>
     <div class="cnt">
+      <div id="followup-alerts" style="margin-bottom:4px;"></div>
       <div class="g4" id="dash-stats"></div>
       <div class="card"><div class="ch">Todos los Proyectos</div><div id="all-proj-tbl"></div></div>
     </div>
@@ -211,6 +232,32 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="mo-overlay" id="edit-modal">
+  <div class="mo-box">
+    <h3>✏️ Editar Proyecto</h3>
+    <div class="form-row"><label>Nombre del Proyecto</label><input type="text" id="em-name" placeholder="Project name"></div>
+    <div class="form-row"><label>Fecha de Bid enviado</label><input type="date" id="em-bid-date"></div>
+    <div class="form-row"><label>Notas</label><textarea id="em-notes" placeholder="Notas adicionales..."></textarea></div>
+    <div class="mo-actions">
+      <button class="btn" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn bp" onclick="saveEditModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- WON MODAL -->
+<div class="mo-overlay" id="won-modal">
+  <div class="mo-box">
+    <h3>🎉 ¡Proyecto Ganado!</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">El proyecto fue marcado como <strong>Won</strong>. ¿Quieres ver el resumen completo con desglose de labor, materiales, equipo y disposal?</p>
+    <div class="mo-actions">
+      <button class="btn" onclick="closeWonModal()">Solo guardar</button>
+      <button class="btn bp" onclick="goToWinSummary()">📋 Ver Job Summary</button>
+    </div>
+  </div>
+</div>
+
 <div id="prog"><div class="prog-box"><h3>Leyendo archivo...</h3><p id="prog-msg">Extrayendo datos</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
 <div id="toast"></div>
 
@@ -218,6 +265,7 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 // ─── STATE ────────────────────────────────────────────────────
 let projects=[];
 let curProjId=null;
+let pendingWonId=null;
 const STATUS=['Pending','Won','Lost'];
 const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
 
@@ -255,7 +303,7 @@ function handleFile(file){
       showProg('Leyendo Key...',92);
       const key=readKey(wb);
       showProg('Guardando...',98);
-      const p={id:'p_'+Date.now(),filename:file.name,status:'Pending',proj,budgets,scopes,key,loadedAt:new Date().toISOString()};
+      const p={id:'p_'+Date.now(),filename:file.name,status:'Pending',proj,budgets,scopes,key,loadedAt:new Date().toISOString(),bidDate:null,notes:'',followupDismissed:false};
       projects.unshift(p);
       savePersist();
       hideProg();
@@ -536,6 +584,7 @@ function renderDashboard(){
   const pend=projects.filter(p=>p.status==='Pending');
   const totalPend=pend.reduce((s,p)=>s+projGrand(p),0);
   const totalWon=won.reduce((s,p)=>s+projGrand(p),0);
+  renderFollowUpAlerts();
   document.getElementById('dash-meta').textContent=`${projects.length} proyecto${projects.length!==1?'s':''} · ${won.length} Won · ${pend.length} Pending`;
   const lost=projects.filter(p=>p.status==='Lost');
   const totalLost=lost.reduce((s,p)=>s+projGrand(p),0);
@@ -548,7 +597,7 @@ function renderDashboard(){
     <table>
       <thead><tr>
         <th>Proyecto</th><th>Cliente</th><th>Contacto</th>
-        <th class="tr">Días</th><th class="tr">Costo Directo</th>
+        <th>Bid Date</th><th class="tr">Días</th><th class="tr">Costo Directo</th>
         <th class="tr">Profit</th><th class="tr">Total</th>
         <th>Status</th><th></th>
       </tr></thead>
@@ -567,6 +616,7 @@ function renderDashboard(){
             ${p.proj.pmPhone?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmPhone)}</div>`:''}
             ${p.proj.pmEmail?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmEmail)}</div>`:''}
           </td>
+          <td style="font-size:12px;">${p.bidDate?new Date(p.bidDate+'T12:00:00').toLocaleDateString('en-US',{day:'2-digit',month:'short'})+'<div style="font-size:11px;color:var(--t3);">'+(daysSinceBid(p)>=0?daysSinceBid(p)+'d ago':'')+'</div>':'<span style="color:var(--t3);">—</span>'}</td>
           <td class="tr">${totalDays(p)>0?totalDays(p)+'d':'—'}</td>
           <td class="tr">${fmt(projCost(p))}</td>
           <td class="tr tac">${fmt(projProfit(p))}</td>
@@ -589,12 +639,75 @@ function projCost(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalCost,0);}
 function projProfit(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalProfit,0);}
 function totalDays(p){return(p.budgets||[]).reduce((s,b)=>s+(b.days||0),0);}
 
+// ─── PM FINANCIAL EXPORT ──────────────────────────────────────
+function buildPMFinancialExport(p) {
+  const contractValue = projGrand(p);
+  const estimatedCost = projCost(p);
+  const estimatedProfit = projProfit(p);
+  const estimatedMargin = contractValue > 0 ? estimatedProfit / contractValue : 0;
+
+  const totalLabor      = p.budgets.reduce((s,b)=>s+(b.laborCost||0),0);
+  const totalEquipment  = p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
+  const totalTrucks     = p.budgets.reduce((s,b)=>s+(b.trucksCost||0),0);
+  const totalDisposal   = p.budgets.reduce((s,b)=>s+(b.dispCost||0),0);
+  const totalMaterials  = p.budgets.reduce((s,b)=>s+(b.matCost||0),0);
+  const totalSubs       = p.budgets.reduce((s,b)=>s+(b.subCost||0),0);
+
+  return {
+    source:   "ZLC Estimator",
+    sentAt:   new Date().toISOString(),
+
+    projectId:      p.proj.jobNum      || "",
+    projectName:    p.proj.name        || p.filename,
+    client:         p.proj.client      || "",
+    address:        p.proj.address     || "",
+    city:           p.proj.city        || "",
+    pm:             p.proj.pm          || "",
+    pmEmail:        p.proj.pmEmail     || "",
+    pmPhone:        p.proj.pmPhone     || "",
+    superintendent: p.proj.super       || "",
+
+    financials: {
+      contractValue,
+      estimatedCost,
+      estimatedProfit,
+      estimatedMargin,
+      estimatedLaborCost:          totalLabor,
+      estimatedEquipmentCost:      totalEquipment,
+      estimatedTruckCost:          totalTrucks,
+      estimatedDisposalCost:       totalDisposal,
+      estimatedMaterialCost:       totalMaterials,
+      estimatedSubcontractorCost:  totalSubs
+    },
+
+    scopes: p.budgets.map(b => ({
+      budgetNumber:      b.sheetName,
+      type:              b.type,
+      description:       b.description,
+      crew:              b.crew,
+      days:              b.days,
+      shifts:            b.shifts,
+      directCost:        b.totalCost,
+      profit:            b.totalProfit,
+      total:             b.grandTotal,
+      laborCost:         b.laborCost,
+      equipmentCost:     (b.ownedEquipC||0)+(b.rentalEquipC||0),
+      truckCost:         b.trucksCost    || 0,
+      disposalCost:      b.dispCost      || 0,
+      materialCost:      b.matCost       || 0,
+      subcontractorCost: b.subCost       || 0
+    }))
+  };
+}
+
 function cycleStatus(id){
   const p=projects.find(x=>x.id===id);if(!p)return;
-  p.status=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
-  savePersist();renderDashboard();rebuildSidebar();
-  if(curProjId===id)openProject(id);
-  toast('Status: '+p.status);
+  const newStatus=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
+  p.status=newStatus;
+  savePersist();renderDashboard();rebuildSidebar();renderFollowUpAlerts();
+  if(newStatus==='Won'){pendingWonId=id;document.getElementById('won-modal').classList.add('show');}
+  else{if(curProjId===id)openProject(id);}
+  toast('Status: '+newStatus);
 }
 function delProj(id){
   if(!confirm('¿Eliminar proyecto?'))return;
@@ -620,11 +733,14 @@ function openProject(id){
   let html='';
 
   // STATUS
-  html+=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-    <button class="badge ${SC[p.status]}" style="font-size:13px;padding:5px 14px;" onclick="cycleStatus('${p.id}');openProject('${p.id}')">
+  const bidLabel=p.bidDate?`Bid: ${new Date(p.bidDate+'T12:00:00').toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'})} · ${daysSinceBid(p)>=0?daysSinceBid(p)+'d ago':''}`:null;
+  html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="badge ${SC[p.status]}" style="font-size:13px;padding:5px 14px;" onclick="cycleStatus('${p.id}')">
       ${p.status}
     </button>
-    <span style="font-size:12px;color:var(--t3);">Clic para cambiar · Cargado: ${new Date(p.loadedAt).toLocaleDateString()}</span>
+    ${bidLabel?`<span style="font-size:12px;color:var(--t2);background:var(--s2);padding:3px 10px;border-radius:100px;">📅 ${bidLabel}</span>`:''}
+    ${p.notes?`<span style="font-size:12px;color:var(--t2);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(p.notes)}">📝 ${esc(p.notes)}</span>`:''}
+    <button class="btn bsm np" onclick="openEditModal('${p.id}')" style="margin-left:auto;">✏️ Editar Bid</button>
   </div>`;
 
   // STATS
@@ -1010,42 +1126,33 @@ function saveEdit(id){
   toast('Información guardada ✓');
 }
 
-// ─── WIN SUMMARY (print-ready) ───────────────────────────────
+// ─── WIN SUMMARY — by scope/class code ──────────────────────
 function printSummary(id){
   const p=projects.find(x=>x.id===id);if(!p)return;
   const name=p.proj.name||p.filename;
   const grand=projGrand(p),cost=projCost(p),profit=projProfit(p);
   const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-
-  // Aggregate all rows across budgets
-  let allLabor=[],allMat=[],allEquip=[],allDisp=[],allTrucks=[];
-  p.budgets.forEach(b=>{
-    b.laborRows.forEach(r=>allLabor.push({...r,budget:b.num}));
-    b.matRows.forEach(r=>allMat.push({...r,budget:b.num}));
-    b.equipRows.forEach(r=>allEquip.push({...r,budget:b.num}));
-    b.dispRows.forEach(r=>allDisp.push({...r,budget:b.num}));
-    b.truckRows.forEach(r=>allTrucks.push({...r,budget:b.num}));
-  });
-
-  const groupBy=(arr,key)=>{const m={};arr.forEach(r=>{const k=r[key];if(!m[k]){m[k]={...r,totalQty:0,totalHours:0,totalCost:0};}m[k].totalQty+=(r.qty||0);m[k].totalHours+=(r.hours||0);m[k].totalCost+=(r.cost||0);});return Object.values(m);};
-  const laborSum=groupBy(allLabor,'type');
-  const matSum=groupBy(allMat,'name');
-  const dispByFac=groupBy(allDisp,'facility');
-  const rentals=allEquip.filter(r=>r.rental);
-  const owned=allEquip.filter(r=>!r.rental);
-
-  const tLaborCost=p.budgets.reduce((s,b)=>s+b.laborCost,0);
-  const tMatCost=p.budgets.reduce((s,b)=>s+b.matCost,0);
-  const tEquipCost=p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
-  const tDispCost=p.budgets.reduce((s,b)=>s+b.dispCost,0);
-  const tTruckCost=p.budgets.reduce((s,b)=>s+b.trucksCost,0);
   const statusColor=p.status==='Won'?'#2d7a4f':p.status==='Lost'?'#b91c1c':'#b45309';
 
   const wsWrap=document.getElementById('ws-wrap');
   const wsContent=document.getElementById('ws-content');
-  if(!wsWrap||!wsContent){console.error('win-summary containers not found');return;}
+  if(!wsWrap||!wsContent)return;
   const wsMeta=document.getElementById('ws-meta');if(wsMeta)wsMeta.textContent=name;
 
+  // Helper: group rows by key, summing qty/hours/cost
+  const groupBy=(arr,key)=>{
+    const m={};
+    arr.forEach(r=>{
+      const k=r[key]||'Other';
+      if(!m[k])m[k]={...r,totalQty:0,totalHours:0,totalCost:0};
+      m[k].totalQty+=(r.qty||0);
+      m[k].totalHours+=(r.hours||0);
+      m[k].totalCost+=(r.cost||0);
+    });
+    return Object.values(m);
+  };
+
+  // ── HEADER ──────────────────────────────────────────────────
   let whtml=`
   <div class="ws-header">
     <div>
@@ -1063,54 +1170,82 @@ function printSummary(id){
     <div class="ws-row"><span class="ws-label">Project</span><span class="ws-val">${esc(name)}</span></div>
     ${p.proj.client?`<div class="ws-row"><span class="ws-label">Client</span><span class="ws-val">${esc(p.proj.client)}</span></div>`:''}
     ${p.proj.address?`<div class="ws-row"><span class="ws-label">Address</span><span class="ws-val">${esc(p.proj.address)}</span></div>`:''}
-    ${p.proj.city?`<div class="ws-row"><span class="ws-label">City</span><span class="ws-val">${esc(p.proj.city)}</span></div>`:''}
     ${p.proj.pm?`<div class="ws-row"><span class="ws-label">Project Manager</span><span class="ws-val">${esc(p.proj.pm)}</span></div>`:''}
-    ${p.proj.pmPhone?`<div class="ws-row"><span class="ws-label">Phone</span><span class="ws-val">${esc(p.proj.pmPhone)}</span></div>`:''}
     ${p.proj.jobNum?`<div class="ws-row"><span class="ws-label">Job #</span><span class="ws-val">${esc(p.proj.jobNum)}</span></div>`:''}
     ${p.proj.planDate?`<div class="ws-row"><span class="ws-label">Plan Date</span><span class="ws-val">${esc(p.proj.planDate)}</span></div>`:''}
     <div class="ws-row"><span class="ws-label">Duration</span><span class="ws-val">${totalDays(p)} days · ${p.budgets.length} scope${p.budgets.length!==1?'s':''}</span></div>
-  </div>
+  </div>`;
 
-  <div class="ws-section">
-    <div class="ws-section-title">Summary by Scope / Budget</div>
-    ${p.budgets.map(b=>`<div style="margin-bottom:10px;padding:12px;border:1px solid var(--bd);border-radius:var(--r);">
-      <div style="font-weight:700;font-size:13px;margin-bottom:8px;">${esc(b.description||b.scopeCode||'Budget #'+b.num)} <span style="font-weight:400;color:var(--t3);font-size:11px;">Budget #${b.num}</span></div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px;">
-        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Days</div><strong>${b.days}d</strong></div>
-        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Crew</div><strong>${esc(b.crew)||'—'}</strong></div>
-        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Direct Cost</div><strong>${fmt(b.totalCost)}</strong></div>
-        <div><div style="color:var(--t3);text-transform:uppercase;font-size:10px;margin-bottom:2px;">Total Budget</div><strong style="color:var(--gn);">${fmt(b.grandTotal)}</strong></div>
+  // ── PER SCOPE/BUDGET ─────────────────────────────────────────
+  // Each budget = one scope block with all its categories
+  p.budgets.forEach(b=>{
+    const scopeLabel=b.description||b.scopeCode||'Budget #'+b.num;
+    const rentals=(b.equipRows||[]).filter(r=>r.rental);
+    const owned=(b.equipRows||[]).filter(r=>!r.rental);
+    const laborG=groupBy(b.laborRows||[],'type');
+    const matG=groupBy(b.matRows||[],'name');
+    const dispG=groupBy(b.dispRows||[],'facility');
+    const truckG=groupBy(b.truckRows||[],'name');
+    const ownedG=groupBy(owned,'name');
+    const rentalG=groupBy(rentals,'name');
+
+    const hasData=b.totalCost>0||b.grandTotal>0;
+
+    whtml+=`
+    <div class="ws-section" style="border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:16px;">
+      <!-- Scope header -->
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--tx);">
+        <div>
+          <div style="font-size:15px;font-weight:700;">${esc(scopeLabel)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${esc(b.sheetName)} · ${esc(b.scopeCode)} · ${b.type}${b.crew?' · '+esc(b.crew):''} · ${b.days}d</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px;font-weight:700;color:var(--gn);">${fmt(b.grandTotal)}</div>
+          <div style="font-size:11px;color:var(--t3);">Costo: ${fmt(b.totalCost)} + Markup: ${fmt(b.totalProfit)}</div>
+        </div>
       </div>
-    </div>`).join('')}
-  </div>`;
 
-  if(laborSum.length)whtml+=`<div class="ws-section">
-    <div class="ws-section-title">👷 Labor — Total ${fmt(tLaborCost)}</div>
-    ${laborSum.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.type)}</span><span class="ws-val">${r.totalHours>0?r.totalHours.toFixed(0)+'h · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
-  </div>`;
+      ${!hasData?'<div style="color:var(--t3);font-size:12px;padding:4px 0;">Sin datos ingresados en este budget</div>':''}
 
-  if(allEquip.length)whtml+=`<div class="ws-section">
-    <div class="ws-section-title">🚜 Equipment & Rentals — Total ${fmt(tEquipCost)}</div>
-    ${owned.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.qty>0?r.qty+' '+r.unit+' · ':''}${fmt(r.cost)}</span></div>`).join('')}
-    ${rentals.length?`<div style="font-size:11px;font-weight:700;color:var(--bl);text-transform:uppercase;letter-spacing:.05em;padding:8px 0 4px;">Rentals</div>`:''}
-    ${rentals.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)} <span style="font-size:10px;background:var(--bll);color:var(--bl);padding:1px 5px;border-radius:4px;">rental</span></span><span class="ws-val">${r.qty>0?r.qty+' '+r.unit+' · ':''}${fmt(r.cost)}</span></div>`).join('')}
-  </div>`;
+      <!-- Labor -->
+      ${laborG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">👷 Labor — ${fmt(b.laborCost)}</div>
+        ${laborG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.type)}</span><span class="ws-val">${r.totalHours>0?r.totalHours.toFixed(0)+'h · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
 
-  if(dispByFac.length)whtml+=`<div class="ws-section">
-    <div class="ws-section-title">🗑️ Disposal — Total ${fmt(tDispCost)}</div>
-    ${dispByFac.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.facility)} <span style="font-size:10px;background:var(--s2);padding:1px 5px;border-radius:4px;">${esc(r.type)}</span></span><span class="ws-val">${r.totalQty>0?r.totalQty.toFixed(1)+' ton · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
-  </div>`;
+      <!-- Equipment owned -->
+      ${ownedG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🚜 Equipment — ${fmt(b.ownedEquipC||0)}</div>
+        ${ownedG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' '+r.unit+' · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
 
-  if(matSum.length)whtml+=`<div class="ws-section">
-    <div class="ws-section-title">🧱 Materials — Total ${fmt(tMatCost)}</div>
-    ${matSum.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' units · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
-  </div>`;
+      <!-- Rentals -->
+      ${rentalG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--bl);margin-bottom:6px;">🔧 Rentals — ${fmt(b.rentalEquipC||0)}</div>
+        ${rentalG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)} <span style="font-size:10px;background:var(--bll);color:var(--bl);padding:1px 5px;border-radius:4px;">rental</span></span><span class="ws-val">${r.totalQty>0?r.totalQty+' '+r.unit+' · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
 
-  if(allTrucks.length)whtml+=`<div class="ws-section">
-    <div class="ws-section-title">🚛 Trucks — Total ${fmt(tTruckCost)}</div>
-    ${allTrucks.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.loads>0?r.loads+' loads · ':''}${fmt(r.cost)}</span></div>`).join('')}
-  </div>`;
+      <!-- Trucks -->
+      ${truckG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🚛 Trucks — ${fmt(b.trucksCost||0)}</div>
+        ${truckG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' loads · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
 
+      <!-- Disposal -->
+      ${dispG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🗑️ Disposal — ${fmt(b.dispCost||0)}</div>
+        ${dispG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.facility)} <span style="font-size:10px;background:var(--s2);padding:1px 5px;border-radius:4px;">${esc(r.type)}</span></span><span class="ws-val">${r.totalQty>0?r.totalQty.toFixed(1)+' ton · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Materials -->
+      ${matG.length?`<div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🧱 Materials — ${fmt(b.matCost||0)}</div>
+        ${matG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' units · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+    </div>`;
+  });
+
+  // ── GRAND TOTAL ──────────────────────────────────────────────
   whtml+=`
   <div class="ws-grand">
     <span class="ws-label">TOTAL DEL PROYECTO</span>
@@ -1129,6 +1264,61 @@ function printSummary(id){
   wsContent.innerHTML=whtml;
   navTo('win-summary');
 }
+
+
+// ─── FOLLOW-UP ALERTS ────────────────────────────────────────
+function daysSinceBid(p){
+  if(!p.bidDate)return -1;
+  return Math.floor((new Date()-new Date(p.bidDate))/(1000*60*60*24));
+}
+function needsFollowup(p){
+  return p.status==='Pending'&&p.bidDate&&!p.followupDismissed&&daysSinceBid(p)>=7;
+}
+function renderFollowUpAlerts(){
+  const el=document.getElementById('followup-alerts');if(!el)return;
+  const fups=projects.filter(needsFollowup);
+  el.innerHTML=fups.map(p=>{
+    const d=daysSinceBid(p);
+    const name=p.customName||p.proj.name||p.filename;
+    return `<div class="followup-banner">
+      <div class="fub-icon">⏰</div>
+      <div class="fub-text"><strong>Follow-up: ${esc(name)}</strong> — Bid enviado hace <strong>${d} días</strong>. Contactar a ${esc(p.proj.client||'el cliente')}.
+      ${p.proj.pmPhone?` <a href="tel:${p.proj.pmPhone}" style="color:var(--ac);">${esc(p.proj.pmPhone)}</a>`:''}</div>
+      <span class="fub-dismiss" onclick="dismissFollowup('${p.id}')">Descartar</span>
+    </div>`;
+  }).join('');
+}
+function dismissFollowup(id){
+  const p=projects.find(x=>x.id===id);if(p){p.followupDismissed=true;savePersist();}
+  renderFollowUpAlerts();renderDashboard();rebuildSidebar();
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────────
+function openEditModal(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  curProjId=id;
+  document.getElementById('em-name').value=p.customName||p.proj.name||'';
+  document.getElementById('em-bid-date').value=p.bidDate||'';
+  document.getElementById('em-notes').value=p.notes||'';
+  document.getElementById('edit-modal').classList.add('show');
+}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('show');}
+function saveEditModal(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const nameVal=document.getElementById('em-name').value.trim();
+  p.customName=nameVal&&nameVal!==p.proj.name?nameVal:null;
+  p.bidDate=document.getElementById('em-bid-date').value||null;
+  p.notes=document.getElementById('em-notes').value.trim();
+  p.followupDismissed=false; // reset so alert shows again if needed
+  savePersist();closeEditModal();
+  openProject(curProjId);renderDashboard();rebuildSidebar();
+  renderFollowUpAlerts();
+  toast('Proyecto actualizado ✓');
+}
+
+// ─── WON MODAL ────────────────────────────────────────────────
+function closeWonModal(){document.getElementById('won-modal').classList.remove('show');pendingWonId=null;}
+function goToWinSummary(){closeWonModal();if(pendingWonId){printSummary(pendingWonId);}pendingWonId=null;}
 
 // ─── SIDEBAR ─────────────────────────────────────────────────
 function rebuildSidebar(){
@@ -1153,6 +1343,7 @@ function navTo(page){
 }
 
 // ─── UTILS ───────────────────────────────────────────────────
+document.querySelectorAll('.mo-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
 function fmt(n){if(!n||isNaN(n))return '$0';return '$'+Math.round(n).toLocaleString('en-US');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showProg(msg,p){document.getElementById('prog').classList.add('show');document.getElementById('prog-msg').textContent=msg;document.getElementById('prog-fill').style.width=p+'%';}
@@ -1162,7 +1353,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 // ─── INIT ─────────────────────────────────────────────────────
 loadPersist();
 rebuildSidebar();
-if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();navTo('dashboard');}
+if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();renderFollowUpAlerts();navTo('dashboard');}
 </script>
 </body>
 </html>

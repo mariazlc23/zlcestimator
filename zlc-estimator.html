@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZLC Estimator</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#f5f4f0;--sf:#fff;--s2:#f0ede8;--bd:#ddd9d0;--b2:#c8c4bb;
+  --tx:#1a1916;--t2:#6b6860;--t3:#9e9b94;
+  --ac:#c8521a;--al:#fdf0ea;--ad:#9e3d0f;
+  --gn:#2d7a4f;--gl:#eaf4ee;--bl:#1a5fa8;--bll:#eaf2fc;
+  --yw:#b45309;--ywl:#fef3c7;--rd:#b91c1c;--rdl:#fee2e2;
+  --r:10px;--rl:14px;--f:'DM Sans',sans-serif;--m:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;}
+#app{display:flex;min-height:100vh;}
+#sb{width:260px;min-width:260px;background:var(--tx);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+#mn{flex:1;overflow-y:auto;}
+.slo{padding:20px 18px 15px;border-bottom:1px solid rgba(255,255,255,.1);}
+.slo h1{font-size:16px;font-weight:700;color:#fff;}
+.slo p{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
+.ss{padding:13px 12px 4px;font-size:10px;color:rgba(255,255,255,.28);letter-spacing:.1em;text-transform:uppercase;font-weight:600;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.6);border-left:3px solid transparent;transition:all .15s;}
+.ni:hover{background:rgba(255,255,255,.07);color:#fff;}
+.ni.active{background:rgba(200,82,26,.22);color:#f4a070;border-left-color:var(--ac);}
+.proj-list{flex:1;overflow-y:auto;}
+.pi{display:flex;align-items:center;gap:8px;padding:8px 18px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.55);border-left:3px solid transparent;transition:all .15s;}
+.pi:hover{background:rgba(255,255,255,.06);color:#fff;}
+.pi.active{color:#f4a070;border-left-color:var(--ac);background:rgba(200,82,26,.15);}
+.pi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.2);}
+.pi.active .pi-dot,.pi-pending .pi-dot{background:var(--yw);}
+.pi-won .pi-dot{background:var(--gn);}
+.pi-lost .pi-dot{background:var(--rd);}
+.sbot{padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);}
+.ubtn{width:100%;padding:9px;background:var(--ac);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:var(--f);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;}
+.ubtn:hover{background:var(--ad);}
+.pg{display:none;}.pg.active{display:block;}
+.mh{padding:18px 28px 14px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.mh h2{font-size:19px;font-weight:700;}
+.mhmeta{font-size:12px;color:var(--t2);margin-top:2px;}
+.ha{display:flex;gap:8px;flex-shrink:0;}
+.btn{padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-family:var(--f);font-size:13px;font-weight:500;color:var(--tx);display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.btn:hover{border-color:var(--b2);background:var(--s2);}
+.bp{background:var(--ac);border-color:var(--ac);color:#fff;}.bp:hover{background:var(--ad);}
+.bsm{padding:5px 11px;font-size:12px;}
+.cnt{padding:24px 28px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px 17px;}
+.sc-l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.sc-v{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;}
+.sc-v.or{color:var(--ac);}.sc-v.gn{color:var(--gn);}.sc-v.bl{color:var(--bl);}
+.sc-s{font-size:12px;color:var(--t3);margin-top:1px;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:22px;margin-bottom:18px;}
+.ch{font-size:11.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;padding:9px 11px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--bd);background:var(--s2);}
+tbody td{padding:10px 11px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#fafaf8;}
+tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;background:var(--s2);}
+.tr{text-align:right;font-family:var(--m);font-size:12.5px;}
+.tw{font-weight:600;}.tac{color:var(--ac);font-weight:600;}.tgn{color:var(--gn);font-weight:600;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);}
+.s-pending{background:var(--ywl);color:var(--yw);}
+.s-won{background:var(--gl);color:var(--gn);}
+.s-lost{background:var(--rdl);color:var(--rd);}
+.info-row{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:12px;color:var(--t3);min-width:120px;flex-shrink:0;}
+.info-val{font-size:13.5px;font-weight:500;word-break:break-word;}
+.sr{display:flex;align-items:center;padding:8px 0;border-top:1px solid var(--bd);}
+.sl{flex:1;font-size:13.5px;color:var(--t2);}
+.sv{font-family:var(--m);font-size:13.5px;font-weight:600;}
+.sr.grand{border-top:2px solid var(--b2);margin-top:4px;padding-top:12px;}
+.sr.grand .sl{font-size:15px;font-weight:700;color:var(--tx);}
+.sr.grand .sv{font-size:19px;color:var(--ac);}
+.shdr{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:8px;margin:18px 0 10px;}
+.shdr::after{content:'';flex:1;height:1px;background:var(--bd);}
+.tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--m);background:var(--s2);color:var(--t2);}
+.prop-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:44px;max-width:800px;}
+#empty-state{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;}
+.drop-card{background:var(--sf);border:2px dashed var(--b2);border-radius:var(--rl);padding:60px 52px;max-width:500px;width:100%;text-align:center;transition:all .2s;}
+.drop-card:hover,.drop-card.drag{border-color:var(--ac);background:var(--al);}
+.drop-card h2{font-size:21px;font-weight:700;margin-bottom:8px;}
+.drop-card p{font-size:13.5px;color:var(--t2);line-height:1.65;margin-bottom:26px;}
+#prog{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;}
+#prog.show{display:flex;}
+.prog-box{background:var(--sf);border-radius:var(--rl);padding:38px 46px;text-align:center;min-width:300px;}
+.prog-box h3{font-size:16px;font-weight:600;margin-bottom:6px;}
+.prog-box p{font-size:13px;color:var(--t2);margin-bottom:18px;}
+.prog-bg{height:7px;background:var(--s2);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--ac);border-radius:4px;transition:width .3s;}
+#toast{position:fixed;bottom:22px;right:22px;background:#1a1916;color:#fff;padding:9px 16px;border-radius:var(--r);font-size:13px;z-index:9999;display:none;}
+.dv{height:1px;background:var(--bd);margin:14px 0;}
+::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
+
+/* WIN SUMMARY */
+.win-summary-wrap{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:36px;max-width:820px;}
+.ws-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:2px solid var(--tx);}
+.ws-logo{font-size:20px;font-weight:700;color:var(--tx);}
+.ws-logo span{color:var(--ac);}
+.ws-logo-sub{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.6;}
+.ws-title{font-size:18px;font-weight:700;color:var(--ac);text-align:right;}
+.ws-title-sub{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.6;}
+.ws-section{margin-bottom:22px;}
+.ws-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bd);}
+.ws-row{display:flex;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px;}
+.ws-row:last-child{border-bottom:none;}
+.ws-label{flex:1;color:var(--t2);}
+.ws-val{font-weight:600;text-align:right;}
+.ws-grand{display:flex;padding:14px 0;border-top:2px solid var(--tx);margin-top:8px;align-items:center;}
+.ws-grand .ws-label{font-size:16px;font-weight:700;color:var(--tx);}
+.ws-grand .ws-val{font-size:22px;color:var(--ac);}
+
+
+/* FOLLOW-UP */
+.followup-banner{background:var(--al);border:1px solid #f5c8ab;border-radius:var(--r);padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.fub-icon{font-size:20px;flex-shrink:0;}
+.fub-text{flex:1;font-size:13px;line-height:1.5;}
+.fub-dismiss{font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline;white-space:nowrap;flex-shrink:0;}
+.pi-followup{position:relative;}
+.pi-followup::after{content:'!';position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--ac);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;text-align:center;line-height:16px;}
+/* MODAL */
+.mo-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:center;justify-content:center;}
+.mo-overlay.show{display:flex;}
+.mo-box{background:var(--sf);border-radius:var(--rl);padding:28px;width:460px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.2);}
+.mo-box h3{font-size:16px;font-weight:700;margin-bottom:18px;}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+.form-row input,.form-row textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r);font-family:var(--f);font-size:13.5px;color:var(--tx);background:var(--sf);}
+.form-row input:focus,.form-row textarea:focus{outline:none;border-color:var(--ac);}
+.form-row textarea{resize:vertical;min-height:70px;}
+.mo-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+@media print{#sb,#prog,.np{display:none!important;}#mn{overflow:visible;}body{background:#fff;}.mh{position:static;}}
+</style>
+</head>
+<body>
+<input type="file" id="file-in" style="display:none" accept=".xlsx,.xlsm,.xls" onchange="handleFile(this.files[0])">
+<div id="app">
+<nav id="sb">
+  <div class="slo"><h1>ZLC Estimator</h1><p>Project Manager</p></div>
+  <div class="ss">Views</div>
+  <div class="ni active" onclick="navTo('dashboard')" id="nav-dashboard">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+  </div>
+  <div class="ss">Projects</div>
+  <div class="proj-list" id="proj-list-sb">
+    <div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>
+  </div>
+  <div class="sbot">
+    <!-- Cloud backup status -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">
+      <span id="cloud-status" style="font-size:11px;color:var(--t3);">☁️ No data</span>
+      <button id="cloud-backup-btn" class="btn bsm" style="font-size:10px;padding:3px 8px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.6);" onclick="backupAllToSheet()">☁️ Backup Sheet</button>
+    </div>
+    <div id="pm-queue-status" style="display:none;background:rgba(45,122,79,.2);border:1px solid rgba(45,122,79,.4);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px;color:#6ee7a0;cursor:pointer;" onclick="openPMQueuePanel()">
+      <div style="font-weight:700;">🏆 <span id="pm-queue-count">0</span> in queue for PM</div>
+      <div style="font-size:10px;opacity:.7;margin-top:2px;">Open the PM App to import</div>
+    </div>
+    <button class="ubtn" onclick="document.getElementById('file-in').click()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Load Master Sheet
+    </button>
+  </div>
+</nav>
+
+<div id="mn">
+  <div id="empty-state">
+    <div class="drop-card" id="drop-zone" ondragover="onDrag(event)" ondragleave="offDrag(event)" ondrop="onDrop(event)">
+      <div style="font-size:52px;margin-bottom:18px;">📊</div>
+      <h2>ZLC Estimator</h2>
+      <p>Upload your <strong>Master Sheet</strong> (.xlsm / .xlsx).<br>Each file = a different project.</p>
+      <button class="btn bp" onclick="document.getElementById('file-in').click()" style="font-size:14px;padding:10px 22px;">Select Excel File</button>
+      <p style="margin-top:14px;font-size:12px;color:var(--t3);">or drag the file here</p>
+    </div>
+  </div>
+
+  <div id="pg-dashboard" class="pg">
+    <div class="mh">
+      <div><h2>Dashboard</h2><div class="mhmeta" id="dash-meta">All projects</div></div>
+      <div class="ha np">
+        <button class="btn bsm" onclick="document.getElementById('file-in').click()">+ Load project</button>
+        <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+    <div class="cnt">
+      <div id="followup-alerts" style="margin-bottom:4px;"></div>
+      <div class="g4" id="dash-stats"></div>
+      <div class="card"><div class="ch">All Projects</div><div id="all-proj-tbl"></div></div>
+    </div>
+  </div>
+
+  <div id="pg-project" class="pg">
+    <div class="mh">
+      <div><h2 id="proj-pg-name">Project</h2><div class="mhmeta" id="proj-pg-meta"></div></div>
+      <div class="ha np">
+        <button class="btn bsm" onclick="navTo('proposal')" style="color:var(--bl);border-color:var(--bl);">📄 Proposal</button>
+        <button class="btn bsm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+    <div class="cnt" id="proj-pg-content"></div>
+  </div>
+
+  <div id="pg-proposal" class="pg">
+    <div class="mh">
+      <div><h2>Proposal</h2><div class="mhmeta" id="prop-meta"></div></div>
+      <div class="ha np"><button class="btn bp bsm" onclick="window.print()">🖨️ Print / PDF</button></div>
+    </div>
+    <div class="cnt"><div id="prop-content"></div></div>
+  </div>
+
+  <div id="pg-budget" class="pg">
+    <div class="mh">
+      <div><h2 id="bpg-title">Budget</h2><div class="mhmeta" id="bpg-meta"></div></div>
+      <div class="ha np"><button class="btn bsm" onclick="window.print()">🖨️ Print</button></div>
+    </div>
+    <div class="cnt" id="bpg-content"></div>
+  </div>
+
+  <!-- WIN SUMMARY PAGE -->
+  <div id="pg-win-summary" class="pg">
+    <div class="mh">
+      <div><h2>Job Summary</h2><div class="mhmeta" id="ws-meta"></div></div>
+      <div class="ha np">
+        <button class="btn bsm" onclick="navTo('project')">← Back</button>
+        <button class="btn bp bsm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+    <div class="cnt">
+      <div class="win-summary-wrap" id="ws-wrap">
+        <div id="ws-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="mo-overlay" id="edit-modal">
+  <div class="mo-box">
+    <h3>✏️ Edit Project</h3>
+    <div class="form-row"><label>Project Name</label><input type="text" id="em-name" placeholder="Project name"></div>
+    <div class="form-row"><label>Bid Sent Date</label><input type="date" id="em-bid-date"></div>
+    <div class="form-row"><label>Notes</label><textarea id="em-notes" placeholder="Additional notes..."></textarea></div>
+    <div class="mo-actions">
+      <button class="btn" onclick="closeEditModal()">Cancel</button>
+      <button class="btn bp" onclick="saveEditModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- WON MODAL -->
+<div class="mo-overlay" id="won-modal">
+  <div class="mo-box">
+    <h3>🎉 Project Won!</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:18px;">The project was marked as <strong>Won</strong>. Do you want to see the full summary with a breakdown of labor, materials, equipment, and disposal?</p>
+    <div class="mo-actions">
+      <button class="btn" onclick="closeWonModal()">Just save</button>
+      <button class="btn bp" onclick="goToWinSummary()">📋 Ver Job Summary</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND TO PM MODAL -->
+<div class="mo-overlay" id="pm-modal">
+  <div class="mo-box" style="width:560px;max-width:96vw;">
+    <h3>📤 Send to PM</h3>
+    <div id="pm-validation" style="display:none;background:var(--rdl);border:1px solid #fca5a5;border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--rd);"></div>
+
+    <!-- Project summary preview -->
+    <div id="pm-preview" style="background:var(--s2);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;"></div>
+
+    <!-- Webhook URL -->
+    <div class="form-row">
+      <label>Endpoint URL <span style="font-weight:400;color:var(--t3);">(webhook, Zapier, Make, etc.)</span></label>
+      <input type="url" id="pm-url" placeholder="https://hooks.zapier.com/hooks/catch/..." oninput="savePMUrl(this.value)">
+    </div>
+
+    <!-- JSON preview toggle -->
+    <div style="margin-bottom:14px;">
+      <button class="btn bsm" onclick="toggleJsonPreview()" id="pm-json-toggle">{ } Ver JSON</button>
+      <button class="btn bsm" onclick="copyJson()" style="margin-left:6px;">📋 Copiar JSON</button>
+    </div>
+    <div id="pm-json-wrap" style="display:none;background:#1a1916;border-radius:var(--r);padding:14px;margin-bottom:14px;max-height:260px;overflow-y:auto;">
+      <pre id="pm-json-content" style="font-family:var(--m);font-size:11px;color:#f5f4f0;white-space:pre-wrap;word-break:break-all;margin:0;"></pre>
+    </div>
+
+    <!-- Sent status -->
+    <div id="pm-sent-badge" style="display:none;background:var(--gl);border-radius:var(--r);padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--gn);"></div>
+
+    <div class="mo-actions">
+      <button class="btn" onclick="closePMModal()">Cancel</button>
+      <button class="btn bp" id="pm-send-btn" onclick="sendToPM()">📤 Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- PM QUEUE PANEL -->
+<div class="mo-overlay" id="pm-queue-modal">
+  <div class="mo-box" style="width:560px;max-width:96vw;">
+    <h3>🏆 Queue for Project Manager</h3>
+    <p style="font-size:13px;color:var(--t2);margin-bottom:16px;">These Won projects are ready to import in the PM App. Open the PM App on the same computer and they will appear automatically.</p>
+    <div id="pm-queue-list" style="margin-bottom:16px;"></div>
+    <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--t2);">
+      <strong>How does it work?</strong> Both apps share the same browser. The PM App automatically detects when there are Won projects and shows a green notification to import them.
+    </div>
+    <div style="background:var(--bll);border:1px solid #b0c8e8;border-radius:var(--r);padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:8px;">☁️ Google Sheets Backup</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Manual backup of all projects to the Sheet. This happens automatically when loading a file or marking Won.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="cloud-backup-btn2" class="btn bsm bp" onclick="backupAllToSheet()">☁️ Save all to Sheet</button>
+        <button id="cloud-restore-btn" class="btn bsm" onclick="restoreFromSheet()">⬇ Restore from Sheet</button>
+      </div>
+    </div>
+    <div class="mo-actions">
+      <button class="btn" onclick="clearWonQueue()">Clear queue</button>
+      <button class="btn bp" onclick="window.open('https://mariazlc23.github.io/zlc-pm/','_blank');closeModal('pm-queue-modal')">Open PM App →</button>
+    </div>
+  </div>
+</div>
+
+<div id="prog"><div class="prog-box"><h3>Reading file...</h3><p id="prog-msg">Extracting data</p><div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div></div>
+<div id="toast"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────
+// ─── GOOGLE SHEETS BACKUP CONFIG ─────────────────────────────
+// Sheet: https://docs.google.com/spreadsheets/d/1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro
+const EST_SHEET_ID     = '1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro';
+// Shared Apps Script URL with PM App (handles both PM and Estimator writes)
+const PM_APPS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbylgsY5Nd3F3DlPQijFjwlNz3D11i2Jz2lET4F5QfjCuPbuTxCEqLlGWrcSArfmf9dGrQ/exec';
+// Google Sheets API Key (read-only) — get one at console.cloud.google.com
+// Enable: Google Sheets API → Credentials → API Key → restrict to Sheets API
+const SHEETS_API_KEY   = '';  // ← paste your API key here
+
+let projects=[];
+let curProjId=null;
+let pendingWonId=null;
+const STATUS=['Pending','Won','Lost'];
+const SC={Pending:'s-pending',Won:'s-won',Lost:'s-lost'};
+
+function savePersist(){try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}}
+function loadPersist(){
+  try{
+    ['zlc_v5','zlc_v6','zlc_projects_v2','zlc_estimator_v2','zlc_v4','zlc_v3'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+    const s=localStorage.getItem('zlc_v7');
+    if(s){const parsed=JSON.parse(s);projects=Array.isArray(parsed)?parsed:[];}
+    else projects=[];
+  }catch(e){projects=[];}
+}
+
+// ─── DROP ─────────────────────────────────────────────────────
+function onDrag(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag');}
+function offDrag(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');}
+function onDrop(e){e.preventDefault();offDrag(e);const f=e.dataTransfer.files[0];if(f)handleFile(f);}
+
+function handleFile(file){
+  if(!file)return;
+  showProg('Opening...',10);
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      showProg('Parsing sheets...',25);
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      showProg('Reading Project Settings...',40);
+      const proj=readProjectSettings(wb);
+      showProg('Reading Proposal...',55);
+      const proposalBudgetNums=readProposalBudgetNums(wb);
+      showProg('Reading Budgets...',70);
+      const budgets=readBudgets(wb,proj,proposalBudgetNums);
+      showProg('Reading Scopes...',85);
+      const scopes=readScopes(wb);
+      showProg('Reading Key...',92);
+      const key=readKey(wb);
+      showProg('Saving...',98);
+      const p={id:'p_'+Date.now(),filename:file.name,status:'Pending',proj,budgets,scopes,key,loadedAt:new Date().toISOString(),bidDate:null,notes:'',followupDismissed:false};
+      projects.unshift(p);
+      savePersist();
+      hideProg();
+      rebuildSidebar();
+      renderDashboard();
+      openProject(p.id);
+      document.getElementById('file-in').value='';
+      toast('Project loaded ✓');
+      // Auto-backup to Google Sheet
+      setTimeout(()=>autoBackup(p),1000);
+    }catch(err){hideProg();console.error(err);toast('Error: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── READ PROJECT SETTINGS ────────────────────────────────────
+// Exact cell map (confirmed from formula analysis):
+//   G8 = Project Name       G9  = Project Address
+//   G10 = Client            G7  = Project Number (Job #)
+//   G11 = Client PO#        G12 = Start date
+//   G13 = Finish date       G14 = Consultant/Architect
+//   G15 = Sheets/Plan Date  G16 = Addendum
+//   G17 = Site Visit        H17 = City
+//   I7  = PM Name           I8  = PM Email
+//   I9  = PM Phone          I10 = Superintendent
+//   J16 = "Travel time" label → J17 = travel time value
+function readProjectSettings(wb){
+  const ws=wb.Sheets['Project settings'];
+  const p={name:'',address:'',client:'',jobNum:'',clientPO:'',
+            startDate:'',endDate:'',architect:'',planDate:'',
+            addendum:'',siteVisit:'',city:'',travelTime:0,
+            pm:'',pmEmail:'',pmPhone:'',super:'',estimatedValue:0};
+  if(!ws)return p;
+
+  // Helper: read cell value, skip 0 and empty
+  const cv=(addr)=>{
+    const c=ws[addr];
+    if(!c||c.v===null||c.v===undefined)return '';
+    const v=c.v;
+    if(v===0||v==='0'||String(v).trim()==='')return '';
+    // Format dates
+    if(c.t==='d'||c.t==='n'&&v>40000&&v<50000){
+      try{
+        const d=new Date(Math.round((v-25569)*86400*1000));
+        return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+      }catch(e){}
+    }
+    return String(v).trim();
+  };
+
+  p.jobNum     = cv('G7');
+  p.name       = cv('G8');
+  p.address    = cv('G9');
+  p.client     = cv('G10');
+  p.clientPO   = cv('G11');
+  p.startDate  = cv('G12');
+  p.endDate    = cv('G13');
+  p.architect  = cv('G14');
+  p.planDate   = cv('G15');
+  p.addendum   = cv('G16');
+  p.siteVisit  = cv('G17');
+  p.city       = cv('H17');
+  p.pm         = cv('I7');
+  p.pmEmail    = cv('I8');
+  p.pmPhone    = cv('I9');
+  p.super      = cv('I10');
+
+  // Travel time: label is J16, value is K16 or J17
+  const tt=ws['K16'];
+  if(tt&&typeof tt.v==='number'&&tt.v>0&&tt.v<24)p.travelTime=tt.v;
+  else{const tt2=ws['J17'];if(tt2&&typeof tt2.v==='number'&&tt2.v>0&&tt2.v<24)p.travelTime=tt2.v;}
+
+  return p;
+}
+
+// ─── READ PROPOSAL BUDGET NUMS ────────────────────────────────
+// Proposal G22:G35 = the 14 SOV line slots
+// In a real file these have formulas like ='Budget #2'!F109
+// Strategy: read formulas from those cells to find which Budget #N they reference
+// ALSO: a budget's Type cell (B2) being non-empty means it's active/in-proposal
+function readProposalBudgetNums(wb){
+  const ws=wb.Sheets['Proposal'];
+  const nums=new Set();
+  if(!ws)return nums;
+
+  // Check G22:G35 for formulas referencing Budget sheets
+  for(let row=22;row<=35;row++){
+    const addr='G'+row;
+    const cell=ws[addr];
+    if(!cell)continue;
+    const formula=cell.f||'';
+    const match=formula.match(/Budget #(\d+)/i);
+    if(match)nums.add(+match[1]);
+    // Also check if value is non-zero (calculated value)
+    if(cell.v&&typeof cell.v==='number'&&cell.v!==0){
+      // We'll also scan nearby cells for description to get budget #
+      const bCell=ws['B'+row];
+      if(bCell&&bCell.f){
+        const m2=bCell.f.match(/Budget #(\d+)/i);
+        if(m2)nums.add(+m2[1]);
+      }
+      const cCell=ws['C'+row];
+      if(cCell&&cCell.f){
+        const m3=cCell.f.match(/Budget #(\d+)/i);
+        if(m3)nums.add(+m3[1]);
+      }
+    }
+  }
+
+  // If no formulas found (empty template or data_only), fall back to:
+  // budgets are in proposal if their Type cell (B2) has a value
+  // We signal this by returning an empty set with a special flag
+  if(nums.size===0)nums.add(-1); // -1 = "use Type cell fallback"
+  return nums;
+}
+
+// ─── READ BUDGETS ─────────────────────────────────────────────
+function readBudgets(wb,proj,proposalNums){
+  const budgets=[];
+  const useFallback=proposalNums.has(-1);
+  const sheetNames=wb.SheetNames.filter(n=>/^Budget #\d+$/.test(n));
+
+  for(const sname of sheetNames){
+    const ws=wb.Sheets[sname];if(!ws)continue;
+    const num=+sname.replace('Budget #','');
+
+    // Determine if this budget is in the Proposal:
+    // 1. If Proposal had explicit formula references, use those
+    // 2. Fallback: Type cell B2 has a non-empty value
+    const typeCell=ws['B2'];
+    const typeVal=typeCell&&typeCell.v?String(typeCell.v).trim():'';
+    const crewCell=ws['C2'];
+    const crewVal=crewCell&&crewCell.v?String(crewCell.v).trim():'';
+    const daysCell=ws['D2'];
+    const daysVal=daysCell&&typeof daysCell.v==='number'?daysCell.v:0;
+    const shiftsCell=ws['E2'];
+    const shiftsVal=shiftsCell&&typeof shiftsCell.v==='number'?shiftsCell.v:8;
+
+    const inProposal=useFallback?!!typeVal:proposalNums.has(num);
+    if(!inProposal)continue;
+
+    // Travel time from Project settings (F2 formula = 'Project settings'!J17)
+    const travelCell=ws['F2'];
+    const travelVal=travelCell&&typeof travelCell.v==='number'?travelCell.v:(proj.travelTime||0);
+
+    // Read all section totals using calculated values
+    const cv=addr=>{const c=ws[addr];return c&&typeof c.v==='number'?c.v:0;};
+
+    const laborCost    = cv('F19');
+    const laborMkAmt   = cv('G20');
+    const ownedEquipC  = cv('F34');
+    const ownedEquipMk = cv('G35');
+    const rentalEquipC = cv('F44');
+    const rentalEquipMk= cv('F45');
+    const trucksCost   = cv('J56');
+    const dispCost     = cv('F67');
+    const dispMkAmt    = cv('F68');
+    const matCost      = cv('F86');
+    const matMkAmt     = cv('F87');
+    const subCost      = cv('F100');
+    const subMkAmt     = cv('F101');
+    const totalCost    = cv('E107');
+    const totalProfit  = cv('E108');
+    const grandTotal   = cv('F109');
+
+    // Markup %
+    const mkPctCell=ws['F20'];
+    const markupPct=mkPctCell&&typeof mkPctCell.v==='number'?mkPctCell.v:0.45;
+
+    // Description: typed text in col B rows 4-8 (skip "Description" placeholder)
+    let desc='';
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+    for(let ri=3;ri<9&&ri<rows.length;ri++){
+      const candidate=String(rows[ri]?.[1]||'').trim();
+      if(candidate&&candidate!=='Description'&&candidate.length>4&&!candidate.startsWith('#')){
+        desc=candidate;break;
+      }
+    }
+
+    // Read individual rows for detail view
+    const laborRows=[];
+    for(let ri=10;ri<=17&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const tp=String(rr[1]||'').trim(),rt=+rr[2]||0,hr=+rr[4]||0,ct=+rr[6]||0;
+      if(tp&&tp!=='#N/A'&&tp!=='Labor Type:'&&(rt>0||ct>0)){
+        laborRows.push({type:tp,rate:rt,hours:hr,cost:ct||rnd(rt*hr)});
+      }
+    }
+    const equipRows=[];
+    for(let ri=23;ri<=32&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const nm=String(rr[1]||'').trim(),qt=+rr[3]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[6]||0;
+      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Equipment',qty:qt,rate:rt,unit:un,cost:ct||rnd(qt*rt)});
+    }
+    for(let ri=39;ri<=42&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const nm=String(rr[1]||'').trim(),qt=+rr[2]||0,rt=+rr[4]||0,un=String(rr[5]||'Days').trim(),ct=+rr[7]||0;
+      if((qt>0||ct>0)&&rt>0)equipRows.push({name:nm||'Rental',qty:qt,rate:rt,unit:un,cost:ct||rnd(qt*rt),rental:true});
+    }
+    const truckRows=[];
+    for(let ri=48;ri<=57&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const nm=String(rr[0]||'').trim(),ld=+rr[4]||0,rt=+rr[5]||0,ct=+rr[7]||0;
+      if(nm&&nm!=='Aggregates'&&(ld>0||ct>0))truckRows.push({name:nm,loads:ld,rate:rt,cost:ct||rnd(ld*rt)});
+    }
+    const dispRows=[];
+    for(let ri=60;ri<=65&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const tp=String(rr[1]||'').trim(),fc=String(rr[2]||'').trim(),un=String(rr[3]||'Ton').trim(),rt=+rr[4]||0,qt=+rr[5]||0,ct=+rr[7]||0;
+      if(tp&&(qt>0||ct>0))dispRows.push({type:tp,facility:fc,unit:un,rate:rt,qty:qt,cost:ct||rnd(qt*rt)});
+    }
+    const matRows=[];
+    for(let ri=72;ri<=84&&ri<rows.length;ri++){
+      const rr=rows[ri];
+      const nm=String(rr[0]||rr[1]||'').trim(),qt=+rr[1]||0,rt=+rr[4]||0,ct=+rr[7]||0;
+      if(nm&&nm!=='Materials'&&nm!=='Item'&&(qt>0||ct>0)&&rt>0)matRows.push({name:nm,qty:qt,rate:rt,cost:ct||rnd(qt*rt)});
+    }
+
+    budgets.push({
+      sheetName:sname,num,type:typeVal,crew:crewVal,
+      days:daysVal||1,shifts:shiftsVal||8,travel:travelVal,
+      description:desc,scopeCode:inferScope(desc,num),
+      laborRows,equipRows,truckRows,dispRows,matRows,
+      laborCost,laborMkAmt,ownedEquipC,rentalEquipC,trucksCost,
+      dispCost,matCost,subCost,
+      totalCost,totalProfit,grandTotal,markupPct,
+      inProposal:true
+    });
+  }
+  return budgets.sort((a,b)=>a.num-b.num);
+}
+
+function rnd(n){return Math.round(n*100)/100;}
+function inferScope(desc,num){
+  const d=(desc||'').toLowerCase();
+  if(d.includes('hard demo'))return 'T001_Hard_Demo';
+  if(d.includes('soft demo'))return 'T002_Soft_Demo';
+  if(d.includes('excavat'))return 'T003_Excavation';
+  if(d.includes('concrete')||d.includes('pour'))return 'T004_Concrete';
+  if(d.includes('utilit')||d.includes('trench'))return 'T005_Utilities';
+  if(d.includes('paving')||d.includes('asphalt')||d.includes('grading'))return 'T006_Paving';
+  return 'Budget_'+num;
+}
+
+// ─── READ SCOPES ──────────────────────────────────────────────
+function readScopes(wb){
+  const ws=wb.Sheets['Scope'];const sc=[];if(!ws)return sc;
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  for(const r of rows){
+    const code=String(r[4]||'').trim(),name=String(r[1]||'').trim(),desc=String(r[2]||'').trim();
+    if(code&&code.startsWith('T0')&&desc.length>10)sc.push({code,name,description:desc});
+  }
+  return sc;
+}
+
+// ─── READ KEY ─────────────────────────────────────────────────
+function readKey(wb){
+  const ws=wb.Sheets['key'];
+  const k={laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]};
+  if(!ws)return k;
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+  for(const r of rows){
+    const r8=String(r[8]||'').trim();
+    const lpMap={'Foreman (Standard)':1,'Laborer (Standard)':1,'Concrete worker (Standard)':1,'Foreman (OT)':1,'Foreman (PW)':1,'Laborer (OT)':1,'Laborer (PW)':1,'Concrete worker (OT)':1,'Concrete worker (PW)':1,'Foreman (Travel Time)':1,'Laborer (Travel Time)':1,'Concrete worker (Travel Time)':1,'Truck driver':1,'Truck driver OT':1};
+    if(lpMap[r8]&&typeof r[9]==='number'){k.laborProd.push({type:r8,st:r[9],ot:+r[10]||0});}
+    const c44=String(r[44]||'').trim();
+    if(c44.includes('Estimator'))k.estimators.push({name:c44.replace(', Estimator','').trim(),phone:String(r[45]||'').trim()});
+    ['Xolos','Chingones','Lobos','Poblanos','Warriors'].forEach(cn=>{
+      if(String(r[11]||'').trim()===cn&&typeof r[12]==='number'&&!k.crews.find(c=>c.name===cn))k.crews.push({name:cn,foremans:r[12],laborers:r[13]||0});
+    });
+  }
+  return k;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────
+function renderDashboard(){
+  if(!projects.length){document.getElementById('empty-state').style.display='flex';return;}
+  document.getElementById('empty-state').style.display='none';
+  const won=projects.filter(p=>p.status==='Won');
+  const pend=projects.filter(p=>p.status==='Pending');
+  const totalPend=pend.reduce((s,p)=>s+projGrand(p),0);
+  const totalWon=won.reduce((s,p)=>s+projGrand(p),0);
+  renderFollowUpAlerts();
+  document.getElementById('dash-meta').textContent=`${projects.length} project${projects.length!==1?'s':''} · ${won.length} Won · ${pend.length} Pending`;
+  const lost=projects.filter(p=>p.status==='Lost');
+  const totalLost=lost.reduce((s,p)=>s+projGrand(p),0);
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="sc"><div class="sc-l">Pipeline (Pending)</div><div class="sc-v or">${fmt(totalPend)}</div><div class="sc-s">${pend.length} project${pend.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Won</div><div class="sc-v gn">${fmt(totalWon)}</div><div class="sc-s">${won.length} project${won.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Total Lost</div><div class="sc-v" style="color:var(--rd);">${fmt(totalLost)}</div><div class="sc-s">${lost.length} project${lost.length!==1?'s':''}</div></div>
+    <div class="sc"><div class="sc-l">Portfolio (Pending+Won)</div><div class="sc-v bl">${fmt(totalPend+totalWon)}</div><div class="sc-s">${projects.length} total projects</div></div>`;
+  document.getElementById('all-proj-tbl').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>Project</th><th>Client</th><th>Contact</th>
+        <th>Bid Date</th><th class="tr">Days</th><th class="tr">Direct Cost</th>
+        <th class="tr">Profit</th><th class="tr">Total</th>
+        <th>Status</th><th></th>
+      </tr></thead>
+      <tbody>${projects.map(p=>`
+        <tr onclick="openProject('${p.id}')" style="cursor:pointer">
+          <td>
+            <div style="font-weight:600;">${esc(p.proj.name||p.filename)}</div>
+            <div style="font-size:11px;color:var(--t3);">${[p.proj.jobNum,p.proj.city].filter(Boolean).join(' · ')}</div>
+          </td>
+          <td>
+            <div>${esc(p.proj.client||'—')}</div>
+            ${p.proj.address?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.address.slice(0,35))}</div>`:''}
+          </td>
+          <td>
+            <div>${esc(p.proj.pm||'—')}</div>
+            ${p.proj.pmPhone?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmPhone)}</div>`:''}
+            ${p.proj.pmEmail?`<div style="font-size:11px;color:var(--t3);">${esc(p.proj.pmEmail)}</div>`:''}
+          </td>
+          <td style="font-size:12px;">${p.bidDate?new Date(p.bidDate+'T12:00:00').toLocaleDateString('en-US',{day:'2-digit',month:'short'})+'<div style="font-size:11px;color:var(--t3);">'+(daysSinceBid(p)>=0?daysSinceBid(p)+'d ago':'')+'</div>':'<span style="color:var(--t3);">—</span>'}</td>
+          <td class="tr">${totalDays(p)>0?totalDays(p)+'d':'—'}</td>
+          <td class="tr">${fmt(projCost(p))}</td>
+          <td class="tr tac">${fmt(projProfit(p))}</td>
+          <td class="tr tgn tw">${fmt(projGrand(p))}</td>
+          <td>
+            <button class="badge ${SC[p.status]}" onclick="event.stopPropagation();cycleStatus('${p.id}')">
+              ${p.status}
+            </button>
+          </td>
+          <td>
+            <button class="btn bsm" style="background:transparent;border-color:transparent;color:var(--rd);" onclick="event.stopPropagation();delProj('${p.id}')">✕</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function projGrand(p){return(p.budgets||[]).reduce((s,b)=>s+b.grandTotal,0);}
+function projCost(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalCost,0);}
+function projProfit(p){return(p.budgets||[]).reduce((s,b)=>s+b.totalProfit,0);}
+function totalDays(p){return(p.budgets||[]).reduce((s,b)=>s+(b.days||0),0);}
+
+// ─── PM FINANCIAL EXPORT ──────────────────────────────────────
+function buildPMFinancialExport(p) {
+  const contractValue = projGrand(p);
+  const estimatedCost = projCost(p);
+  const estimatedProfit = projProfit(p);
+  const estimatedMargin = contractValue > 0 ? estimatedProfit / contractValue : 0;
+
+  const totalLabor      = p.budgets.reduce((s,b)=>s+(b.laborCost||0),0);
+  const totalEquipment  = p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
+  const totalTrucks     = p.budgets.reduce((s,b)=>s+(b.trucksCost||0),0);
+  const totalDisposal   = p.budgets.reduce((s,b)=>s+(b.dispCost||0),0);
+  const totalMaterials  = p.budgets.reduce((s,b)=>s+(b.matCost||0),0);
+  const totalSubs       = p.budgets.reduce((s,b)=>s+(b.subCost||0),0);
+
+  return {
+    source:   "ZLC Estimator",
+    sentAt:   new Date().toISOString(),
+
+    projectId:      p.proj.jobNum      || "",
+    projectName:    p.proj.name        || p.filename,
+    client:         p.proj.client      || "",
+    address:        p.proj.address     || "",
+    city:           p.proj.city        || "",
+    pm:             p.proj.pm          || "",
+    pmEmail:        p.proj.pmEmail     || "",
+    pmPhone:        p.proj.pmPhone     || "",
+    superintendent: p.proj.super       || "",
+
+    financials: {
+      contractValue,
+      estimatedCost,
+      estimatedProfit,
+      estimatedMargin,
+      estimatedLaborCost:          totalLabor,
+      estimatedEquipmentCost:      totalEquipment,
+      estimatedTruckCost:          totalTrucks,
+      estimatedDisposalCost:       totalDisposal,
+      estimatedMaterialCost:       totalMaterials,
+      estimatedSubcontractorCost:  totalSubs
+    },
+
+    scopes: p.budgets.map(b => ({
+      budgetNumber:      b.sheetName,
+      type:              b.type,
+      description:       b.description,
+      crew:              b.crew,
+      days:              b.days,
+      shifts:            b.shifts,
+      directCost:        b.totalCost,
+      profit:            b.totalProfit,
+      total:             b.grandTotal,
+      laborCost:         b.laborCost,
+      equipmentCost:     (b.ownedEquipC||0)+(b.rentalEquipC||0),
+      truckCost:         b.trucksCost    || 0,
+      disposalCost:      b.dispCost      || 0,
+      materialCost:      b.matCost       || 0,
+      subcontractorCost: b.subCost       || 0
+    }))
+  };
+}
+
+function cycleStatus(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const newStatus=STATUS[(STATUS.indexOf(p.status)+1)%STATUS.length];
+  p.status=newStatus;
+  p.wonDate = newStatus==='Won' ? new Date().toISOString() : (p.wonDate||null);
+  savePersist();renderDashboard();rebuildSidebar();renderFollowUpAlerts();updateQueueBadge();
+  if(newStatus==='Won'){
+    pushToWonQueue(p);
+    setTimeout(()=>autoBackup(p),800); // backup Won projects immediately
+    // Also update status in sheet
+    estSheetWrite('updateEstimate',{estimatingId:p.id,status:'Won',wonDate:p.wonDate||new Date().toISOString()}).catch(()=>{});
+    pendingWonId=id;
+    document.getElementById('won-modal').classList.add('show');
+  } else {
+    // If un-winning, remove from queue
+    if(p.status!=='Won') removeFromWonQueue(id);
+    if(curProjId===id)openProject(id);
+  }
+  toast('Status: '+newStatus);
+}
+
+// ─── WON QUEUE (for PM App) ───────────────────────────────────
+// Writes to localStorage key 'zlc_est_won_queue' which the PM app reads
+function buildQueueEntry(p){
+  // ── Crew composition (confirmed exact values) ──────────────
+  const CREW_COMP = {
+    'Xolos':     { foremans:1, laborers:3 },
+    'Chingones': { foremans:1, laborers:3 },
+    'Lobos':     { foremans:1, laborers:2 },
+    'Poblanos':  { foremans:1, laborers:3 },
+    'Warriors':  { foremans:1, laborers:1 },
+  };
+
+  // Also read from key sheet if available (overrides defaults)
+  const crewMap = {...CREW_COMP};
+  (p.key&&p.key.crews||[]).forEach(c=>{
+    crewMap[c.name]={foremans:c.foremans||1, laborers:c.laborers||0};
+  });
+
+  // Extract 3-digit code from description first ("004 Concrete..." → "004")
+  function extractCode(b){
+    if(b.description){const m=b.description.match(/^(\d{3})\s/);if(m)return m[1];}
+    if(b.scopeCode){const m=b.scopeCode.match(/T?(\d{3})/);if(m)return m[1];}
+    return String(b.num||1).padStart(3,'0');
+  }
+
+  // Man days = crew composition × days worked
+  function calcManDays(b){
+    const crew = crewMap[b.crew] || {foremans:1, laborers:0};
+    const days  = b.days || 0;
+    return {
+      foremanDays:  crew.foremans * days,
+      laborerDays:  crew.laborers * days,
+    };
+  }
+
+  const codeEntries = p.budgets.map(b=>{
+    const {foremanDays, laborerDays} = calcManDays(b);
+    return {
+      code:          extractCode(b),
+      description:   b.description || b.scopeCode || b.sheetName,
+      value:         Math.round(b.grandTotal  || 0),
+      estimatedCost: Math.round(b.totalCost   || 0),
+      profit:        Math.round(b.totalProfit || 0),
+      days:          b.days  || 0,
+      crew:          b.crew  || '',
+      type:          b.type  || '',
+      foremanDays,
+      laborerDays,
+      _budget:       b.sheetName,
+    };
+  });
+
+  return {
+    id:            p.proj.jobNum || p.id,
+    num:           p.proj.jobNum || '',
+    name:          p.proj.name   || p.filename,
+    client:        p.proj.client || '',
+    pm:            p.proj.pm     || '',
+    address:       p.proj.address|| '',
+    city:          p.proj.city   || '',
+    pmEmail:       p.proj.pmEmail|| '',
+    pmPhone:       p.proj.pmPhone|| '',
+    notes:         p.notes       || '',
+    wonDate:       p.wonDate     || new Date().toISOString(),
+    _estimatingId: p.id,
+    codes:         codeEntries,
+    contractValue:   projGrand(p),
+    estimatedCost:   projCost(p),
+    estimatedProfit: projProfit(p),
+    estimatedMargin: projGrand(p)>0 ? projProfit(p)/projGrand(p) : 0,
+    ...buildPMFinancialExport(p),
+    cos:[], rfis:[], subs:[],
+  };
+}
+
+function pushToWonQueue(p){
+  try{
+    const queue = JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    // Remove if already in queue (avoid duplicates)
+    const filtered = queue.filter(x=>x._estimatingId!==p.id);
+    filtered.unshift(buildQueueEntry(p));
+    localStorage.setItem('zlc_est_won_queue', JSON.stringify(filtered));
+    localStorage.setItem('zlc_est_won_time', new Date().toISOString());
+    console.log('✓ Project pushed to PM queue:', p.proj.name||p.filename);
+  }catch(e){ console.warn('Won queue write error:', e); }
+}
+
+function removeFromWonQueue(projId){
+  try{
+    const queue = JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    const filtered = queue.filter(x=>x._estimatingId!==projId);
+    localStorage.setItem('zlc_est_won_queue', JSON.stringify(filtered));
+  }catch(e){}
+}
+
+function getWonQueueCount(){
+  try{ return JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]').length; }
+  catch(e){ return 0; }
+}
+function delProj(id){
+  if(!confirm('Delete project?'))return;
+  projects=projects.filter(p=>p.id!==id);
+  savePersist();rebuildSidebar();renderDashboard();
+  if(curProjId===id){curProjId=null;navTo('dashboard');}
+}
+
+// ─── PROJECT DETAIL ───────────────────────────────────────────
+function openProject(id){
+  curProjId=id;
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  document.querySelectorAll('.pi').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('pi-'+id);if(el)el.classList.add('active');
+  const grand=projGrand(p),cost=projCost(p),profit=projProfit(p);
+  const margin=cost>0?Math.round(profit/cost*100):0;
+
+  document.getElementById('proj-pg-name').textContent=p.proj.name||p.filename;
+  document.getElementById('proj-pg-meta').textContent=[p.proj.client,p.proj.city].filter(Boolean).join(' · ')||p.filename;
+
+  buildProposalPage(p);
+
+  let html='';
+
+  // STATUS
+  const bidLabel=p.bidDate?`Bid: ${new Date(p.bidDate+'T12:00:00').toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'})} · ${daysSinceBid(p)>=0?daysSinceBid(p)+'d ago':''}`:null;
+  html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <button class="badge ${SC[p.status]}" style="font-size:13px;padding:5px 14px;" onclick="cycleStatus('${p.id}')">
+      ${p.status}
+    </button>
+    ${bidLabel?`<span style="font-size:12px;color:var(--t2);background:var(--s2);padding:3px 10px;border-radius:100px;">📅 ${bidLabel}</span>`:''}
+    ${p.notes?`<span style="font-size:12px;color:var(--t2);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(p.notes)}">📝 ${esc(p.notes)}</span>`:''}
+    ${p.sentToPMAt?`<span style="font-size:12px;background:var(--gl);color:var(--gn);padding:3px 10px;border-radius:100px;">✅ Sent to PM: ${new Date(p.sentToPMAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
+    <button class="btn bsm np" onclick="openEditModal('${p.id}')" style="margin-left:auto;">✏️ Editar Bid</button>
+  </div>`;
+
+  // STATS
+  html+=`<div class="g4" style="margin-bottom:18px;">
+    <div class="sc"><div class="sc-l">Grand Total</div><div class="sc-v gn">${fmt(grand)}</div><div class="sc-s">todos los budgets</div></div>
+    <div class="sc"><div class="sc-l">Direct Cost</div><div class="sc-v bl">${fmt(cost)}</div><div class="sc-s">pre-markup</div></div>
+    <div class="sc"><div class="sc-l">Profit / Markup</div><div class="sc-v or">${fmt(profit)}</div><div class="sc-s">${margin}% margin</div></div>
+    <div class="sc"><div class="sc-l">Budgets en Proposal</div><div class="sc-v">${p.budgets.length}</div><div class="sc-s">${totalDays(p)>0?totalDays(p)+' días totales':''}</div></div>
+  </div>`;
+
+  // PROJECT INFO + CONTACT — editable
+  html+=`<div class="g2">
+    <div class="card"><div class="ch">Información del Proyecto <button class="btn bsm np" style="font-weight:400;" onclick="toggleEdit('${p.id}')">✏️ Editar</button></div>
+      <div id="proj-info-${p.id}">
+        ${[
+          ['Project Name',p.proj.name],
+          ['Job / Project #',p.proj.jobNum],
+          ['Dirección',p.proj.address],
+          ['Ciudad',p.proj.city],
+          ['Client',p.proj.client],
+          ['Client PO#',p.proj.clientPO],
+          ['Architect / Consultant',p.proj.architect],
+          ['Sheets / Plan Date',p.proj.planDate],
+          ['Addendum',p.proj.addendum],
+          ['Site Visit',p.proj.siteVisit],
+          ['Start Date',p.proj.startDate],
+          ['Finish Date',p.proj.endDate],
+          ['Travel Time',p.proj.travelTime>0?p.proj.travelTime+' hrs':''],
+        ].filter(([,v])=>v&&String(v).trim()).map(([l,v])=>
+          `<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${esc(v)}</span></div>`
+        ).join('')||'<div style="color:var(--t3);font-size:13px;padding:8px 0;">Sin datos — usa Editar para ingresar manualmente</div>'}
+      </div>
+      <div id="proj-edit-${p.id}" style="display:none;">
+        ${[
+          ['name','Project Name',p.proj.name,'text'],
+          ['jobNum','Job / Project #',p.proj.jobNum,'text'],
+          ['address','Dirección',p.proj.address,'text'],
+          ['city','Ciudad',p.proj.city,'text'],
+          ['client','Client',p.proj.client,'text'],
+          ['clientPO','Client PO#',p.proj.clientPO,'text'],
+          ['architect','Architect / Consultant',p.proj.architect,'text'],
+          ['planDate','Sheets / Plan Date',p.proj.planDate,'text'],
+          ['startDate','Start Date',p.proj.startDate,'text'],
+          ['endDate','Finish Date',p.proj.endDate,'text'],
+        ].map(([field,label,val,type])=>
+          `<div class="info-row"><span class="info-label" style="padding-top:6px;">${label}</span>
+           <input type="${type}" value="${esc(val||'')} " data-field="${field}" data-proj="${p.id}"
+             style="flex:1;padding:5px 8px;border:1px solid var(--bd);border-radius:6px;font-family:var(--f);font-size:13px;"
+             onchange="updateProjField('${p.id}','${field}',this.value)"></div>`
+        ).join('')}
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn bsm bp" onclick="saveEdit('${p.id}')">💾 Save</button>
+          <button class="btn bsm" onclick="toggleEdit('${p.id}')">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="ch">Cliente & Contacto</div>
+      ${p.proj.client?`<div style="font-size:18px;font-weight:700;margin-bottom:14px;color:var(--tx);">${esc(p.proj.client)}</div>`:''}
+      ${[
+        ['Project Manager',p.proj.pm],
+        ['Email PM',p.proj.pmEmail],
+        ['Teléfono PM',p.proj.pmPhone],
+        ['Superintendent',p.proj.super],
+      ].filter(([,v])=>v&&String(v).trim()).map(([l,v])=>
+        `<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${esc(v)}</span></div>`
+      ).join('')||'<div style="color:var(--t3);font-size:13px;padding:8px 0;">Sin datos de contacto en el Excel</div>'}
+      ${p.key.estimators.length?`<div class="shdr" style="margin-top:14px;">Estimators ZLC</div>
+        ${p.key.estimators.map(e=>`<div class="info-row"><span class="info-label">${esc(e.name)}</span><span class="info-val" style="color:var(--t2);font-size:12.5px;">${esc(e.phone)}</span></div>`).join('')}`:''}
+      ${p.key.crews.length?`<div class="shdr" style="margin-top:14px;">Cuadrillas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${p.key.crews.map(c=>`<span class="badge" style="background:var(--bll);color:var(--bl);">${c.name} ${c.foremans}F+${c.laborers}L</span>`).join('')}
+        </div>`:''}
+    </div>
+  </div>`;
+
+  // BUDGETS TABLE (only proposal budgets)
+  html+=`<div class="card"><div class="ch">
+    Budgets en Proposal
+    <span style="font-weight:400;color:var(--t3);font-size:11px;">${p.budgets.length} activos</span>
+  </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Scope Description</th><th>Type</th><th>Crew</th>
+        <th class="tr">Days</th><th class="tr">Direct Cost</th>
+        <th class="tr">Markup</th><th class="tr">Total</th>
+      </tr></thead>
+      <tbody>${p.budgets.map((b,i)=>`
+        <tr onclick="openBudget('${p.id}',${i})" style="cursor:pointer">
+          <td><span class="tag">${esc(b.sheetName)}</span></td>
+          <td>
+            <div style="font-weight:500;max-width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(b.description)}">${esc(b.description||'Sin descripción')}</div>
+            <div style="font-size:11px;color:var(--t3);">${esc(b.scopeCode)}</div>
+          </td>
+          <td style="font-size:12.5px;color:var(--t2);">${esc(b.type)}</td>
+          <td style="font-size:12.5px;color:var(--bl);">${esc(b.crew)}</td>
+          <td class="tr">${b.days>0?b.days+'d':'—'}</td>
+          <td class="tr">${fmt(b.totalCost)}</td>
+          <td class="tr tac">${fmt(b.totalProfit)}</td>
+          <td class="tr tgn tw">${fmt(b.grandTotal)}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr>
+        <td colspan="5">TOTAL PROYECTO</td>
+        <td class="tr tw">${fmt(cost)}</td>
+        <td class="tr tac">${fmt(profit)}</td>
+        <td class="tr" style="font-size:15px;color:var(--gn);">${fmt(grand)}</td>
+      </tr></tfoot>
+    </table>
+  </div>`;
+
+  // WON SUMMARY — detailed breakdown by category across all budgets
+  if(p.status==='Won'&&p.budgets.length){
+    const totalLabor=p.budgets.reduce((s,b)=>s+b.laborCost,0);
+    const totalEquip=p.budgets.reduce((s,b)=>s+(b.ownedEquipC||0)+(b.rentalEquipC||0),0);
+    const totalTrucks=p.budgets.reduce((s,b)=>s+(b.trucksCost||0),0);
+    const totalDisp=p.budgets.reduce((s,b)=>s+(b.dispCost||0),0);
+    const totalMat=p.budgets.reduce((s,b)=>s+(b.matCost||0),0);
+    const totalSub=p.budgets.reduce((s,b)=>s+(b.subCost||0),0);
+    const totalMk=p.budgets.reduce((s,b)=>s+b.totalProfit,0);
+
+    html+=`<div class="card" style="border:2px solid var(--gn);margin-top:4px;">
+      <div class="ch" style="color:var(--gn);">
+        🏆 Summary — Won Project
+        <span style="font-weight:400;font-size:11px;color:var(--t3);">${p.budgets.length} budget${p.budgets.length!==1?'s':''}</span>
+      </div>
+
+      <!-- Per-budget breakdown -->
+      <table style="margin-bottom:20px;">
+        <thead><tr>
+          <th>Budget</th><th>Description</th>
+          <th class="tr">Labor</th><th class="tr">Equipment</th><th class="tr">Trucks</th>
+          <th class="tr">Disposal</th><th class="tr">Materials</th>
+          <th class="tr">Subs</th><th class="tr">Markup</th><th class="tr">Total</th>
+        </tr></thead>
+        <tbody>${p.budgets.map((b,i)=>`
+          <tr onclick="openBudget('${p.id}',${i})" style="cursor:pointer">
+            <td><span class="tag">${esc(b.sheetName)}</span></td>
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--t2);" title="${esc(b.description)}">${esc(b.description||b.scopeCode)}</td>
+            <td class="tr">${b.laborCost>0?fmt(b.laborCost):'—'}</td>
+            <td class="tr">${(b.ownedEquipC+b.rentalEquipC)>0?fmt(b.ownedEquipC+b.rentalEquipC):'—'}</td>
+            <td class="tr">${b.trucksCost>0?fmt(b.trucksCost):'—'}</td>
+            <td class="tr">${b.dispCost>0?fmt(b.dispCost):'—'}</td>
+            <td class="tr">${b.matCost>0?fmt(b.matCost):'—'}</td>
+            <td class="tr">${b.subCost>0?fmt(b.subCost):'—'}</td>
+            <td class="tr tac">${fmt(b.totalProfit)}</td>
+            <td class="tr tgn tw">${fmt(b.grandTotal)}</td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot><tr style="background:var(--gl);">
+          <td colspan="2" style="color:var(--gn);font-weight:700;">TOTALES</td>
+          <td class="tr tw">${fmt(totalLabor)}</td>
+          <td class="tr tw">${fmt(totalEquip)}</td>
+          <td class="tr tw">${fmt(totalTrucks)}</td>
+          <td class="tr tw">${fmt(totalDisp)}</td>
+          <td class="tr tw">${fmt(totalMat)}</td>
+          <td class="tr tw">${fmt(totalSub)}</td>
+          <td class="tr tac tw">${fmt(totalMk)}</td>
+          <td class="tr" style="font-size:15px;color:var(--gn);font-weight:700;">${fmt(grand)}</td>
+        </tr></tfoot>
+      </table>
+
+      <!-- Category totals visual summary -->
+      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;">Category Summary</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;">
+        ${[
+          ['👷 Labor',totalLabor,'var(--ac)'],
+          ['🚜 Equipment',totalEquip,'var(--bl)'],
+          ['🚛 Trucks',totalTrucks,'#7c3aed'],
+          ['🗑️ Disposal',totalDisp,'var(--gn)'],
+          ['🧱 Materials',totalMat,'#d97706'],
+          ['🏗️ Subs',totalSub,'var(--t2)'],
+        ].filter(([,v])=>v>0).map(([l,v,c])=>`
+          <div style="background:var(--s2);border-radius:var(--r);padding:12px 14px;">
+            <div style="font-size:12px;color:var(--t2);margin-bottom:4px;">${l}</div>
+            <div style="font-size:17px;font-weight:700;color:${c};">${fmt(v)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(v/cost*100):'0'}% del costo</div>
+          </div>`).join('')}
+        <div style="background:var(--al);border-radius:var(--r);padding:12px 14px;border:1px solid var(--ac);">
+          <div style="font-size:12px;color:var(--ac);margin-bottom:4px;">💰 Markup Total</div>
+          <div style="font-size:17px;font-weight:700;color:var(--ac);">${fmt(totalMk)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${cost>0?Math.round(totalMk/cost*100):'0'}% margin</div>
+        </div>
+        <div style="background:var(--gl);border-radius:var(--r);padding:12px 14px;border:1px solid var(--gn);">
+          <div style="font-size:12px;color:var(--gn);margin-bottom:4px;">🏆 Grand Total</div>
+          <div style="font-size:17px;font-weight:700;color:var(--gn);">${fmt(grand)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">costo + markup</div>
+        </div>
+      </div>
+
+      <!-- Cost breakdown bar -->
+      ${(()=>{
+        const bars=[{l:'Labor',v:totalLabor,c:'var(--ac)'},{l:'Equipment',v:totalEquip,c:'var(--bl)'},{l:'Trucks',v:totalTrucks,c:'#7c3aed'},{l:'Disposal',v:totalDisp,c:'var(--gn)'},{l:'Materials',v:totalMat,c:'#d97706'},{l:'Subs',v:totalSub,c:'var(--t2)'}].filter(x=>x.v>0);
+        if(!bars.length)return '';
+        const tot=cost||1;
+        return `<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Direct Cost Distribution</div>
+        <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;margin-bottom:10px;gap:1px;">
+          ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;">
+          ${bars.map(x=>`<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+            <div style="width:10px;height:10px;border-radius:3px;background:${x.c};flex-shrink:0;"></div>
+            <span style="color:var(--t2);">${x.l}</span><strong>${fmt(x.v)}</strong>
+            <span style="color:var(--t3);font-size:11px;">${Math.round(x.v/tot*100)}%</span>
+          </div>`).join('')}
+        </div>`;
+      })()}
+    </div>`;
+  }
+
+  html+=`<div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn bsm" onclick="navTo('proposal')">📄 Ver Proposal completo</button>
+    <button class="btn bsm bp np" onclick="printSummary('${p.id}')">🖨️ Print Summary</button>
+    <button class="btn bsm np" onclick="openPMModal('${p.id}')" style="background:var(--bl);border-color:var(--bl);color:#fff;">
+      ${p.sentToPM?'✅':'📤'} Send to PM
+    </button>
+  </div>`;
+
+  document.getElementById('proj-pg-content').innerHTML=html;
+  navTo('project');
+}
+
+// ─── BUDGET DETAIL ────────────────────────────────────────────
+function openBudget(projId,idx){
+  curProjId=projId;
+  const p=projects.find(x=>x.id===projId);if(!p)return;
+  const b=p.budgets[idx];if(!b)return;
+
+  document.getElementById('bpg-title').textContent=b.sheetName;
+  document.getElementById('bpg-meta').textContent=[b.type,b.crew,b.days>0?b.days+'d':'',b.travel>0?b.travel+'h travel':''].filter(Boolean).join(' · ');
+
+  let html='';
+
+  if(b.description){
+    html+=`<div class="card"><div class="ch">Description</div>
+      <p style="font-size:13.5px;line-height:1.75;color:var(--t2);">${esc(b.description)}</p>
+      <div style="margin-top:10px;"><span class="tag">${esc(b.scopeCode)}</span></div>
+    </div>`;
+  }
+
+  // Cost bar
+  const tot=b.totalCost||1;
+  const bars=[{l:'Labor',v:b.laborCost,c:'var(--ac)'},{l:'Equipment',v:(b.ownedEquipC||0)+(b.rentalEquipC||0),c:'var(--bl)'},{l:'Trucks',v:b.trucksCost||0,c:'#7c3aed'},{l:'Disposal',v:b.dispCost||0,c:'var(--gn)'},{l:'Materials',v:b.matCost||0,c:'#d97706'}].filter(x=>x.v>0);
+  if(bars.length){
+    html+=`<div class="card"><div class="ch">Breakdown — ${fmt(b.totalCost)}</div>
+      <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:14px;gap:1px;">
+        ${bars.map(x=>`<div style="width:${Math.max(2,Math.round(x.v/tot*100))}%;background:${x.c};" title="${x.l}: ${fmt(x.v)}"></div>`).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 20px;">
+        ${bars.map(x=>`<div style="display:flex;align-items:center;gap:7px;font-size:12.5px;">
+          <div style="width:9px;height:9px;border-radius:3px;background:${x.c};flex-shrink:0;"></div>
+          <span style="color:var(--t2);">${x.l}</span><strong>${fmt(x.v)}</strong>
+          <span style="color:var(--t3);font-size:11px;">${Math.round(x.v/tot*100)}%</span>
+        </div>`).join('')}
+      </div></div>`;
+  }
+
+  if(b.laborRows.length){html+=mkTable('👷 Labor',['Labor Type','Rate ($/hr)','Hours','Cost'],b.laborRows.map(r=>[esc(r.type),'$'+r.rate.toFixed(2),r.hours.toFixed(1)+'h',fmt(r.cost)]),fmt(b.laborCost));}
+  if(b.equipRows.length){html+=mkTable('🚜 Equipment',['Equipo','Unit','Qty','Rate','Cost'],b.equipRows.map(r=>[esc(r.name)+(r.rental?' <span class="tag">rental</span>':''),r.unit,r.qty,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt((b.ownedEquipC||0)+(b.rentalEquipC||0)));}
+  if(b.truckRows.length){html+=mkTable('🚛 Trucks',['Tipo','Loads','Rate','Cost'],b.truckRows.map(r=>[esc(r.name),r.loads,'$'+r.rate.toFixed(0),fmt(r.cost)]),fmt(b.trucksCost));}
+  if(b.dispRows.length){html+=mkTable('🗑️ Disposal',['Tipo','Facilidad','Qty','Unit','$/Unit','Cost'],b.dispRows.map(r=>['<span class="tag">'+esc(r.type)+'</span>',esc(r.facility),r.qty,r.unit,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.dispCost));}
+  if(b.matRows.length){html+=mkTable('🧱 Materials',['Material','Qty','Rate','Cost'],b.matRows.map(r=>[esc(r.name),r.qty,'$'+r.rate.toFixed(2),fmt(r.cost)]),fmt(b.matCost));}
+
+  html+=`<div class="card"><div class="ch">💰 Summary — ${b.sheetName}</div>
+    <div style="max-width:420px;">
+      ${b.laborCost>0?srw('Labor',fmt(b.laborCost)):''}
+      ${(b.ownedEquipC+b.rentalEquipC)>0?srw('Equipment',fmt(b.ownedEquipC+b.rentalEquipC)):''}
+      ${b.trucksCost>0?srw('Trucks',fmt(b.trucksCost)):''}
+      ${b.dispCost>0?srw('Disposal',fmt(b.dispCost)):''}
+      ${b.matCost>0?srw('Materials',fmt(b.matCost)):''}
+      ${b.subCost>0?srw('Subcontractors',fmt(b.subCost)):''}
+      ${srw('Total Direct Cost','<strong>'+fmt(b.totalCost)+'</strong>')}
+      <div class="sr"><span class="sl" style="color:var(--ac);">+ Markup / Profit (${Math.round(b.markupPct*100)}%)</span><span class="sv" style="color:var(--ac);">${fmt(b.totalProfit)}</span></div>
+      <div class="sr grand"><span class="sl">TOTAL ${esc(b.sheetName)}</span><span class="sv">${fmt(b.grandTotal)}</span></div>
+    </div></div>`;
+
+  document.getElementById('bpg-content').innerHTML=html;
+  navTo('budget');
+}
+
+function srw(l,v){return `<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`;}
+function mkTable(title,headers,rows,total){
+  const lastIdx=headers.length-1;
+  return `<div class="card"><div class="ch">${title}</div>
+    <table><thead><tr>${headers.map((h,i)=>`<th${i===lastIdx?' class="tr"':''}>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i===lastIdx?' class="tr tac"':''} style="font-size:13px;">${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    <tfoot><tr><td colspan="${headers.length-1}">Total</td><td class="tr tac">${total}</td></tr></tfoot>
+    </table></div>`;
+}
+
+// ─── PROPOSAL ────────────────────────────────────────────────
+function buildProposalPage(p){
+  const budgets=p.budgets,scopes=p.scopes,proj=p.proj;
+  const grand=projGrand(p);
+  const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('prop-meta').textContent=proj.name||p.filename;
+  document.getElementById('prop-content').innerHTML=`
+  <div class="prop-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;">
+      <div>
+        <div style="font-size:24px;font-weight:700;">ZLC Corporation</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:4px;">1027 Detroit Ave, Ste A · Concord, CA 94518</div>
+        <div style="font-size:13px;color:var(--t2);">Phone: 925-465-6663 · CA License 890327</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:20px;font-weight:700;color:var(--ac);">PROPOSAL</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:4px;">Date: ${today}</div>
+        ${proj.jobNum?`<div style="font-size:12px;color:var(--t2);">Job #: ${esc(proj.jobNum)}</div>`:''}
+      </div>
+    </div>
+    <div style="padding:14px 16px;background:var(--s2);border-radius:var(--r);margin-bottom:24px;">
+      <div class="g2" style="gap:16px;">
+        <div>
+          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Project</div>
+          <div style="font-weight:700;font-size:15px;">${esc(proj.name||p.filename)}</div>
+          ${proj.address?`<div style="font-size:13px;color:var(--t2);">${esc(proj.address)}</div>`:''}
+          ${proj.planDate?`<div style="font-size:12px;color:var(--t3);">Plans: ${esc(proj.planDate)}</div>`:''}
+          ${proj.architect?`<div style="font-size:12px;color:var(--t3);">Architect: ${esc(proj.architect)}</div>`:''}
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Client</div>
+          <div style="font-weight:700;font-size:15px;">${esc(proj.client||'—')}</div>
+          ${proj.pm?`<div style="font-size:13px;color:var(--t2);">PM: ${esc(proj.pm)}</div>`:''}
+          ${proj.pmEmail?`<div style="font-size:12px;color:var(--t3);">${esc(proj.pmEmail)}</div>`:''}
+          ${proj.city?`<div style="font-size:12px;color:var(--t3);">${esc(proj.city)}</div>`:''}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:10px;">Scope of Work — Schedule of Values</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <thead><tr style="border-bottom:2px solid var(--b2);">
+        <th style="text-align:left;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;min-width:110px;">Budget</th>
+        <th style="text-align:left;padding:10px 10px;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Description</th>
+        <th style="text-align:right;padding:10px 0;font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;">Amount</th>
+      </tr></thead>
+      <tbody>${budgets.map(b=>{
+        const s=scopes.find(sc=>b.scopeCode&&sc.code&&b.scopeCode.includes(sc.code.split('_')[0]));
+        const desc=b.description&&b.description.trim()?b.description:(s?s.description:b.scopeCode||b.sheetName);
+        return `<tr style="border-bottom:1px solid var(--bd);">
+          <td style="padding:12px 0;vertical-align:top;">
+            <div style="font-family:var(--m);font-size:11px;color:var(--t2);font-weight:600;">${esc(b.sheetName)}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px;">${esc(b.scopeCode)}</div>
+          </td>
+          <td style="padding:12px 10px;font-size:13px;vertical-align:top;line-height:1.65;">${esc(desc)}</td>
+          <td style="padding:12px 0;text-align:right;font-family:var(--m);font-weight:700;vertical-align:top;font-size:14px;">${fmt(b.grandTotal)}</td>
+        </tr>`;}).join('')}
+      </tbody>
+      <tfoot><tr style="border-top:2px solid var(--tx);">
+        <td colspan="2" style="padding:16px 0;font-size:16px;font-weight:700;">TOTAL PROPOSAL</td>
+        <td style="text-align:right;font-family:var(--m);font-size:21px;font-weight:700;color:var(--ac);">${fmt(grand)}</td>
+      </tr></tfoot>
+    </table>
+    <div style="padding:14px;border:1px solid var(--bd);border-radius:var(--r);font-size:12.5px;color:var(--t2);line-height:1.8;">
+      <strong>Notes:</strong> This proposal is based on plans and specifications as described above. Any work not specifically listed is excluded. Prices are valid for 30 days from date of proposal.
+    </div>
+    <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
+      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">ZLC Corporation — Authorized Signature / Date</div>
+      <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">Client Acceptance / Date</div>
+    </div>
+  </div>`;
+}
+
+// ─── EDIT PROJECT INFO ───────────────────────────────────────
+function toggleEdit(id){
+  const info=document.getElementById('proj-info-'+id);
+  const edit=document.getElementById('proj-edit-'+id);
+  if(!info||!edit)return;
+  const isEditing=edit.style.display!=='none';
+  info.style.display=isEditing?'':'none';
+  edit.style.display=isEditing?'none':'';
+}
+function updateProjField(id,field,val){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  p.proj[field]=val.trim();
+}
+function saveEdit(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  // Collect all input values
+  document.querySelectorAll(`[data-proj="${id}"]`).forEach(inp=>{
+    const field=inp.dataset.field;
+    if(field)p.proj[field]=inp.value.trim();
+  });
+  savePersist();
+  toggleEdit(id);
+  openProject(id); // re-render with new data
+  rebuildSidebar();
+  toast('Info saved ✓');
+}
+
+// ─── WIN SUMMARY — by scope/class code ──────────────────────
+function printSummary(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const name=p.proj.name||p.filename;
+  const grand=projGrand(p),cost=projCost(p),profit=projProfit(p);
+  const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const statusColor=p.status==='Won'?'#2d7a4f':p.status==='Lost'?'#b91c1c':'#b45309';
+
+  const wsWrap=document.getElementById('ws-wrap');
+  const wsContent=document.getElementById('ws-content');
+  if(!wsWrap||!wsContent)return;
+  const wsMeta=document.getElementById('ws-meta');if(wsMeta)wsMeta.textContent=name;
+
+  // Helper: group rows by key, summing qty/hours/cost
+  const groupBy=(arr,key)=>{
+    const m={};
+    arr.forEach(r=>{
+      const k=r[key]||'Other';
+      if(!m[k])m[k]={...r,totalQty:0,totalHours:0,totalCost:0};
+      m[k].totalQty+=(r.qty||0);
+      m[k].totalHours+=(r.hours||0);
+      m[k].totalCost+=(r.cost||0);
+    });
+    return Object.values(m);
+  };
+
+  // ── HEADER ──────────────────────────────────────────────────
+  let whtml=`
+  <div class="ws-header">
+    <div>
+      <div class="ws-logo">ZLC <span>Corporation</span></div>
+      <div class="ws-logo-sub">1027 Detroit Ave, Ste A · Concord, CA 94518<br>925-465-6663 · CA License 890327</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="ws-title">JOB SUMMARY</div>
+      <div class="ws-title-sub">Date: ${today}<br>Status: <span style="color:${statusColor};font-weight:700;">${p.status} ●</span></div>
+    </div>
+  </div>
+
+  <div class="ws-section">
+    <div class="ws-section-title">Project Information</div>
+    <div class="ws-row"><span class="ws-label">Project</span><span class="ws-val">${esc(name)}</span></div>
+    ${p.proj.client?`<div class="ws-row"><span class="ws-label">Client</span><span class="ws-val">${esc(p.proj.client)}</span></div>`:''}
+    ${p.proj.address?`<div class="ws-row"><span class="ws-label">Address</span><span class="ws-val">${esc(p.proj.address)}</span></div>`:''}
+    ${p.proj.pm?`<div class="ws-row"><span class="ws-label">Project Manager</span><span class="ws-val">${esc(p.proj.pm)}</span></div>`:''}
+    ${p.proj.jobNum?`<div class="ws-row"><span class="ws-label">Job #</span><span class="ws-val">${esc(p.proj.jobNum)}</span></div>`:''}
+    ${p.proj.planDate?`<div class="ws-row"><span class="ws-label">Plan Date</span><span class="ws-val">${esc(p.proj.planDate)}</span></div>`:''}
+    <div class="ws-row"><span class="ws-label">Duration</span><span class="ws-val">${totalDays(p)} days · ${p.budgets.length} scope${p.budgets.length!==1?'s':''}</span></div>
+  </div>`;
+
+  // ── PER SCOPE/BUDGET ─────────────────────────────────────────
+  // Each budget = one scope block with all its categories
+  p.budgets.forEach(b=>{
+    const scopeLabel=b.description||b.scopeCode||'Budget #'+b.num;
+    const rentals=(b.equipRows||[]).filter(r=>r.rental);
+    const owned=(b.equipRows||[]).filter(r=>!r.rental);
+    const laborG=groupBy(b.laborRows||[],'type');
+    const matG=groupBy(b.matRows||[],'name');
+    const dispG=groupBy(b.dispRows||[],'facility');
+    const truckG=groupBy(b.truckRows||[],'name');
+    const ownedG=groupBy(owned,'name');
+    const rentalG=groupBy(rentals,'name');
+
+    const hasData=b.totalCost>0||b.grandTotal>0;
+
+    whtml+=`
+    <div class="ws-section" style="border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:16px;">
+      <!-- Scope header -->
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--tx);">
+        <div>
+          <div style="font-size:15px;font-weight:700;">${esc(scopeLabel)}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">${esc(b.sheetName)} · ${esc(b.scopeCode)} · ${b.type}${b.crew?' · '+esc(b.crew):''} · ${b.days}d</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px;font-weight:700;color:var(--gn);">${fmt(b.grandTotal)}</div>
+          <div style="font-size:11px;color:var(--t3);">Cost: ${fmt(b.totalCost)} + Markup: ${fmt(b.totalProfit)}</div>
+        </div>
+      </div>
+
+      ${!hasData?'<div style="color:var(--t3);font-size:12px;padding:4px 0;">Sin datos ingresados en este budget</div>':''}
+
+      <!-- Labor -->
+      ${laborG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">👷 Labor — ${fmt(b.laborCost)}</div>
+        ${laborG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.type)}</span><span class="ws-val">${r.totalHours>0?r.totalHours.toFixed(0)+'h · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Equipment owned -->
+      ${ownedG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🚜 Equipment — ${fmt(b.ownedEquipC||0)}</div>
+        ${ownedG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' '+r.unit+' · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Rentals -->
+      ${rentalG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--bl);margin-bottom:6px;">🔧 Rentals — ${fmt(b.rentalEquipC||0)}</div>
+        ${rentalG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)} <span style="font-size:10px;background:var(--bll);color:var(--bl);padding:1px 5px;border-radius:4px;">rental</span></span><span class="ws-val">${r.totalQty>0?r.totalQty+' '+r.unit+' · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Trucks -->
+      ${truckG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🚛 Trucks — ${fmt(b.trucksCost||0)}</div>
+        ${truckG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' loads · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Disposal -->
+      ${dispG.length?`<div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🗑️ Disposal — ${fmt(b.dispCost||0)}</div>
+        ${dispG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.facility)} <span style="font-size:10px;background:var(--s2);padding:1px 5px;border-radius:4px;">${esc(r.type)}</span></span><span class="ws-val">${r.totalQty>0?r.totalQty.toFixed(1)+' ton · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+
+      <!-- Materials -->
+      ${matG.length?`<div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">🧱 Materials — ${fmt(b.matCost||0)}</div>
+        ${matG.map(r=>`<div class="ws-row"><span class="ws-label">${esc(r.name)}</span><span class="ws-val">${r.totalQty>0?r.totalQty+' units · ':''}${fmt(r.totalCost)}</span></div>`).join('')}
+      </div>`:''}
+    </div>`;
+  });
+
+  // ── GRAND TOTAL ──────────────────────────────────────────────
+  whtml+=`
+  <div class="ws-grand">
+    <span class="ws-label">TOTAL DEL PROYECTO</span>
+    <span class="ws-val">${fmt(grand)}</span>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:24px;font-size:13px;color:var(--t2);">
+    <span>Direct cost: <strong>${fmt(cost)}</strong></span>
+    <span>Profit: <strong style="color:var(--ac);">${fmt(profit)}</strong></span>
+    <span>Margen: <strong>${cost>0?Math.round(profit/cost*100):0}%</strong></span>
+  </div>
+  <div style="margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:52px;">
+    <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">ZLC Corporation — Authorized / Date</div>
+    <div style="border-top:1px solid var(--bd);padding-top:8px;font-size:11px;color:var(--t3);">Client — Accepted / Date</div>
+  </div>`;
+
+  wsContent.innerHTML=whtml;
+  navTo('win-summary');
+}
+
+
+// ─── FOLLOW-UP ALERTS ────────────────────────────────────────
+function daysSinceBid(p){
+  if(!p.bidDate)return -1;
+  return Math.floor((new Date()-new Date(p.bidDate))/(1000*60*60*24));
+}
+function needsFollowup(p){
+  return p.status==='Pending'&&p.bidDate&&!p.followupDismissed&&daysSinceBid(p)>=7;
+}
+function renderFollowUpAlerts(){
+  const el=document.getElementById('followup-alerts');if(!el)return;
+  const fups=projects.filter(needsFollowup);
+  el.innerHTML=fups.map(p=>{
+    const d=daysSinceBid(p);
+    const name=p.customName||p.proj.name||p.filename;
+    return `<div class="followup-banner">
+      <div class="fub-icon">⏰</div>
+      <div class="fub-text"><strong>Follow-up: ${esc(name)}</strong> — Bid sent <strong>${d} days</strong> ago. Contact ${esc(p.proj.client||'the client')}.
+      ${p.proj.pmPhone?` <a href="tel:${p.proj.pmPhone}" style="color:var(--ac);">${esc(p.proj.pmPhone)}</a>`:''}</div>
+      <span class="fub-dismiss" onclick="dismissFollowup('${p.id}')">Descartar</span>
+    </div>`;
+  }).join('');
+}
+function dismissFollowup(id){
+  const p=projects.find(x=>x.id===id);if(p){p.followupDismissed=true;savePersist();}
+  renderFollowUpAlerts();renderDashboard();rebuildSidebar();
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────────
+function openEditModal(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  curProjId=id;
+  document.getElementById('em-name').value=p.customName||p.proj.name||'';
+  document.getElementById('em-bid-date').value=p.bidDate||'';
+  document.getElementById('em-notes').value=p.notes||'';
+  document.getElementById('edit-modal').classList.add('show');
+}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('show');}
+function saveEditModal(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const nameVal=document.getElementById('em-name').value.trim();
+  p.customName=nameVal&&nameVal!==p.proj.name?nameVal:null;
+  p.bidDate=document.getElementById('em-bid-date').value||null;
+  p.notes=document.getElementById('em-notes').value.trim();
+  p.followupDismissed=false; // reset so alert shows again if needed
+  savePersist();closeEditModal();
+  openProject(curProjId);renderDashboard();rebuildSidebar();
+  renderFollowUpAlerts();
+  toast('Proyecto actualizado ✓');
+}
+
+// ─── WON MODAL ────────────────────────────────────────────────
+function closeWonModal(){document.getElementById('won-modal').classList.remove('show');pendingWonId=null;}
+function goToWinSummary(){closeWonModal();if(pendingWonId){printSummary(pendingWonId);}pendingWonId=null;}
+
+
+
+// ─── CLOUD BACKUP (Google Sheets) ────────────────────────────
+// Saves project data to Google Sheet via Apps Script
+// Sheet columns mirror PM App format so both apps share the same data
+
+function estSheetWrite(action, payload){
+  return new Promise((resolve,reject)=>{
+    if(!PM_APPS_SCRIPT){ reject('No Apps Script URL'); return; }
+    const cbName = '_estCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const data   = JSON.stringify({action, ...payload});
+    const encoded= encodeURIComponent(data);
+    const script = document.createElement('script');
+    const timer  = setTimeout(()=>{ delete window[cbName]; script.remove(); reject('timeout'); }, 15000);
+    window[cbName] = function(result){
+      clearTimeout(timer); delete window[cbName]; script.remove();
+      if(result && result.success) resolve(result);
+      else reject(result?.error || 'Sheet write failed');
+    };
+    script.src = PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
+    script.onerror = ()=>{ clearTimeout(timer); delete window[cbName]; reject('Script load error'); };
+    document.head.appendChild(script);
+  });
+}
+
+// Backup a single project to Google Sheet
+async function backupProjectToSheet(p){
+  try{
+    const grand = projGrand(p);
+    const today = new Date();
+    const fullDate = `${today.getMonth()+1}/1/${today.getFullYear()}`;
+
+    // Build codes array from budgets — each budget = one cost code line
+    const codes = p.budgets.map(b=>({
+      code:        b.scopeCode ? b.scopeCode.replace(/[^0-9]/g,'').slice(0,3) : b.num.toString().padStart(3,'0'),
+      description: b.description || b.scopeCode || b.sheetName,
+      value:       b.grandTotal  || 0,
+      estimatedCost: b.totalCost || 0,
+    })).filter(c=>c.value>0);
+
+    // Write to sheet via Apps Script (same action as PM app uses)
+    await estSheetWrite('addEstimate', {
+      // Field names match Apps Script addEstimate() exactly
+      estimatingId: p.id,
+      jobNum:       p.proj.jobNum  || '',
+      name:         p.proj.name    || p.filename,
+      client:       p.proj.client  || '',
+      pm:           p.proj.pm      || '',
+      pmEmail:      p.proj.pmEmail || '',
+      pmPhone:      p.proj.pmPhone || '',
+      address:      p.proj.address || '',
+      city:         p.proj.city    || '',
+      status:       p.status,
+      grand,
+      estimatedCost: projCost(p),
+      profit:       projProfit(p),
+      bidDate:      p.bidDate      || '',
+      notes:        p.notes        || '',
+      wonDate:      p.wonDate      || '',
+      sentAt:       new Date().toISOString(),
+      scopes: p.budgets.map(b=>({
+        budgetNumber: b.sheetName,
+        scopeCode:    b.scopeCode,
+        description:  b.description,
+        type:         b.type,
+        crew:         b.crew,
+        days:         b.days,
+        total:        b.grandTotal,
+        cost:         b.totalCost,
+        profit:       b.totalProfit,
+        labor:        b.laborCost    || 0,
+        equipment:    (b.ownedEquipC||0)+(b.rentalEquipC||0),
+        trucks:       b.trucksCost   || 0,
+        disposal:     b.dispCost     || 0,
+        materials:    b.matCost      || 0,
+      })),
+    });
+    return true;
+  }catch(err){
+    console.warn('Sheet backup failed:', err);
+    return false;
+  }
+}
+
+// Backup ALL projects to sheet
+async function backupAllToSheet(){
+  const btn=document.getElementById('cloud-backup-btn');
+  if(btn){btn.textContent='☁️ Saving...';btn.disabled=true;}
+  let ok=0,fail=0;
+  for(const p of projects){
+    const success=await backupProjectToSheet(p);
+    if(success)ok++;else fail++;
+    await new Promise(r=>setTimeout(r,600)); // throttle
+  }
+  if(btn){btn.textContent='☁️ Backup Sheet';btn.disabled=false;}
+  const msg=`☁️ Backup: ${ok} guardados${fail?', '+fail+' fallaron':''}`;
+  toast(msg);
+  updateCloudStatus(ok>0);
+}
+
+// Auto-backup when a project is loaded or status changes
+async function autoBackup(p){
+  if(!p)return;
+  const ok=await backupProjectToSheet(p);
+  if(ok){
+    updateCloudStatus(true);
+  }
+}
+
+function updateCloudStatus(success){
+  const el=document.getElementById('cloud-status');
+  if(!el)return;
+  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if(success){
+    el.textContent=`☁️ Synced ${now}`;
+    el.style.color='var(--gn)';
+  }else{
+    el.textContent='☁️ Sin conexión';
+    el.style.color='var(--t3)';
+  }
+}
+
+// Read projects back from sheet (restore)
+async function restoreFromSheet(){
+  const btn=document.getElementById('cloud-restore-btn');
+  if(btn){btn.textContent='⏳ Reading...';btn.disabled=true;}
+  try{
+    // Use Apps Script loadEstimates action — no API key needed
+    const rows = await new Promise((resolve,reject)=>{
+      if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
+      const cbName='_restoreCb_'+Date.now();
+      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
+      const script=document.createElement('script');
+      const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
+      window[cbName]=function(result){
+        clearTimeout(timer);delete window[cbName];script.remove();
+        if(result&&result.ok)resolve(result.rows||[]);
+        else reject(result?.error||'Load failed');
+      };
+      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
+      script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
+      document.head.appendChild(script);
+    });
+
+    if(!rows.length){toast('Sheet vacío — no hay datos para restaurar');return;}
+
+    // Convert sheet rows back to project format
+    let added=0;
+    rows.forEach(r=>{
+      const estId=String(r['Estimating ID']||'');
+      // Skip if already loaded
+      if(estId&&projects.find(x=>x.id===estId))return;
+      const scopes=r['Scopes JSON']||[];
+      projects.push({
+        id:             estId||'restored_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        filename:       String(r['Project Name']||r['Job #']||'Restored Project'),
+        status:         String(r['Status']||'Pending'),
+        bidDate:        String(r['Bid Date']||'')||null,
+        notes:          String(r['Notes']||''),
+        wonDate:        String(r['Won Date']||'')||null,
+        loadedAt:       String(r['Sent At']||new Date().toISOString()),
+        sentToPM:       false,
+        followupDismissed:false,
+        proj:{
+          name:    String(r['Project Name']||''),
+          jobNum:  String(r['Job #']||''),
+          client:  String(r['Client']||''),
+          pm:      String(r['PM']||''),
+          pmEmail: String(r['PM Email']||''),
+          pmPhone: String(r['PM Phone']||''),
+          address: String(r['Address']||''),
+          city:    String(r['City']||''),
+          planDate:'',startDate:'',endDate:'',
+          architect:'',addendum:'',siteVisit:'',travelTime:0,
+        },
+        // Restore budgets from scopes JSON if available
+        budgets: scopes.map((s,i)=>({
+          sheetName:   s.budgetNumber||'Budget #'+(i+1),
+          num:         i+1,
+          scopeCode:   s.scopeCode||'',
+          description: s.description||'',
+          type:        s.type||'Standard',
+          crew:        s.crew||'',
+          days:        s.days||0,
+          shifts:      8,travel:0,
+          grandTotal:  s.total||0,
+          totalCost:   s.cost||0,
+          totalProfit: s.profit||0,
+          laborCost:   s.labor||0,
+          ownedEquipC: s.equipment||0,
+          rentalEquipC:0,trucksCost:s.trucks||0,
+          dispCost:    s.disposal||0,
+          matCost:     s.materials||0,
+          subCost:     0,markupPct:0.45,
+          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
+        })),
+        changeOrders:[],scopes:[],
+        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+        _restoredFromSheet:true,
+      });
+      added++;
+    });
+
+    savePersist();rebuildSidebar();renderDashboard();
+    toast(`✓ ${added} project${added!==1?'s':''} restored from Sheet`);
+  }catch(err){
+    console.error('Restore error:',err);
+    toast('Error: '+err.message);
+  }finally{
+    if(btn){btn.textContent='⬇ Restore from Sheet';btn.disabled=false;}
+  }
+}
+
+function parseSheetToProjects(rows){
+  // Headers row defines columns
+  const hdr=(rows[0]||[]).map(h=>String(h||'').toLowerCase().trim());
+  const get=(r,name)=>{const i=hdr.indexOf(name);return i>=0?(r[i]||''):''};
+  const projects=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const id=get(r,'id')||get(r,'project id');
+    const name=get(r,'name')||get(r,'project name');
+    if(!id&&!name)continue;
+    projects.push({
+      id:'restored_'+Date.now()+'_'+i,
+      filename:name||id,
+      status:get(r,'status')||'Pending',
+      bidDate:get(r,'biddate')||null,
+      notes:get(r,'notes')||'',
+      loadedAt:get(r,'sentat')||new Date().toISOString(),
+      sentToPM:false,
+      followupDismissed:false,
+      proj:{
+        name:name,
+        jobNum:id,
+        client:get(r,'client'),
+        pm:get(r,'pm'),
+        pmEmail:get(r,'pmemail'),
+        pmPhone:get(r,'pmphone'),
+        address:get(r,'address'),
+        city:get(r,'city'),
+        planDate:'',startDate:'',endDate:'',
+        architect:'',addendum:'',siteVisit:'',travelTime:0,
+      },
+      budgets:[],changeOrders:[],scopes:[],
+      key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+    });
+  }
+  return projects;
+}
+
+// ─── SEND TO PM ───────────────────────────────────────────────
+const PM_URL_KEY = 'zlc_pm_webhook_url';
+
+function savePMUrl(v){ try{localStorage.setItem(PM_URL_KEY,v);}catch(e){} }
+function loadPMUrl(){ try{return localStorage.getItem(PM_URL_KEY)||'';}catch(e){return '';} }
+
+function openPMModal(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  curProjId=id;
+
+  // ── 6. Validate before opening ──────────────────────────────
+  const errors=[];
+  if(!p.proj.name&&!p.filename)  errors.push('Missing: project name');
+  if(!p.proj.client)             errors.push('Missing: client');
+  if(!p.proj.pm&&!p.proj.pmEmail)errors.push('Missing: PM or PM email');
+  if(!p.budgets||!p.budgets.length)errors.push('The project has no active budgets');
+  if(projGrand(p)===0)           errors.push('Grand Total is $0 — check the budgets');
+
+  const valDiv=document.getElementById('pm-validation');
+  if(errors.length){
+    valDiv.style.display='';
+    valDiv.innerHTML='<strong>⚠️ Complete this information before sending:</strong><ul style="margin-top:6px;padding-left:18px;">'
+      +errors.map(e=>`<li>${e}</li>`).join('')+'</ul>';
+  }else{
+    valDiv.style.display='none';
+  }
+
+  // ── 4. Preview ──────────────────────────────────────────────
+  const data=buildPMFinancialExport(p);
+  const pct=n=>Math.round((n/data.financials.estimatedCost||0)*100);
+  document.getElementById('pm-preview').innerHTML=`
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;">${esc(data.projectName)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="font-size:12px;color:var(--t2);">Client</div><div style="font-size:12px;font-weight:600;">${esc(data.client||'—')}</div>
+      <div style="font-size:12px;color:var(--t2);">PM</div><div style="font-size:12px;font-weight:600;">${esc(data.pm||'—')} ${data.pmEmail?'<span style="color:var(--t3);">'+esc(data.pmEmail)+'</span>':''}</div>
+      <div style="font-size:12px;color:var(--t2);">Contract Value</div><div style="font-size:13px;font-weight:700;color:var(--gn);">${fmt(data.financials.contractValue)}</div>
+      <div style="font-size:12px;color:var(--t2);">Est. Cost</div><div style="font-size:12px;">${fmt(data.financials.estimatedCost)}</div>
+      <div style="font-size:12px;color:var(--t2);">Profit</div><div style="font-size:12px;color:var(--ac);font-weight:600;">${fmt(data.financials.estimatedProfit)} <span style="color:var(--t3);">(${Math.round(data.financials.estimatedMargin*100)}%)</span></div>
+      <div style="font-size:12px;color:var(--t2);">Scopes</div><div style="font-size:12px;">${data.scopes.length} budgets</div>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:6px;">
+      ${[
+        ['Labor',data.financials.estimatedLaborCost],
+        ['Equipment',data.financials.estimatedEquipmentCost],
+        ['Trucks',data.financials.estimatedTruckCost],
+        ['Disposal',data.financials.estimatedDisposalCost],
+        ['Materials',data.financials.estimatedMaterialCost],
+      ].filter(([,v])=>v>0).map(([l,v])=>`<span style="font-size:11px;background:var(--sf);border:1px solid var(--bd);padding:2px 8px;border-radius:100px;">${l}: <strong>${fmt(v)}</strong></span>`).join('')}
+    </div>`;
+
+  // JSON preview
+  document.getElementById('pm-json-content').textContent=JSON.stringify(data,null,2);
+  document.getElementById('pm-json-wrap').style.display='none';
+  document.getElementById('pm-json-toggle').textContent='{ } View JSON';
+
+  // Restore saved URL
+  document.getElementById('pm-url').value=loadPMUrl();
+
+  // Sent badge
+  const sentBadge=document.getElementById('pm-sent-badge');
+  if(p.sentToPMAt){
+    sentBadge.style.display='';
+    sentBadge.innerHTML=`✅ Sent on ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+  }else{
+    sentBadge.style.display='none';
+  }
+
+  document.getElementById('pm-modal').classList.add('show');
+}
+
+function closePMModal(){ document.getElementById('pm-modal').classList.remove('show'); }
+
+function toggleJsonPreview(){
+  const wrap=document.getElementById('pm-json-wrap');
+  const btn=document.getElementById('pm-json-toggle');
+  const hidden=wrap.style.display==='none';
+  wrap.style.display=hidden?'':'none';
+  btn.textContent=hidden?'{ } Hide JSON':'{ } View JSON';
+}
+
+function copyJson(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const json=JSON.stringify(buildPMFinancialExport(p),null,2);
+  navigator.clipboard.writeText(json).then(()=>toast('JSON copied ✓')).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');ta.value=json;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    toast('JSON copied ✓');
+  });
+}
+
+// ── 2. sendToPM ───────────────────────────────────────────────
+async function sendToPM(){
+  const p=projects.find(x=>x.id===curProjId);if(!p)return;
+  const url=document.getElementById('pm-url').value.trim();
+  const data=buildPMFinancialExport(p);
+  const btn=document.getElementById('pm-send-btn');
+
+  // ── 6. Re-validate ──────────────────────────────────────────
+  const errors=[];
+  if(!data.projectName)  errors.push('Missing project name');
+  if(!data.client)       errors.push('Missing client');
+  if(projGrand(p)===0)   errors.push('Grand Total is $0');
+  if(!url){
+    // No URL — just copy JSON and show confirmation
+    copyJson();
+    toast('No URL configured — JSON copied to clipboard');
+    return;
+  }
+  if(!/^https?:\/\/.+/.test(url)){ toast('Invalid URL — must start with https://'); return; }
+  if(errors.length){ toast('⚠️ '+errors[0]); return; }
+
+  // ── Send ────────────────────────────────────────────────────
+  btn.textContent='Sending...';btn.disabled=true;
+  try{
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+
+    // ── 5. Save sentToPM / sentToPMAt ───────────────────────
+    p.sentToPM=true;
+    p.sentToPMAt=new Date().toISOString();
+    // Also write to won queue so PM app gets notified
+    if(p.status==='Won') pushToWonQueue(p);
+    savePersist();
+
+    const sentBadge=document.getElementById('pm-sent-badge');
+    sentBadge.style.display='';
+    sentBadge.innerHTML=`✅ Sent on ${new Date(p.sentToPMAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short'})}`;
+
+    toast('✅ Successfully sent to PM');
+    rebuildSidebar();
+    // Refresh project view to show badge
+    if(curProjId)openProject(curProjId);
+  }catch(err){
+    toast('❌ Send error: '+err.message);
+    console.error(err);
+  }finally{
+    btn.textContent='📤 Send';btn.disabled=false;
+  }
+}
+
+
+// ─── PM QUEUE UI ──────────────────────────────────────────────
+function updateQueueBadge(){
+  const n=getWonQueueCount();
+  const el=document.getElementById('pm-queue-status');
+  const cnt=document.getElementById('pm-queue-count');
+  if(!el)return;
+  if(n>0){ el.style.display=''; if(cnt)cnt.textContent=n; }
+  else{ el.style.display='none'; }
+}
+
+function openPMQueuePanel(){
+  try{
+    const queue=JSON.parse(localStorage.getItem('zlc_est_won_queue')||'[]');
+    const list=document.getElementById('pm-queue-list');
+    if(!list)return;
+    if(!queue.length){
+      list.innerHTML='<div style="color:var(--t3);font-size:13px;padding:8px 0;">The queue is empty.</div>';
+    }else{
+      list.innerHTML=queue.map((q,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--s2);border-radius:var(--r);margin-bottom:8px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">${esc(q.name||'—')}</div>
+            <div style="font-size:11px;color:var(--t3);">${esc(q.client||'')} · ${esc(q.num||q.id||'')} · ${q.codes?q.codes.length+' scopes':''}</div>
+            <div style="font-size:11px;color:var(--gn);margin-top:2px;">Total: ${fmt(q.contractValue||0)}</div>
+          </div>
+          <button class="btn bsm" style="color:var(--rd);border-color:var(--rd);" onclick="removeFromWonQueue('${q._estimatingId}');updateQueueBadge();openPMQueuePanel();">✕</button>
+        </div>`).join('');
+    }
+  }catch(e){}
+  document.getElementById('pm-queue-modal').classList.add('show');
+}
+
+function clearWonQueue(){
+  if(!confirm('Clear the queue? Projects will not be imported into the PM App.'))return;
+  localStorage.removeItem('zlc_est_won_queue');
+  localStorage.removeItem('zlc_est_won_time');
+  updateQueueBadge();
+  openPMQueuePanel();
+  toast('Queue cleared');
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+// ─── SIDEBAR ─────────────────────────────────────────────────
+function rebuildSidebar(){
+  const list=document.getElementById('proj-list-sb');
+  if(!projects.length){list.innerHTML='<div style="padding:10px 18px;font-size:12px;color:rgba(255,255,255,.28);">Upload a file to get started</div>';return;}
+  list.innerHTML=projects.map(p=>`
+    <div class="pi pi-${p.status.toLowerCase()} ${p.id===curProjId?'active':''}" id="pi-${p.id}" onclick="openProject('${p.id}')">
+      <div class="pi-dot"></div>
+      <div style="overflow:hidden;min-width:0;">
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;">${esc(p.proj.name||p.filename)}</div>
+        <div style="font-size:10.5px;opacity:.55;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.proj.client||p.status)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── NAV ─────────────────────────────────────────────────────
+function navTo(page){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('pg-'+page);if(pg)pg.classList.add('active');
+  const nv=document.getElementById('nav-'+page);if(nv)nv.classList.add('active');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────
+document.querySelectorAll('.mo-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+function fmt(n){if(!n||isNaN(n))return '$0';return '$'+Math.round(n).toLocaleString('en-US');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showProg(msg,p){document.getElementById('prog').classList.add('show');document.getElementById('prog-msg').textContent=msg;document.getElementById('prog-fill').style.width=p+'%';}
+function hideProg(){document.getElementById('prog').classList.remove('show');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
+
+// ─── INIT ─────────────────────────────────────────────────────
+loadPersist();
+rebuildSidebar();
+if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();renderFollowUpAlerts();navTo('dashboard');}
+updateQueueBadge();
+</script>
+</body>
+</html>

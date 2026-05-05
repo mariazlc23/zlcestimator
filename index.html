@@ -332,9 +332,9 @@ tfoot td{padding:10px 11px;border-top:2px solid var(--b2);font-weight:700;backgr
 // ─── STATE ────────────────────────────────────────────────────
 // ─── GOOGLE SHEETS BACKUP CONFIG ─────────────────────────────
 // Sheet: https://docs.google.com/spreadsheets/d/1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro
-const EST_SHEET_ID     = '1Ce9tK41rRUqPc4V3lyHWVepnh3ajrU9GbOIgd6mk9ro';
+const EST_SHEET_ID     = '1Y35oa2ebgCisj3PzVs2dTMUN5dY2Hhci4RIt55Kn44Y'; // PM Sheet — same as Apps Script
 // Shared Apps Script URL with PM App (handles both PM and Estimator writes)
-const PM_APPS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbylgsY5Nd3F3DlPQijFjwlNz3D11i2Jz2lET4F5QfjCuPbuTxCEqLlGWrcSArfmf9dGrQ/exec';
+const PM_APPS_SCRIPT   = 'https://script.google.com/macros/s/AKfycbyouaZzlhceAs7vs7HJG0bb9mIul84DGHAQ8g-Tjm93meyeu-gvB1QArlBTXDm2Cg7e/exec';
 // Google Sheets API Key (read-only) — get one at console.cloud.google.com
 // Enable: Google Sheets API → Credentials → API Key → restrict to Sheets API
 const SHEETS_API_KEY   = '';  // ← paste your API key here
@@ -787,13 +787,12 @@ async function cycleStatus(id){
   if(newStatus==='Won'){
     pushToWonQueue(p);
     toast('🏆 Won — saving to cloud...');
-    // Full backup immediately (not delayed) so PM App sees it right away
     const ok = await backupProjectToSheet(p);
     if(ok){
-      toast('✅ Won — saved to cloud!');
+      toast('✅ Won — saved to cloud! PM App will see it now.');
       updateCloudStatus(true);
     }else{
-      toast('⚠️ Won saved locally — cloud sync failed, try Backup Sheet');
+      toast('⚠️ Saved locally — cloud failed. Try ☁️ Backup Sheet.');
     }
     pendingWonId=id;
     document.getElementById('won-modal').classList.add('show');
@@ -801,7 +800,6 @@ async function cycleStatus(id){
     if(p.status!=='Won') removeFromWonQueue(id);
     if(curProjId===id)openProject(id);
     toast('Status: '+newStatus);
-    // Also update status in sheet
     backupProjectToSheet(p).catch(()=>{});
   }
 }
@@ -1526,27 +1524,21 @@ function goToWinSummary(){closeWonModal();if(pendingWonId){printSummary(pendingW
 // Saves project data to Google Sheet via Apps Script
 // Sheet columns mirror PM App format so both apps share the same data
 
-// ─── SHEET COMMUNICATION ─────────────────────────────────────
-// Uses fetch (POST) as primary — Apps Script must be deployed as
-// "Execute as Me, Anyone can access (even anonymous)".
-// Falls back to JSONP if fetch is blocked by CORS preflight.
 async function estSheetWrite(action, payload){
   if(!PM_APPS_SCRIPT) throw new Error('No Apps Script URL');
   const body = JSON.stringify({action, ...payload});
-
-  // Try fetch POST first (works when Apps Script CORS is open)
+  // Try POST first
   try{
-    const res = await fetch(PM_APPS_SCRIPT, {
+    const res = await fetch(PM_APPS_SCRIPT,{
       method:'POST',
-      headers:{'Content-Type':'text/plain'}, // avoid CORS preflight
+      headers:{'Content-Type':'text/plain'},
       body
     });
     const json = await res.json();
     if(json.ok || json.success) return json;
     throw new Error(json.error||'Sheet error');
   }catch(fetchErr){
-    // Fallback: JSONP GET (read-only friendly, works for writes too
-    // when Apps Script doGet handles the data param)
+    // Fallback: JSONP
     return new Promise((resolve,reject)=>{
       const cbName='_estCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
       const encoded=encodeURIComponent(body);
@@ -1664,35 +1656,97 @@ function updateCloudStatus(success){
   }
 }
 
-// ─── SHARED: load all estimates from Sheets ──────────────────
-async function loadEstimatesFromSheet(){
-  // Try POST first
+// ─── SHEET READ (fetch + JSONP fallback) ─────────────────────
+async function sheetRead(action, payload){
+  const body = JSON.stringify({action, ...payload});
   try{
-    const res=await fetch(PM_APPS_SCRIPT,{
+    const res = await fetch(PM_APPS_SCRIPT,{
       method:'POST',
       headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({action:'loadEstimates'})
+      body
     });
-    const json=await res.json();
-    if(json.ok) return json.rows||[];
-    throw new Error(json.error||'Load failed');
+    const json = await res.json();
+    if(json.ok) return json;
+    throw new Error(json.error||'Read failed');
   }catch(e){
-    // Fallback JSONP
     return new Promise((resolve,reject)=>{
       if(!PM_APPS_SCRIPT){reject('No Apps Script URL');return;}
-      const cbName='_loadCb_'+Date.now();
-      const data=encodeURIComponent(JSON.stringify({action:'loadEstimates'}));
+      const cbName='_rd_'+Date.now();
+      const encoded=encodeURIComponent(body);
       const script=document.createElement('script');
       const timer=setTimeout(()=>{delete window[cbName];script.remove();reject('timeout');},20000);
       window[cbName]=function(result){
         clearTimeout(timer);delete window[cbName];script.remove();
-        if(result&&result.ok)resolve(result.rows||[]);
-        else reject(result?.error||'Load failed');
+        if(result&&result.ok)resolve(result);
+        else reject(result?.error||'Read failed');
       };
-      script.src=PM_APPS_SCRIPT+'?data='+data+'&callback='+cbName;
+      script.src=PM_APPS_SCRIPT+'?data='+encoded+'&callback='+cbName;
       script.onerror=()=>{clearTimeout(timer);delete window[cbName];reject('Script error');};
       document.head.appendChild(script);
     });
+  }
+}
+
+// ─── LOAD FROM CLOUD ON STARTUP ──────────────────────────────
+async function loadFromCloud(){
+  updateCloudStatus(null);
+  try{
+    const res = await sheetRead('loadEstimates',{});
+    const rows = res.rows||[];
+    let added=0;
+    rows.forEach(r=>{
+      const estId=String(r['Estimating ID']||'').trim();
+      if(estId&&projects.find(x=>x.id===estId))return;
+      const scopes=r['Scopes JSON']||[];
+      projects.push({
+        id:       estId||'cloud_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+        filename: String(r['Project Name']||r['Job #']||'Cloud Project'),
+        status:   String(r['Status']||'Pending'),
+        bidDate:  String(r['Bid Date']||'')||null,
+        notes:    String(r['Notes']||''),
+        wonDate:  String(r['Won Date']||'')||null,
+        loadedAt: String(r['Sent At']||new Date().toISOString()),
+        sentToPM:false, followupDismissed:false,
+        proj:{
+          name:    String(r['Project Name']||''),
+          jobNum:  String(r['Job #']||''),
+          client:  String(r['Client']||''),
+          pm:      String(r['PM']||''),
+          pmEmail: String(r['PM Email']||''),
+          pmPhone: String(r['PM Phone']||''),
+          address: String(r['Address']||''),
+          city:    String(r['City']||''),
+          planDate:'',startDate:'',endDate:'',
+          architect:'',addendum:'',siteVisit:'',travelTime:0,
+        },
+        budgets:scopes.map((s,i)=>({
+          sheetName:s.budgetNumber||'Budget #'+(i+1),
+          num:i+1, scopeCode:s.scopeCode||'', description:s.description||'',
+          type:s.type||'Standard', crew:s.crew||'', days:s.days||0,
+          shifts:8, travel:0,
+          grandTotal:s.total||0, totalCost:s.cost||0, totalProfit:s.profit||0,
+          laborCost:s.labor||0, ownedEquipC:s.equipment||0,
+          rentalEquipC:0, trucksCost:s.trucks||0, dispCost:s.disposal||0,
+          matCost:s.materials||0, subCost:0, markupPct:0.45,
+          laborRows:[],equipRows:[],truckRows:[],dispRows:[],matRows:[],
+        })),
+        changeOrders:[],scopes:[],
+        key:{laborProd:[],laborTM:[],equipment:[],materials:[],disposal:[],estimators:[],crews:[]},
+        _restoredFromSheet:true,
+      });
+      added++;
+    });
+    if(added>0){
+      try{localStorage.setItem('zlc_v7',JSON.stringify(projects));}catch(e){}
+      rebuildSidebar();renderDashboard();renderFollowUpAlerts();
+      document.getElementById('empty-state').style.display='none';
+      navTo('dashboard');
+      toast(`☁️ ${added} project${added!==1?'s':''} loaded from cloud`);
+    }
+    updateCloudStatus(true);
+  }catch(err){
+    console.warn('Cloud load failed:',err);
+    updateCloudStatus(false);
   }
 }
 
@@ -1702,7 +1756,7 @@ async function restoreFromSheet(){
   if(btn){btn.textContent='⏳ Reading...';btn.disabled=true;}
   try{
     // Use Apps Script loadEstimates action — no API key needed
-    const rows = await loadEstimatesFromSheet();
+    const rows = await sheetRead('loadEstimates',{});
 
     if(!rows.length){toast('Sheet is empty — no data to restore');return;}
 
@@ -2030,10 +2084,14 @@ function hideProg(){document.getElementById('prog').classList.remove('show');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.display='none';},3000);}
 
 // ─── INIT ─────────────────────────────────────────────────────
-loadPersist();
+loadPersist();          // seed from localStorage cache
 rebuildSidebar();
-if(projects.length){document.getElementById('empty-state').style.display='none';renderDashboard();renderFollowUpAlerts();navTo('dashboard');}
+if(projects.length){
+  document.getElementById('empty-state').style.display='none';
+  renderDashboard();renderFollowUpAlerts();navTo('dashboard');
+}
 updateQueueBadge();
+loadFromCloud();        // sync from Google Sheets in background
 </script>
 </body>
 </html>
